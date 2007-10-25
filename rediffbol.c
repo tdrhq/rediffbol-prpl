@@ -40,6 +40,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
  */
 
+#define PURPLE_PLUGINS
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
@@ -65,6 +66,7 @@
 #include <curl/curl.h>
 #include <assert.h>
 #include "xmlnode.h"
+#include <ctype.h>
 
 //#include <libxml/xmlreader.h>
 
@@ -653,7 +655,7 @@ static void rediffbol_input_user_info(PurplePluginAction *action)
 static GList *rediffbol_actions(PurplePlugin *plugin, gpointer context)
 {
   PurplePluginAction *action = purple_plugin_action_new(
-    _("Set User Info..."), rediffbol_input_user_info);
+    "Set User Info...", rediffbol_input_user_info);
   return g_list_append(NULL, action);
 }
 
@@ -725,12 +727,12 @@ static void rediffbol_tooltip_text(PurpleBuddy *buddy,
     if (full) {
       const char *user_info = purple_account_get_user_info(gc->account);
       if (user_info)
-        purple_notify_user_info_add_pair(info, _("User info"), user_info);
+        purple_notify_user_info_add_pair(info, ("User info"), user_info);
     }
 
   } else {
     /* they're not logged in */
-    purple_notify_user_info_add_pair(info, _("User info"), _("not logged in"));
+    purple_notify_user_info_add_pair(info, ("User info"), ("not logged in"));
   }
     
   purple_debug_info("rediffbol", "showing %s tooltip for %s\n",
@@ -748,25 +750,25 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
 
   type = purple_status_type_new(PURPLE_STATUS_AVAILABLE, RB_STATUS_ONLINE,
                                 RB_STATUS_ONLINE, TRUE);
-  purple_status_type_add_attr(type, "message", _("Online"),
+  purple_status_type_add_attr(type, "message", ("Online"),
                               purple_value_new(PURPLE_TYPE_STRING));
   types = g_list_append(types, type);
 
   type = purple_status_type_new(PURPLE_STATUS_AWAY, RB_STATUS_AWAY,
                                 RB_STATUS_AWAY, TRUE);
-  purple_status_type_add_attr(type, "message", _("Away"),
+  purple_status_type_add_attr(type, "message", ("Away"),
                               purple_value_new(PURPLE_TYPE_STRING));
   types = g_list_append(types, type);
   
   type = purple_status_type_new(PURPLE_STATUS_OFFLINE, RB_STATUS_OFFLINE,
                                 RB_STATUS_OFFLINE, TRUE);
-  purple_status_type_add_attr(type, "message", _("Offline"),
+  purple_status_type_add_attr(type, "message", ("Offline"),
                               purple_value_new(PURPLE_TYPE_STRING));
   types = g_list_append(types, type);
 
   type = purple_status_type_new(PURPLE_STATUS_AWAY, RB_STATUS_BUSY,
                                 RB_STATUS_BUSY, TRUE);
-  purple_status_type_add_attr(type, "message", _("Busy"),
+  purple_status_type_add_attr(type, "message", ("Busy"),
                               purple_value_new(PURPLE_TYPE_STRING));
   types = g_list_append(types, type);
 
@@ -778,9 +780,9 @@ static void blist_example_menu_item(PurpleBlistNode *node, gpointer userdata) {
                     ((PurpleBuddy *)node)->name);
 
   purple_notify_info(NULL,  /* plugin handle or PurpleConnection */
-                     _("Primary title"),
-                     _("Secondary title"),
-                     _("This is the callback for the rediffbol menu item."));
+                     ("Primary title"),
+                     ("Secondary title"),
+                     ("This is the callback for the rediffbol menu item."));
 }
 
 static GList *rediffbol_blist_node_menu(PurpleBlistNode *node) {
@@ -788,7 +790,7 @@ static GList *rediffbol_blist_node_menu(PurpleBlistNode *node) {
 
   if (PURPLE_BLIST_NODE_IS_BUDDY(node)) {
     PurpleMenuAction *action = purple_menu_action_new(
-      _("Rediffbol example menu item"),
+      ("Rediffbol example menu item"),
       PURPLE_CALLBACK(blist_example_menu_item),
       NULL,   /* userdata passed to the callback */
       NULL);  /* child menu items */
@@ -804,7 +806,7 @@ static GList *rediffbol_chat_info(PurpleConnection *gc) {
   purple_debug_info("rediffbol", "returning chat setting 'room'\n");
 
   pce = g_new0(struct proto_chat_entry, 1);
-  pce->label = _(_("Chat _room"));
+  pce->label = (("Chat _room"));
   pce->identifier = "room";
   pce->required = TRUE;
 
@@ -833,7 +835,7 @@ static void rediffbol_login(PurpleAccount *acct)
 
 
   
-  purple_connection_update_progress(gc, _("Connecting"),
+  purple_connection_update_progress(gc, ("Connecting"),
                                     0,   /* which connection step this is */
                                     2);  /* total number of steps */
 
@@ -946,8 +948,8 @@ static void rediffbol_get_info(PurpleConnection *gc, const char *username) {
                     gc->account->username);
 
   if (!get_rediffbol_gc(username)) {
-    char *msg = g_strdup_printf(_("%s is not logged in."), username);
-    purple_notify_error(gc, _("User Info"), _("User info not available. "), msg);
+    char *msg = g_strdup_printf(("%s is not logged in."), username);
+    purple_notify_error(gc, ("User Info"), ("User info not available. "), msg);
     g_free(msg);
   }
 
@@ -955,7 +957,7 @@ static void rediffbol_get_info(PurpleConnection *gc, const char *username) {
   if (acct)
     body = purple_account_get_user_info(acct);
   else
-    body = _("No user info.");
+    body = ("No user info.");
   purple_notify_user_info_add_pair(info, "Info", body);
 
   /* show a buddy's user info in a nice dialog box */
@@ -1190,6 +1192,7 @@ static PurplePluginProtocolInfo prpl_info =
 
 static void rediffbol_init(PurplePlugin *plugin)
 {
+	printf("rediff starting up\n"); 
   purple_debug_info("rediffbol", "starting up\n");
   _null_protocol = plugin;
 }

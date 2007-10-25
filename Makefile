@@ -1,6 +1,9 @@
 #
-# pidgin-latex Makefile
+# rediffbol-prpl Makefile
 #
+# Copyright 2007 Arnold Noronha <arnstein87 AT sourceforge DOT net>
+#
+# From existing code for pidgin-LaTeX by:
 # Copyright 2004 Edouard Geuten <thegrima AT altern DOT org>
 #
 # Heavily inspired and copied from :
@@ -31,32 +34,21 @@ else
   LIB_INSTALL_DIR = $(PREFIX)/lib/pidgin
 endif
 
-REDIFFBOL = rediffbol
 
 PIDGIN_CFLAGS  = $(shell pkg-config pidgin --cflags)
 GTK_CFLAGS   = $(shell pkg-config gtk+-2.0 --cflags)
 PIDGIN_LIBS    = $(shell pkg-config pidgin --libs)
 GTK_LIBS     = $(shell pkg-config gtk+-2.0 --libs)
 PIDGIN_LIBDIR  = $(shell pkg-config --variable=libdir pidgin)/pidgin
-CURL_LIBS = $(shell curl-config --libs) 
-CURL_CFLAGS = $(shell curl-config --cflags)
-CFLAGS = $(PIDGIN_CFLAGS) $(GTK_CFLAGS) $(CURL_CFLAGS)
-LDFLAGS = $(PIDGIN_LIBS) $(CURL_LIBS) $(GTK_LIBS)
 
-all: $(REDIFFBOL).so $(REDIFFBOL).la
+all: librediffbol.so
 
 install: all
 	mkdir -p $(LIB_INSTALL_DIR)
-	cp $(REDIFFBOL).so $(LIB_INSTALL_DIR)
+	cp librediffbol.so $(LIB_INSTALL_DIR)
 
-$(REDIFFBOL).so: $(REDIFFBOL).o
-	$(CC) -shared $(CFLAGS) $< -o $@ $(PIDGIN_LIBS) $(GTK_LIBS) $(CURL_LIBS) -Wl,--export-dynamic -Wl,-soname
-
-$(REDIFFBOL).o:$(REDIFFBOL).c 
-	$(CC) $(CFLAGS) -fPIC -c $< -o $@ $(PIDGIN_CFLAGS) $(GTK_CFLAGS) $(CURL_CFLAGS) -DHAVE_CONFIG_H
-
-$(REDIFFBOL).la:$(REDIFFBOL).o $(REDIFFBOL)
-	$(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS)   $(LDFLAGS) $< -o $@
+librediffbol.so: rediffbol.c
+	$(CC) -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS)  $(shell curl-config --cflags --libs) $(shell pkg-config --cflags --libs libxml-2.0) rediffbol.c
 
 clean:
 	rm -rf *.o *.c~ *.h~ *.so *.la .libs
