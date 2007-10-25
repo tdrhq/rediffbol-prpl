@@ -31,25 +31,32 @@ else
   LIB_INSTALL_DIR = $(PREFIX)/lib/pidgin
 endif
 
-PIDGIN_LATEX = LaTeX
+REDIFFBOL = rediffbol
 
 PIDGIN_CFLAGS  = $(shell pkg-config pidgin --cflags)
 GTK_CFLAGS   = $(shell pkg-config gtk+-2.0 --cflags)
 PIDGIN_LIBS    = $(shell pkg-config pidgin --libs)
 GTK_LIBS     = $(shell pkg-config gtk+-2.0 --libs)
 PIDGIN_LIBDIR  = $(shell pkg-config --variable=libdir pidgin)/pidgin
+CURL_LIBS = $(shell curl-config --libs) 
+CURL_CFLAGS = $(shell curl-config --cflags)
+CFLAGS = $(PIDGIN_CFLAGS) $(GTK_CFLAGS) $(CURL_CFLAGS)
+LDFLAGS = $(PIDGIN_LIBS) $(CURL_LIBS) $(GTK_LIBS)
 
-all: $(PIDGIN_LATEX).so
+all: $(REDIFFBOL).so $(REDIFFBOL).la
 
 install: all
 	mkdir -p $(LIB_INSTALL_DIR)
-	cp $(PIDGIN_LATEX).so $(LIB_INSTALL_DIR)
+	cp $(REDIFFBOL).so $(LIB_INSTALL_DIR)
 
-$(PIDGIN_LATEX).so: $(PIDGIN_LATEX).o
-	$(CC) -shared $(CFLAGS) $< -o $@ $(PIDGIN_LIBS) $(GTK_LIBS) -Wl,--export-dynamic -Wl,-soname
+$(REDIFFBOL).so: $(REDIFFBOL).o
+	$(CC) -shared $(CFLAGS) $< -o $@ $(PIDGIN_LIBS) $(GTK_LIBS) $(CURL_LIBS) -Wl,--export-dynamic -Wl,-soname
 
-$(PIDGIN_LATEX).o:$(PIDGIN_LATEX).c $(PIDGIN_LATEX).h
-	$(CC) $(CFLAGS) -fPIC -c $< -o $@ $(PIDGIN_CFLAGS) $(GTK_CFLAGS) -DHAVE_CONFIG_H
+$(REDIFFBOL).o:$(REDIFFBOL).c 
+	$(CC) $(CFLAGS) -fPIC -c $< -o $@ $(PIDGIN_CFLAGS) $(GTK_CFLAGS) $(CURL_CFLAGS) -DHAVE_CONFIG_H
+
+$(REDIFFBOL).la:$(REDIFFBOL).o $(REDIFFBOL)
+	$(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS)   $(LDFLAGS) $< -o $@
 
 clean:
 	rm -rf *.o *.c~ *.h~ *.so *.la .libs

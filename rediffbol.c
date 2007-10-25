@@ -46,8 +46,8 @@
 
 #include <glib.h>
 
-#include "internal.h"
-#include "config.h"
+//#include "internal.h"
+//#include "config.h"
 #include "account.h"
 #include "accountopt.h"
 #include "blist.h"
