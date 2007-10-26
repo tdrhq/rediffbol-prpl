@@ -865,40 +865,12 @@ static void rediffbol_remove_buddies(PurpleConnection *gc, GList *buddies,
 
 }
 
-/*
- * rediffbol uses purple's local whitelist and blacklist, stored in blist.xml, as
- * its authoritative privacy settings, and uses purple's logic (specifically
- * purple_privacy_check(), from privacy.h), to determine whether messages are
- * allowed or blocked.
- */
-static void rediffbol_add_permit(PurpleConnection *gc, const char *name) {
-  purple_debug_info("rediffbol", "%s adds %s to their allowed list\n",
-                    gc->account->username, name);
-}
-
-static void rediffbol_add_deny(PurpleConnection *gc, const char *name) {
-  purple_debug_info("rediffbol", "%s adds %s to their blocked list\n",
-                    gc->account->username, name);
-}
-
-static void rediffbol_rem_permit(PurpleConnection *gc, const char *name) {
-
-}
-
-static void rediffbol_rem_deny(PurpleConnection *gc, const char *name) {
-
-}
 
 static void rediffbol_set_permit_deny(PurpleConnection *gc) {
   /* this is for synchronizing the local black/whitelist with the server.
    * for rediffbol, it's a noop.
    */
 }
-
-
-
-
-
 
 static void rediffbol_get_cb_info(PurpleConnection *gc, int id, const char *who) {
   PurpleConversation *conv = purple_find_chat(gc, id);
@@ -930,11 +902,6 @@ static void rediffbol_set_buddy_icon(PurpleConnection *gc,
  purple_debug_info("rediffbol", "setting %s's buddy icon to %s\n",
                    gc->account->username, purple_imgstore_get_filename(img));
 }
-
-
-
-
-
 
 /*
  * prpl stuff. see prpl.h for more information.
@@ -975,11 +942,11 @@ static PurplePluginProtocolInfo prpl_info =
   NULL,                /* add_buddies */
   NULL,               /* remove_buddy */
   NULL,             /* remove_buddies */
-  rediffbol_add_permit,                 /* add_permit */
-  rediffbol_add_deny,                   /* add_deny */
-  rediffbol_rem_permit,                 /* rem_permit */
-  rediffbol_rem_deny,                   /* rem_deny */
-  rediffbol_set_permit_deny,            /* set_permit_deny */
+  NULL,                 /* add_permit */
+  NULL,                   /* add_deny */
+  NULL,                 /* rem_permit */
+  NULL,                   /* rem_deny */
+  NULL,            /* set_permit_deny */
   NULL,                  /* join_chat */
   NULL,                /* reject_chat */
   NULL,              /* get_chat_name */
