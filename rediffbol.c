@@ -740,32 +740,6 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
   return types;
 }
 
-
-static GList *rediffbol_chat_info(PurpleConnection *gc) {
-  struct proto_chat_entry *pce; /* defined in prpl.h */
-
-  purple_debug_info("rediffbol", "returning chat setting 'room'\n");
-
-  pce = g_new0(struct proto_chat_entry, 1);
-  pce->label = (("Chat _room"));
-  pce->identifier = "room";
-  pce->required = TRUE;
-
-  return g_list_append(NULL, pce);
-}
-
-static GHashTable *rediffbol_chat_info_defaults(PurpleConnection *gc,
-                                               const char *room) {
-  GHashTable *defaults;
-
-  purple_debug_info("rediffbol", "returning chat default setting "
-                    "'room' = 'default'\n");
-
-  defaults = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
-  g_hash_table_insert(defaults, "room", g_strdup("default"));
-  return defaults;
-}  
-
 static void rediffbol_login(PurpleAccount *acct)
 {
   PurpleConnection *gc = purple_account_get_connection(acct);
