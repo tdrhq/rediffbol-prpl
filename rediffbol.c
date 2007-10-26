@@ -658,31 +658,6 @@ static const char *rediffbol_list_emblem(PurpleBuddy *buddy)
   return emblem;
 }
 
-static char *rediffbol_status_text(PurpleBuddy *buddy) {
-  purple_debug_info("rediffbol", "getting %s's status text for %s\n",
-                    buddy->name, buddy->account->username);
-
-  if (purple_find_buddy(buddy->account, buddy->name)) {
-    PurplePresence *presence = purple_buddy_get_presence(buddy);
-    PurpleStatus *status = purple_presence_get_active_status(presence);
-    const char *name = purple_status_get_name(status);
-    const char *message = purple_status_get_attr_string(status, "message");
-
-    char *text;
-    if (message && strlen(message) > 0)
-      text = g_strdup_printf("%s: %s", name, message);
-    else
-      text = g_strdup(name);
-
-    purple_debug_info("rediffbol", "%s's status text is %s\n", buddy->name, text);
-    return text;
-
-  } else {
-    purple_debug_info("rediffbol", "...but %s is not logged in\n", buddy->name);
-    return "Not logged in";
-  }
-}
-
 static void rediffbol_tooltip_text(PurpleBuddy *buddy,
                                   PurpleNotifyUserInfo *info,
                                   gboolean full) {
@@ -981,7 +956,7 @@ static PurplePluginProtocolInfo prpl_info =
   },
   rediffbol_list_icon,                  /* list_icon */
   rediffbol_list_emblem,                /* list_emblem */
-  rediffbol_status_text,                /* status_text */
+  NULL,                /* status_text */
   rediffbol_tooltip_text,               /* tooltip_text */
   rediffbol_status_types,               /* status_types */
   NULL,            /* blist_node_menu */
