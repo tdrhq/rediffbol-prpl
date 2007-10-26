@@ -772,44 +772,12 @@ static void rediffbol_login(PurpleAccount *acct)
   GList *offline_messages;
 
   purple_debug_info("rediffbol", "logging in %s\n", acct->username);
-
-
-
-  
   purple_connection_update_progress(gc, ("Connecting"),
                                     0,   /* which connection step this is */
                                     2);  /* total number of steps */
 
 	printf("starting connection\n");
 	start_connection(acct);
-
-
-  /* tell purple about everyone on our buddy list who's connected */
-  //purple_prpl_got_user_status(acct, "arnold",PURPLE_STATUS_AVAILABLE ,
-  //                              "message" , "", NULL);
-
-
-
-
-  /* fetch stored offline messages */
-  purple_debug_info("rediffbol", "checking for offline messages for %s\n",
-                    acct->username);
-  offline_messages = g_hash_table_lookup(goffline_messages, acct->username); 
-  while (offline_messages) {
-    GOfflineMessage *message = (GOfflineMessage *)offline_messages->data;
-    purple_debug_info("rediffbol", "delivering offline message to %s: %s\n",
-                      acct->username, message->message);
-    serv_got_im(gc, message->from, message->message, message->flags,
-                message->mtime);
-    offline_messages = g_list_next(offline_messages);
-
-    g_free(message->from);
-    g_free(message->message);
-    g_free(message);
-  }
-
-  g_list_free(offline_messages);
-  g_hash_table_remove(goffline_messages, &acct->username);
 }
 
 static void rediffbol_close(PurpleConnection *gc)
