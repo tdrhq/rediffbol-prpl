@@ -849,36 +849,6 @@ static void rediffbol_set_info(PurpleConnection *gc, const char *info) {
                     gc->account->username, info);
 }
 
-static char *typing_state_to_string(PurpleTypingState typing) {
-  switch (typing) {
-  case PURPLE_NOT_TYPING:  return "is not typing";
-  case PURPLE_TYPING:      return "is typing";
-  case PURPLE_TYPED:       return "stopped typing momentarily";
-  default:               return "unknown typing state";
-  }
-}
-
-static void notify_typing(PurpleConnection *from, PurpleConnection *to,
-                          gpointer typing) {
-  char *from_username = from->account->username;
-  char *action = typing_state_to_string((PurpleTypingState)typing);
-  purple_debug_info("rediffbol", "notifying %s that %s %s\n",
-                    to->account->username, from_username, action);
-
-  serv_got_typing(to,
-                  from_username,
-                  0, /* if non-zero, a timeout in seconds after which to
-                      * reset the typing status to PURPLE_NOT_TYPING */
-                  (PurpleTypingState)typing);
-}
-
-static unsigned int rediffbol_send_typing(PurpleConnection *gc, const char *name,
-                                         PurpleTypingState typing) {
-  purple_debug_info("rediffbol", "%s %s\n", gc->account->username,
-                    typing_state_to_string(typing));
-  foreach_rediffbol_gc(notify_typing, gc, (gpointer)typing);
-  return 0;
-}
 
 static void rediffbol_get_info(PurpleConnection *gc, const char *username) {
   const char *body;
@@ -1079,7 +1049,7 @@ static PurplePluginProtocolInfo prpl_info =
   rediffbol_close,                      /* close */
   rediffbol_send_im,                    /* send_im */
   NULL,                   /* set_info */
-  rediffbol_send_typing,                /* send_typing */
+  NULL,                /* send_typing */
   rediffbol_get_info,                   /* get_info */
   rediffbol_set_status,                 /* set_status */
   rediffbol_set_idle,                   /* set_idle */
