@@ -48,7 +48,7 @@ install: all
 	cp librediffbol.so $(LIB_INSTALL_DIR)
 
 librediffbol.so: rediffbol.c
-	$(CC) -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS)  $(shell curl-config --cflags --libs) $(shell pkg-config --cflags --libs libxml-2.0) rediffbol.c
+	$(CC) -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS)  $(shell curl-config --cflags --libs) $(CFLAGS) $(shell pkg-config --cflags --libs libxml-2.0) rediffbol.c
 
 clean:
 	rm -rf *.o *.c~ *.h~ *.so *.la .libs

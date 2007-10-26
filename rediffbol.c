@@ -24,8 +24,6 @@
 
 #include <glib.h>
 
-//#include "internal.h"
-//#include "config.h"
 #include "account.h"
 #include "accountopt.h"
 #include "blist.h"
@@ -446,7 +444,7 @@ connection_thread(RediffBolConn *ret) {
   FILE * dump = fopen("/dev/null", "w") ;
   curl_easy_setopt(ret->easy_handle, CURLOPT_WRITEDATA, dump);
   //  curl_easy_setopt(ret->easy_handle, CURLOPT_VERBOSE, 1);
-  curl_easy_setopt(ret->easy_handle, CURLOPT_FOLLOWLOCATION, 1) ;
+  //curl_easy_setopt(ret->easy_handle, CURLOPT_FOLLOWLOCATION, 1) ;
   curl_easy_perform(ret->easy_handle) ;
 
   if ( false && !(ret->connection_state & RB_CONN_STATE_CONNECTED) ) { 
