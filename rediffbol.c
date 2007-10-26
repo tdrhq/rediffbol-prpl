@@ -1,30 +1,7 @@
 /**
- * purple
- *
- * Purple is the legal property of its developers, whose names are too numerous
- * to list here.  Please refer to the COPYRIGHT file distributed with this
- * source distribution.
- *
- * Rediffbol is a mock protocol plugin for Pidgin and libpurple. You can create
- * accounts with it, sign on and off, add buddies, and send and receive IMs,
- * all without connecting to a server!
+ * rediffbol.c
+ * (c) Copyright 2007, Arnold Noronha
  * 
- * Beyond that basic functionality, rediffbol supports presence and
- * away/available messages, offline messages, user info, typing notification,
- * privacy allow/block lists, chat rooms, whispering, room lists, and protocol
- * icons and emblems. Notable missing features are file transfer and account
- * registration and authentication.
- * 
- * Rediffbol is intended as an example of how to write a libpurple protocol
- * plugin. It doesn't contain networking code or an event loop, but it does
- * demonstrate how to use the libpurple API to do pretty much everything a prpl
- * might need to do.
- * 
- * Rediffbol is also a useful tool for hacking on Pidgin, Finch, and other
- * libpurple clients. It's a full-featured protocol plugin, but doesn't depend
- * on an external server, so it's a quick and easy way to exercise test new
- * code. It also allows you to work while you're disconnected.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
