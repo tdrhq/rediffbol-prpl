@@ -740,30 +740,6 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
   return types;
 }
 
-static void blist_example_menu_item(PurpleBlistNode *node, gpointer userdata) {
-  purple_debug_info("rediffbol", "example menu item clicked on user\n",
-                    ((PurpleBuddy *)node)->name);
-
-  purple_notify_info(NULL,  /* plugin handle or PurpleConnection */
-                     ("Primary title"),
-                     ("Secondary title"),
-                     ("This is the callback for the rediffbol menu item."));
-}
-
-static GList *rediffbol_blist_node_menu(PurpleBlistNode *node) {
-  purple_debug_info("rediffbol", "providing buddy list context menu item\n");
-
-  if (PURPLE_BLIST_NODE_IS_BUDDY(node)) {
-    PurpleMenuAction *action = purple_menu_action_new(
-      ("Rediffbol example menu item"),
-      PURPLE_CALLBACK(blist_example_menu_item),
-      NULL,   /* userdata passed to the callback */
-      NULL);  /* child menu items */
-    return g_list_append(NULL, action);
-  } else {
-    return NULL;
-  }
-}
 
 static GList *rediffbol_chat_info(PurpleConnection *gc) {
   struct proto_chat_entry *pce; /* defined in prpl.h */
@@ -1096,7 +1072,7 @@ static PurplePluginProtocolInfo prpl_info =
   rediffbol_status_text,                /* status_text */
   rediffbol_tooltip_text,               /* tooltip_text */
   rediffbol_status_types,               /* status_types */
-  rediffbol_blist_node_menu,            /* blist_node_menu */
+  NULL,            /* blist_node_menu */
   NULL,                  /* chat_info */
   NULL,         /* chat_info_defaults */
   rediffbol_login,                      /* login */
