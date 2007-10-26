@@ -648,13 +648,10 @@ static const char *rediffbol_list_emblem(PurpleBuddy *buddy)
 {
   const char* emblem;
 
-  if (get_rediffbol_gc(buddy->name)) {
-    PurplePresence *presence = purple_buddy_get_presence(buddy);
-    PurpleStatus *status = purple_presence_get_active_status(presence);
-    emblem = purple_status_get_name(status);
-  } else {
-    emblem = "offline";
-  }
+
+  PurplePresence *presence = purple_buddy_get_presence(buddy);
+  PurpleStatus *status = purple_presence_get_active_status(presence);
+  emblem = purple_status_get_name(status);
 
   purple_debug_info("rediffbol", "using emblem %s for %s's buddy %s\n",
                     emblem, buddy->account->username, buddy->name);
@@ -689,27 +686,20 @@ static char *rediffbol_status_text(PurpleBuddy *buddy) {
 static void rediffbol_tooltip_text(PurpleBuddy *buddy,
                                   PurpleNotifyUserInfo *info,
                                   gboolean full) {
-  PurpleConnection *gc = get_rediffbol_gc(buddy->name);
 
-  if (gc) {
-    /* they're logged in */
-    PurplePresence *presence = purple_buddy_get_presence(buddy);
-    PurpleStatus *status = purple_presence_get_active_status(presence);
-    const char *msg = rediffbol_status_text(buddy);
-    purple_notify_user_info_add_pair(info, purple_status_get_name(status),
-                                     msg);
-
-    if (full) {
-      const char *user_info = purple_account_get_user_info(gc->account);
-      if (user_info)
-        purple_notify_user_info_add_pair(info, ("User info"), user_info);
+  /* they're logged in */
+  PurplePresence *presence = purple_buddy_get_presence(buddy);
+  PurpleStatus *status = purple_presence_get_active_status(presence);
+  const char *msg = rediffbol_status_text(buddy);
+  purple_notify_user_info_add_pair(info, purple_status_get_name(status),
+				   msg);
+  
+  if (full) {
+    const char *user_info = "No information";
+    if (user_info)
+      purple_notify_user_info_add_pair(info, ("User info"), user_info);
     }
-
-  } else {
-    /* they're not logged in */
-    purple_notify_user_info_add_pair(info, ("User info"), ("not logged in"));
-  }
-    
+  
   purple_debug_info("rediffbol", "showing %s tooltip for %s\n",
                     (full) ? "full" : "short", buddy->name);
 }
