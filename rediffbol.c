@@ -662,7 +662,7 @@ static void rediffbol_tooltip_text(PurpleBuddy *buddy,
                                   PurpleNotifyUserInfo *info,
                                   gboolean full) {
 
-  /* they're logged in */
+  /* they're logged in */ /*
   PurplePresence *presence = purple_buddy_get_presence(buddy);
   PurpleStatus *status = purple_presence_get_active_status(presence);
   const char *msg = rediffbol_status_text(buddy);
@@ -676,7 +676,7 @@ static void rediffbol_tooltip_text(PurpleBuddy *buddy,
     }
   
   purple_debug_info("rediffbol", "showing %s tooltip for %s\n",
-                    (full) ? "full" : "short", buddy->name);
+  (full) ? "full" : "short", buddy->name); */
 }
 
 static GList *rediffbol_status_types(PurpleAccount *acct)
@@ -761,40 +761,6 @@ static int rediffbol_send_im(PurpleConnection *gc, const char *who,
   return 1;
 }
 
-static void rediffbol_set_info(PurpleConnection *gc, const char *info) {
-  purple_debug_info("rediffbol", "setting %s's user info to %s\n",
-                    gc->account->username, info);
-}
-
-
-static void rediffbol_get_info(PurpleConnection *gc, const char *username) {
-  const char *body;
-  PurpleNotifyUserInfo *info = purple_notify_user_info_new();
-  PurpleAccount *acct;
-
-  purple_debug_info("rediffbol", "Fetching %s's user info for %s\n", username,
-                    gc->account->username);
-
-  if (!get_rediffbol_gc(username)) {
-    char *msg = g_strdup_printf(("%s is not logged in."), username);
-    purple_notify_error(gc, ("User Info"), ("User info not available. "), msg);
-    g_free(msg);
-  }
-
-  acct = purple_accounts_find(username, REDIFFBOLPRPL_ID);
-  if (acct)
-    body = purple_account_get_user_info(acct);
-  else
-    body = ("No user info.");
-  purple_notify_user_info_add_pair(info, "Info", body);
-
-  /* show a buddy's user info in a nice dialog box */
-  purple_notify_userinfo(gc,        /* connection the buddy info came through */
-                         username,  /* buddy's username */
-                         info,      /* body */
-                         NULL,      /* callback called when dialog closed */
-                         NULL);     /* userdata for callback */
-}
 
 static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
   const char *msg = purple_status_get_attr_string(status, "message");
@@ -802,12 +768,6 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
                     acct->username, purple_status_get_name(status), msg);
 
 
-}
-
-static void rediffbol_set_idle(PurpleConnection *gc, int idletime) {
-  purple_debug_info("rediffbol",
-                    "purple reports that %s has been idle for %d seconds\n",
-                    gc->account->username, idletime);
 }
 
 
@@ -872,15 +832,6 @@ static void rediffbol_set_permit_deny(PurpleConnection *gc) {
    */
 }
 
-static void rediffbol_get_cb_info(PurpleConnection *gc, int id, const char *who) {
-  PurpleConversation *conv = purple_find_chat(gc, id);
-  purple_debug_info("rediffbol",
-                    "retrieving %s's info for %s in chat room %s\n", who,
-                    gc->account->username, conv->name);
-
-  rediffbol_get_info(gc, who);
-}
-
 static void rediffbol_alias_buddy(PurpleConnection *gc, const char *who,
                                  const char *alias) {
  purple_debug_info("rediffbol", "%s sets %'s alias to %s\n",
@@ -924,7 +875,7 @@ static PurplePluginProtocolInfo prpl_info =
   rediffbol_list_icon,                  /* list_icon */
   rediffbol_list_emblem,                /* list_emblem */
   NULL,                /* status_text */
-  rediffbol_tooltip_text,               /* tooltip_text */
+  NULL,               /* tooltip_text */
   rediffbol_status_types,               /* status_types */
   NULL,            /* blist_node_menu */
   NULL,                  /* chat_info */
@@ -934,9 +885,9 @@ static PurplePluginProtocolInfo prpl_info =
   rediffbol_send_im,                    /* send_im */
   NULL,                   /* set_info */
   NULL,                /* send_typing */
-  rediffbol_get_info,                   /* get_info */
+  NULL,                   /* get_info */
   rediffbol_set_status,                 /* set_status */
-  rediffbol_set_idle,                   /* set_idle */
+  NULL,                   /* set_idle */
   NULL,              /* change_passwd */
   rediffbol_add_buddy,                  /* add_buddy */
   NULL,                /* add_buddies */
@@ -956,7 +907,7 @@ static PurplePluginProtocolInfo prpl_info =
   NULL,                  /* chat_send */
   NULL,                                /* keepalive */
   NULL,              /* register_user */
-  rediffbol_get_cb_info,                /* get_cb_info */
+  NULL,                /* get_cb_info */
   NULL,                                /* get_cb_away */
   rediffbol_alias_buddy,                /* alias_buddy */
   NULL,                /* group_buddy */
