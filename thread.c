@@ -6,6 +6,7 @@
 void send_update_contacts_request(RediffBolConn *conn) ;
 void send_update_messages_request(RediffBolConn *conn) ;
 bool send_message(RediffBolConn*conn, RMessage* msg) ;
+void send_add_buddy(RediffBolConn *conn, const char *email) ;
 size_t login_header_received( void *ptr,  size_t  size,  size_t  nmemb,  void
 			      *stream) ;
 size_t curl_callback_push_on_gstring(void  *buffer,  

@@ -476,30 +476,19 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 static void rediffbol_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 				PurpleGroup *group)
 {
-	char *username = gc->account->username;
-	PurpleConnection *buddy_gc = get_rediffbol_gc(buddy->name);
+
+	RediffBolConn *conn = r_find_by_acct(gc->account) ;
 	
-	purple_debug_info("rediffbol", "adding %s to %s's buddy list\n", buddy->name,
-			  username);
+	assert(conn) ;
+	RCommand *comm = g_new(RCommand, 1) ;
+	comm->code = COMMAND_ADD_BUDDY ; 
+	comm->data = g_strdup(buddy->name) ;
 	
-	if (buddy_gc) {
-		PurpleAccount *buddy_acct = buddy_gc->account;
-		
-		
-		
-		if (purple_find_buddy(buddy_acct, username)) {
-			purple_debug_info("rediffbol", "%s is already on %s's buddy list\n",
-					  username, buddy->name);
-		} else {
-			purple_debug_info("rediffbol", "asking %s if they want to add %s\n",
-					  buddy->name, username);
-			purple_account_request_add(buddy_acct,
-						   username,
-						   NULL,   /* local account id (rarely used) */
-						   NULL,   /* alias */
-						   NULL);  /* message */
-		}
-	}
+	g_async_queue_push(conn->commands, comm)  ; 
+	
+	purple_debug_info("rediffbol", "Adding %s", buddy->name);
+	return ;
+	
 }
 
 static void rediffbol_add_buddies(PurpleConnection *gc, GList *buddies,
@@ -571,71 +560,71 @@ static PurplePluginProtocolInfo prpl_info =
 		0,                               /* min_height */
 		128,                             /* max_width */
       128,                             /* max_height */
-      10000,                           /* max_filesize */
-      PURPLE_ICON_SCALE_DISPLAY,       /* scale_rules */
-  },
-  rediffbol_list_icon,                  /* list_icon */
-  rediffbol_list_emblem,                /* list_emblem */
-  NULL,                /* status_text */
-  NULL,               /* tooltip_text */
-  rediffbol_status_types,               /* status_types */
-  NULL,            /* blist_node_menu */
-  NULL,                  /* chat_info */
-  NULL,         /* chat_info_defaults */
-  rediffbol_login,                      /* login */
-  rediffbol_close,                      /* close */
-  rediffbol_send_im,                    /* send_im */
-  NULL,                   /* set_info */
-  NULL,                /* send_typing */
-  NULL,                   /* get_info */
-  rediffbol_set_status,                 /* set_status */
-  NULL,                   /* set_idle */
-  NULL,              /* change_passwd */
-  rediffbol_add_buddy,                  /* add_buddy */
-  NULL,                /* add_buddies */
-  NULL,               /* remove_buddy */
-  NULL,             /* remove_buddies */
-  NULL,                 /* add_permit */
-  NULL,                   /* add_deny */
-  NULL,                 /* rem_permit */
-  NULL,                   /* rem_deny */
-  NULL,            /* set_permit_deny */
-  NULL,                  /* join_chat */
-  NULL,                /* reject_chat */
-  NULL,              /* get_chat_name */
-  NULL,                /* chat_invite */
-  NULL,                 /* chat_leave */
-  NULL,               /* chat_whisper */
-  NULL,                  /* chat_send */
-  NULL,                                /* keepalive */
-  NULL,              /* register_user */
-  NULL,                /* get_cb_info */
-  NULL,                                /* get_cb_away */
-  rediffbol_alias_buddy,                /* alias_buddy */
-  NULL,                /* group_buddy */
-  NULL,               /* rename_group */
-  NULL,                                /* buddy_free */
-  NULL,               /* convo_closed */
-  rediffbol_normalize,                  /* normalize */
-  rediffbol_set_buddy_icon,             /* set_buddy_icon */
-  NULL,               /* remove_group */
-  NULL,                                /* get_cb_real_name */
-  NULL,             /* set_chat_topic */
-  NULL,                                /* find_blist_chat */
-  NULL,          /* roomlist_get_list */
-  NULL,            /* roomlist_cancel */
-  NULL,   /* roomlist_expand_category */
-  NULL,           /* can_receive_file */
-  NULL,                                /* send_file */
-  NULL,                                /* new_xfer */
-  NULL,            /* offline_message */
-  NULL,                                /* whiteboard_prpl_ops */
-  NULL,                                /* send_raw */
-  NULL,                                /* roomlist_room_serialize */
-  NULL,                                /* padding... */
-  NULL,
-  NULL,
-  NULL,
+		10000,                           /* max_filesize */
+		PURPLE_ICON_SCALE_DISPLAY,       /* scale_rules */
+	},
+	rediffbol_list_icon,                  /* list_icon */
+	rediffbol_list_emblem,                /* list_emblem */
+	NULL,                /* status_text */
+	NULL,               /* tooltip_text */
+	rediffbol_status_types,               /* status_types */
+	NULL,            /* blist_node_menu */
+	NULL,                  /* chat_info */
+	NULL,         /* chat_info_defaults */
+	rediffbol_login,                      /* login */
+	rediffbol_close,                      /* close */
+	rediffbol_send_im,                    /* send_im */
+	NULL,                   /* set_info */
+	NULL,                /* send_typing */
+	NULL,                   /* get_info */
+	rediffbol_set_status,                 /* set_status */
+	NULL,                   /* set_idle */
+	NULL,              /* change_passwd */
+	rediffbol_add_buddy,                  /* add_buddy */
+	NULL,                /* add_buddies */
+	NULL,               /* remove_buddy */
+	NULL,             /* remove_buddies */
+	NULL,                 /* add_permit */
+	NULL,                   /* add_deny */
+	NULL,                 /* rem_permit */
+	NULL,                   /* rem_deny */
+	NULL,            /* set_permit_deny */
+	NULL,                  /* join_chat */
+	NULL,                /* reject_chat */
+	NULL,              /* get_chat_name */
+	NULL,                /* chat_invite */
+	NULL,                 /* chat_leave */
+	NULL,               /* chat_whisper */
+	NULL,                  /* chat_send */
+	NULL,                                /* keepalive */
+	NULL,              /* register_user */
+	NULL,                /* get_cb_info */
+	NULL,                                /* get_cb_away */
+	rediffbol_alias_buddy,                /* alias_buddy */
+	NULL,                /* group_buddy */
+	NULL,               /* rename_group */
+	NULL,                                /* buddy_free */
+	NULL,               /* convo_closed */
+	rediffbol_normalize,                  /* normalize */
+	rediffbol_set_buddy_icon,             /* set_buddy_icon */
+	NULL,               /* remove_group */
+	NULL,                                /* get_cb_real_name */
+	NULL,             /* set_chat_topic */
+	NULL,                                /* find_blist_chat */
+	NULL,          /* roomlist_get_list */
+	NULL,            /* roomlist_cancel */
+	NULL,   /* roomlist_expand_category */
+	NULL,           /* can_receive_file */
+	NULL,                                /* send_file */
+	NULL,                                /* new_xfer */
+	NULL,            /* offline_message */
+	NULL,                                /* whiteboard_prpl_ops */
+	NULL,                                /* send_raw */
+	NULL,                                /* roomlist_room_serialize */
+	NULL,                                /* padding... */
+	NULL,
+	NULL,
+	NULL,
 };
 
 static void rediffbol_init(PurplePlugin *plugin)
