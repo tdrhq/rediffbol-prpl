@@ -372,21 +372,7 @@ static void rediffbol_tooltip_text(PurpleBuddy *buddy,
 				   PurpleNotifyUserInfo *info,
 				   gboolean full) {
 	
-	/* they're logged in */ /*
-	   PurplePresence *presence = purple_buddy_get_presence(buddy);
-	   PurpleStatus *status = purple_presence_get_active_status(presence);
-	   const char *msg = rediffbol_status_text(buddy);
-	   purple_notify_user_info_add_pair(info, purple_status_get_name(status),
-	   msg);
-	   
-	   if (full) {
-	   const char *user_info = "No information";
-	   if (user_info)
-	   purple_notify_user_info_add_pair(info, ("User info"), user_info);
-	   }
-	   
-	   purple_debug_info("rediffbol", "showing %s tooltip for %s\n",
-	   (full) ? "full" : "short", buddy->name); */
+	/*TODO*/
 }
 
 static GList *rediffbol_status_types(PurpleAccount *acct)
