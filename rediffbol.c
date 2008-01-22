@@ -172,8 +172,8 @@ static gboolean process_signals (RediffBolConn *conn) {
 		if ( sig -> code == SIGNAL_SHUTDOWN_COMPLETED ) { 
 			/* free up everything related to this connection*/
 			g_free (sig) ;
-			g_async_queue_free(conn->commands);
-			g_async_queue_free(conn->signals);
+			g_async_queue_unref(conn->commands);
+			g_async_queue_unref(conn->signals);
 			return false ;
 		}
 		g_free(sig) ;

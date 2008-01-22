@@ -75,6 +75,8 @@ connection_thread(RediffBolConn *ret) {
 	g_string_free(at, TRUE) ;
 	g_string_free(tmp, TRUE) ;
 	
+	g_async_queue_ref(ret->commands);
+	g_async_queue_ref(ret->signals) ;
 	
 	do { 
 		GTimeVal v ; 
@@ -106,10 +108,13 @@ connection_thread(RediffBolConn *ret) {
 			g_free(ret->login) ;
 			g_free(ret->session_id) ;
 
+
 			RSignal *sig = g_new(RSignal,1) ;
 			sig->data = NULL; 
 			sig->code = SIGNAL_SHUTDOWN_COMPLETED ; 
 			g_async_queue_push(ret->signals, sig) ;
+			g_async_queue_unref(ret->commands) ;
+			g_async_queue_unref(ret->signals) ;
 			return NULL;
 		} 
 	} while ( true) ; 
