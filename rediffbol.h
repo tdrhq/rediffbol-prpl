@@ -50,7 +50,7 @@ typedef struct  {
     COMMAND_UPDATE_MESSAGES,
     COMMAND_SEND_MESSAGE, 
     COMMAND_CHANGE_STATE,
-    COMMAND_ADD_CONTACT,
+    COMMAND_ADD_BUDDY,
     COMMAND_SHUTDOWN
   } code; 
   void * data; 

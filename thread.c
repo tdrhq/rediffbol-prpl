@@ -93,6 +93,10 @@ connection_thread(RediffBolConn *ret) {
 		if ( comm->code == COMMAND_SEND_MESSAGE ) 
 			send_message (ret, comm->data) ;
 		
+		if ( comm->code == COMMAND_ADD_BUDDY ) { 
+			send_add_buddy(ret, (char*)comm->data) ;
+			g_free(comm->data) ;
+		}
 		if ( comm->code == COMMAND_SHUTDOWN ) { 
 
 			/* cleanup what belongs to me */
@@ -255,4 +259,43 @@ size_t curl_callback_push_on_gstring(void  *buffer,
 				     GString  *userp) {
 	g_string_append_len( userp, buffer, size*nmemb) ;
 	return size*nmemb ; 
+}
+
+void send_add_buddy(RediffBolConn *conn, const char *email) { 
+	GString *post = g_string_new("") ;
+	GString *data = g_string_new("") ;
+	
+	char *escaped_email = curl_easy_escape( conn->easy_handle,
+						email, strlen(email)) ;
+	
+	g_string_printf(post, "do=addfriends&login=%s&session_id=%s&txtaddfrnds=%s",
+			conn->login, conn->session_id,
+			escaped_email) ;
+	
+	curl_free(escaped_email) ;
+	
+	curl_easy_setopt(conn->easy_handle, CURLOPT_URL, "http://f1webmsngr.rediff.com/webmsngr/Main.php" ) ;
+	
+	
+	curl_easy_setopt(conn->easy_handle, CURLOPT_POSTFIELDS, post->str) ; 
+	
+	
+	curl_easy_setopt(conn->easy_handle, CURLOPT_WRITEFUNCTION, 
+			 curl_callback_push_on_gstring) ;
+	curl_easy_setopt(conn->easy_handle, CURLOPT_WRITEDATA,
+			 data); 
+	
+	bool ret = true ; 
+	if ( curl_easy_perform(conn->easy_handle) != 0 ) 
+		ret = false ;
+	
+	/* Note that we don't need to send a signal now! */
+	
+	curl_easy_setopt(conn->easy_handle, CURLOPT_HTTPGET, 1);  
+	
+	/* cleanup */
+	g_string_free(post, TRUE);
+	g_string_free(data, TRUE) ;
+
+
 }
