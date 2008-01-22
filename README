@@ -6,7 +6,8 @@ OVERVIEW
 
 Rediffbol is an IM service used by some people in India.
 
-Rediffbol-prpl is a Rediffbol protocol-plugin for pidgin. 
+Rediffbol-prpl is a Rediffbol protocol-plugin for pidgin.
+ 
 -----------------------
 BUILDING AND INSTALLING
 -----------------------
@@ -14,4 +15,8 @@ BUILDING AND INSTALLING
 To build just type "make" followed by "make install". Please let me know if 
 you have any compilation issues. I haven't tried compiling on Windows yet.
 
+-------
+AUTHORS
+-------
 
+Arnold "arnstein87" Noronha <arnold AT cmi DOT ac DOT in, arn_2000 AT rediffmail DOT com>
