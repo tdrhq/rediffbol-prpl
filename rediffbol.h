@@ -72,14 +72,14 @@ typedef struct {
 } RMessage ; 
 
 typedef struct { 
-  PurpleAccount *acct;
-  CURL * easy_handle; 
-  GAsyncQueue *commands ; 
-  GAsyncQueue *signals ; 
-  char* session_id; 
-  char* login ;
+	PurpleAccount *acct;     /* owner: libpurple */
+	CURL * easy_handle;      /* owner: thread */
+	GAsyncQueue *commands ;  /* owner: plugin main loop */
+	GAsyncQueue *signals ;   /* owner: plugin main loop */
+	char* session_id;        /* owner: thread */
+	char* login ;            /* owner: thread */
 
-  int connection_state; 
+	int connection_state; 
 } RediffBolConn ;
 
 

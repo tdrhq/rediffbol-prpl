@@ -14,7 +14,8 @@ size_t curl_callback_push_on_gstring(void  *buffer,
 
 
 
-extern GPrivate *current_connection  = NULL ;
+GPrivate *current_connection  = NULL ;
+
 gpointer
 connection_thread(RediffBolConn *ret) {
 	
@@ -48,8 +49,6 @@ connection_thread(RediffBolConn *ret) {
 	
 	FILE * dump = fopen("/dev/null", "w") ;
 	curl_easy_setopt(ret->easy_handle, CURLOPT_WRITEDATA, dump);
-	//  curl_easy_setopt(ret->easy_handle, CURLOPT_VERBOSE, 1);
-	//curl_easy_setopt(ret->easy_handle, CURLOPT_FOLLOWLOCATION, 1) ;
 	curl_easy_perform(ret->easy_handle) ;
 	
 	if ( false && !(ret->connection_state & RB_CONN_STATE_CONNECTED) ) { 
@@ -77,16 +76,13 @@ connection_thread(RediffBolConn *ret) {
 	
 	
 	do { 
-		
 		GTimeVal v ; 
 		g_get_current_time(&v);
 		g_time_val_add(&v, 500);
 		RCommand *comm = g_async_queue_pop(ret->commands ) ;
 		
-		/* ideally we'd like to do some background processing */
 		if ( comm == NULL ) continue ; 
 		
-		printf("OK sergeant!\n");
 		/* do what the command orders */
 		if ( comm->code == COMMAND_UPDATE_CONTACTS ) 
 			send_update_contacts_request( ret) ;
@@ -98,6 +94,13 @@ connection_thread(RediffBolConn *ret) {
 			send_message (ret, comm->data) ;
 		
 		if ( comm->code == COMMAND_SHUTDOWN ) { 
+
+			/* cleanup what belongs to me */
+			curl_easy_cleanup(ret->easy_handle) ;
+			ret->easy_handle = NULL ; 
+			g_free(ret->login) ;
+			g_free(ret->session_id) ;
+
 			RSignal *sig = g_new(RSignal,1) ;
 			sig->data = NULL; 
 			sig->code = SIGNAL_SHUTDOWN_COMPLETED ; 
@@ -149,8 +152,6 @@ void send_update_contacts_request(RediffBolConn *conn) {
 			 "http://f4webmsngr.rediff.com/webmsngr/Main.php?do=getContacts&login=%s&session_id=%s&random_key=%d", 
 			 conn->login, conn->session_id, rand() % 1000000 ) ;
 	
-	// Lets make the request.
-	printf("url is: %s\n", url->str); 
 	curl_easy_setopt(conn->easy_handle, CURLOPT_URL, 
 			 url->str);
 	
@@ -160,11 +161,8 @@ void send_update_contacts_request(RediffBolConn *conn) {
 	curl_easy_setopt(conn->easy_handle, CURLOPT_WRITEDATA, 
 			 data) ;
 	
-	printf("about to easy perform\n");
 	if (  curl_easy_perform(conn->easy_handle) != 0  ) { 
-		printf("oh crap!\n");
-		
-		return true ; 
+		return  ; /* bad */ 
 	}
 	printf("and done\n");
 	//  printf("XML data: %s\n", data->str) ;

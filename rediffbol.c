@@ -157,7 +157,6 @@ static gboolean  update_contacts (RediffBolConn *conn, GString *data ) {
 }
 
 static gboolean process_signals (RediffBolConn *conn) { 
-	printf("Processing signals\n") ;
 	RSignal *sig; 
 	while (  sig = g_async_queue_try_pop(conn->signals) ){ 
 		if ( sig->code == SIGNAL_UPDATE_CONTACTS_COMPLETED ) { 
@@ -170,6 +169,13 @@ static gboolean process_signals (RediffBolConn *conn) {
 			g_string_free((GString*) sig->data, false) ;
 		}
 		
+		if ( sig -> code == SIGNAL_SHUTDOWN_COMPLETED ) { 
+			/* free up everything related to this connection*/
+			g_free (sig) ;
+			g_async_queue_free(conn->commands);
+			g_async_queue_free(conn->signals);
+			return false ;
+		}
 		g_free(sig) ;
 	}
 	
