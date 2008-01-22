@@ -5,9 +5,17 @@
  */
 void send_update_contacts_request(RediffBolConn *conn) ;
 void send_update_messages_request(RediffBolConn *conn) ;
-void send_message(RediffBolConn*conn, RMsg* msg) ;
+bool send_message(RediffBolConn*conn, RMessage* msg) ;
+size_t login_header_received( void *ptr,  size_t  size,  size_t  nmemb,  void
+			      *stream) ;
+size_t curl_callback_push_on_gstring(void  *buffer,  
+				     size_t  size,  size_t  nmemb,  
+				     GString  *userp) ;
 
-GPrivate *current_connection  = NULL ;
+
+
+extern GPrivate *current_connection  = NULL ;
+gpointer
 connection_thread(RediffBolConn *ret) {
 	
 	/* anywhere in the thread I should be able to retreive which 
@@ -93,7 +101,7 @@ connection_thread(RediffBolConn *ret) {
 			RSignal *sig = g_new(RSignal,1) ;
 			sig->data = NULL; 
 			sig->code = SIGNAL_SHUTDOWN_COMPLETED ; 
-			g_async_queue_push(conn->signals, sig) ;
+			g_async_queue_push(ret->signals, sig) ;
 			return NULL;
 		} 
 	} while ( true) ; 
@@ -241,4 +249,11 @@ bool send_message(RediffBolConn *conn, RMessage *msg) {
 	g_string_free(msg->content, TRUE);
 	
 	g_free(msg); 
+}
+
+size_t curl_callback_push_on_gstring(void  *buffer,  
+				     size_t  size,  size_t  nmemb,  
+				     GString  *userp) {
+	g_string_append_len( userp, buffer, size*nmemb) ;
+	return size*nmemb ; 
 }

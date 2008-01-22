@@ -44,6 +44,7 @@
 #include <ctype.h>
 
 //#include <libxml/xmlreader.h>
+#include "rediffbol.h"
 
 #define REDIFFBOLPRPL_ID "prpl-rediffbol"
 
@@ -77,12 +78,6 @@ RediffBolConn* r_find_by_acct(PurpleAccount *acct) {
 	return NULL ; 
 }
 
-size_t curl_callback_push_on_gstring(void  *buffer,  
-				     size_t  size,  size_t  nmemb,  
-				     GString  *userp) {
-	g_string_append_len( userp, buffer, size*nmemb) ;
-	return size*nmemb ; 
-}
 
 void parse_url_param(gchar *data, gchar* param, GString *tmp) { 
 	char *end=NULL, *beg =data ;
@@ -444,6 +439,8 @@ static void rediffbol_close(PurpleConnection *gc)
 	RCommand *comm = g_new(RCommand, 1 ) ;
 	comm->code = COMMAND_SHUTDOWN ; 
 	comm->data = NULL ;
+
+	RediffBolConn *conn = r_find_by_acct(gc->account) ;
 	g_async_queue_push(conn->commands, comm) ;
 }
 

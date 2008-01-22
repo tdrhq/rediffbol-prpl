@@ -84,6 +84,7 @@ typedef struct {
 
 
 extern GList * list  ;
+extern GPrivate *current_connection   ;
 
 /**
  * Function listing that runs in the thread
