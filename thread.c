@@ -112,38 +112,39 @@ connection_thread(RediffBolConn *ret) {
 }
 /* while logging in, a header has been received! */
 size_t login_header_received( void *ptr,  size_t  size,  size_t  nmemb,  void
-              *stream) {
-
-  //  printf("%x\n", (uint)  g_thread_self() );
-  size_t len = size*nmemb;
-  ((char*)ptr)[len] = '\0'; 
-  
-  char *header = (char*) ptr;
-  char* pos = strchr(header, ':');
-  if ( !pos ) return len ;
-  *pos = '\0';
-  pos ++ ;
-  while ( isspace(*pos) ) pos ++ ; 
-  
-  if ( strcmp(header, "Location") == 0 )   { 
-    RediffBolConn *conn = g_private_get(current_connection) ;
-    
-    char *session_string = strdup(strchr(pos, '?')+1 );
-
-    g_strchomp(session_string) ;
-
-    GString *tmp = g_string_new("") ;
-    parse_url_param(session_string, "session_id", tmp) ;
-    conn->session_id = g_string_free(tmp, false) ;
-
-    tmp = g_string_new("") ;
-    parse_url_param(session_string, "login", tmp) ;
-    conn->login = g_string_free(tmp, false) ;
-    
-    conn->connection_state = RB_CONN_STATE_UPDATED | RB_CONN_STATE_CONNECTED ;
-  }
-  
-  return len; 
+			      *stream) {
+	
+	//  printf("%x\n", (uint)  g_thread_self() );
+	size_t len = size*nmemb;
+	((char*)ptr)[len] = '\0'; 
+	
+	char *header = (char*) ptr;
+	char* pos = strchr(header, ':');
+	if ( !pos ) return len ;
+	*pos = '\0';
+	pos ++ ;
+	while ( isspace(*pos) ) pos ++ ; 
+	
+	if ( strcmp(header, "Location") == 0 )   { 
+		RediffBolConn *conn = g_private_get(current_connection) ;
+		
+		char *session_string = strdup(strchr(pos, '?')+1 );
+		
+		g_strchomp(session_string) ;
+		
+		GString *tmp = g_string_new("") ;
+		parse_url_param(session_string, "session_id", tmp) ;
+		conn->session_id = g_string_free(tmp, false) ;
+		
+		tmp = g_string_new("") ;
+		parse_url_param(session_string, "login", tmp) ;
+		conn->login = g_string_free(tmp, false) ;
+		
+		conn->connection_state = RB_CONN_STATE_UPDATED 
+			| RB_CONN_STATE_CONNECTED ;
+	}
+	
+	return len; 
 }
 
 void send_update_contacts_request(RediffBolConn *conn) { 
