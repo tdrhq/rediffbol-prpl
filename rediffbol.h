@@ -1,3 +1,6 @@
+#ifndef __REDIFFBOL_H__
+#define __REDIFFBOL_H__ 
+
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
@@ -24,12 +27,6 @@
 #include <ctype.h>
 
 
-#define RB_STATUS_ONLINE   "online"
-#define RB_STATUS_AWAY     "away"
-#define RB_STATUS_OFFLINE  "offline"
-#define RB_STATUS_BUSY     "busy" 
-#define RB_STATUS_INVISIBLE "invisible" 
-
 typedef int bool ;
 #define true 1 
 #define false 0
@@ -40,6 +37,11 @@ typedef void (*GcFunc)(PurpleConnection *from,
 
 struct RediffBolConn { 
 	int fd ; 
-	GString buffer ;
 	PacketRecvCallback rx_cb ;
+	GotConnectedCallback got_connected_cb ;
+	g_circ_buffer *txbuf ;
+	guint tx_handler; 
 };
+
+
+#endif
