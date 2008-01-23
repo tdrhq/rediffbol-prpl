@@ -117,3 +117,5 @@ static void conn_write_cb( gpointer data, gint source,
 	purple_circ_buffer_mark_read(rb->txbuf, ret) ;
 
 }
+
+
