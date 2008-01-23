@@ -11,7 +11,7 @@ struct Response {
 } ;
 
 
-struct Response* 
+extern struct Response* 
 response_init_protected(int respId, int datalen, RESPONSE_DESTRUCTOR *rd) ;
 
-void response_free(struct Response *r) ;
+extern void response_free(struct Response *r) ;
