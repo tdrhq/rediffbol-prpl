@@ -41,6 +41,7 @@ struct RediffBolConn {
 	GotConnectedCallback got_connected_cb ;
 	g_circ_buffer *txbuf ;
 	guint tx_handler; 
+	guint rx_handler; 
 };
 
 

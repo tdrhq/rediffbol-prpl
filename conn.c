@@ -24,6 +24,7 @@ bool conn_establish_connection(
 	}
 	rb-> txbuf = purple_circ_buffer_init(0) ;
 	rb->tx_handler = NULL ; 
+	rb->rx_handler = NULL ;
 }
 
 static void conn_got_connected(gpointer data, gint source, 
@@ -42,6 +43,9 @@ static void conn_got_connected(gpointer data, gint source,
 	/* so now this callback need not take care of connection issues */
 	rb->got_connected_cb(account) ;
 	
+
+	rb->rx_handler = purple_input_add(rb->fd, PURPLE_INPUT_READ, 
+					  conn_read_cb, account) ;
 }
 
 /* shutdowns the connection, waits till all packets are sent. 
@@ -119,3 +123,7 @@ static void conn_write_cb( gpointer data, gint source,
 }
 
 
+
+static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {
+	
+}
