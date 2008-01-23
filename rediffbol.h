@@ -37,57 +37,8 @@ typedef int bool ;
 typedef void (*GcFunc)(PurpleConnection *from,
                        PurpleConnection *to,
                        gpointer userdata);
-enum { 
-	RB_CONN_STATE_OFFLINE=0,
-	RB_CONN_STATE_CONNECTING=1,
-	RB_CONN_STATE_CONNECTED=2,
-	RB_CONN_STATE_BAD=4,
-	RB_CONN_STATE_UPDATED=8
+
+struct RediffBolConn { 
+	int fd ; 
+	GString buffer ;
 };
-typedef struct  { 
-  enum { 
-    COMMAND_UPDATE_CONTACTS,
-    COMMAND_UPDATE_MESSAGES,
-    COMMAND_SEND_MESSAGE, 
-    COMMAND_CHANGE_STATE,
-    COMMAND_ADD_BUDDY,
-    COMMAND_SHUTDOWN
-  } code; 
-  void * data; 
-} RCommand;
-
-typedef struct  { 
-  enum { 
-    SIGNAL_UPDATE_CONTACTS_COMPLETED, 
-    SIGNAL_UPDATE_MESSAGES_COMPLETED,
-    SIGNAL_DEL_CONTACT ,
-    SIGNAL_SHUTDOWN_COMPLETED
-  } code ; 
-  void *data ;
-} RSignal;
-
-typedef struct { 
-  GString *to ;
-  GString *content ; 
-} RMessage ; 
-
-typedef struct { 
-	PurpleAccount *acct;     /* owner: libpurple */
-	CURL * easy_handle;      /* owner: thread */
-	GAsyncQueue *commands ;  /* owner: plugin main loop */
-	GAsyncQueue *signals ;   /* owner: plugin main loop */
-	char* session_id;        /* owner: thread */
-	char* login ;            /* owner: thread */
-
-	int connection_state; 
-} RediffBolConn ;
-
-
-extern GList * list  ;
-extern GPrivate *current_connection   ;
-
-/**
- * Function listing that runs in the thread
- */
-
-extern gpointer connection_thread(RediffBolConn *ret) ;

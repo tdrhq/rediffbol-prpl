@@ -422,7 +422,8 @@ static void rediffbol_login(PurpleAccount *acct)
 					  2);  /* total number of steps */
 	
 	printf("starting connection\n");
-	start_connection(acct);
+
+
 }
 
 static void rediffbol_close(PurpleConnection *gc)
