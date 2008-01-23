@@ -41,6 +41,5 @@ typedef void (*GcFunc)(PurpleConnection *from,
 struct RediffBolConn { 
 	int fd ; 
 	GString buffer ;
-	PurpleInputFunction tx_cb ;
-	PurpleInputFunction rx_cb ;
+	PacketRecvCallback rx_cb ;
 };
