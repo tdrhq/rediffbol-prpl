@@ -3,12 +3,9 @@
 
 struct Response* 
 response_init_protected(int respId, int datalen, RESPONSE_DESTRUCTOR *rd) {
-	struct Response *ret = g_new(struct Response, 1) ;
+	if ( datalen == 0 ) datalen = sizeof(struct Response) ;
+	struct Response *ret = g_malloc(datalen) ;
 	ret->responseId = respId ;
-	if ( datalen ) 
-		ret->data = g_malloc(datalen) ;
-	else 
-		ret->data = NULL ;
 	ret->destructor = rd ;
 }
 void response_free(struct Response *r) { 

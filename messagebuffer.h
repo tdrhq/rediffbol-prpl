@@ -3,6 +3,7 @@
 
 struct MessageBuffer { 
 	int offset ; 
+	int err ; 
 	GString * str ; 
 } ;
 
@@ -29,3 +30,5 @@ extern gint16 messagebuffer_readShort(struct MessageBuffer *m) ;
 extern gboolean messagebuffer_isEnd(struct MessageBuffer *m) ;
 
 extern gboolean messagebuffer_getLength(struct MessageBuffer *m) ; 
+
+extern void messagebuffer_reset(struct MessageBuffer *m) ;

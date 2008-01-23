@@ -5,6 +5,11 @@ struct MessageBuffer *messagebuffer_init(const gchar *s) {
 	struct MessageBuffer *m = g_new(struct MessageBuffer, 1) ;
 	m->str = g_string_new(s) ;
 	m->offset = 0;
+	m->err = 0 ; 
+}
+
+static int messagebuffer_left(struct MessageBuffer *m) { 
+	return m->str->len - m->offset ; 
 }
 
 void messagebuffer_free(struct MessageBuffer* m) { 
@@ -13,21 +18,35 @@ void messagebuffer_free(struct MessageBuffer* m) {
 }
 
 gint32 messagebuffer_readInt32(struct MessageBuffer *m) {
+	if ( messagebuffer_left(m) < 4 ) { 
+		m->err = 1 ;
+		return 0 ; 
+	}
 	int i = *((gint32*) (m->str->str+m->offset));
 	m->offset += 4; 
 	return i ;
 }
 
 void messagebuffer_seek(struct MessageBuffer *m, int len) { 
+	if ( m->offset + len >= m->str->len) 
+		m->err = 1 ;
 	m->offset += len ;
 }
 
 char messagebuffer_readByte(struct MessageBuffer *m) {
+	if ( m->offset == m->str->len) { 
+		m->err = 1 ;
+		return '\0' ; 
+	}
 	return m->str->str[m->offset++] ;
 }
 
 void messagebuffer_readBytes(struct MessageBuffer *m, GString *s, int len) { 
 	int i ;
+	if ( messagebuffer_left(m) < len ) { 
+		m -> err =1 ;
+		return ; 
+	}
 	for(i = 0 ; i < len; i++) 
 		g_string_append_c(s, messagebuffer_readByte(m) );
 }
@@ -68,4 +87,9 @@ gboolean messagebuffer_isEnd(struct MessageBuffer *m) {
 
 gboolean messagebuffer_getLength(struct MessageBuffer *m) { 
 	return (m->str->len) ;
+}
+
+extern void messagebuffer_reset(struct MessageBuffer *m) {
+	m->offset = 0 ;
+	m->err = 0 ;
 }
