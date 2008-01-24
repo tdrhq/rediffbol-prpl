@@ -3,6 +3,7 @@
 #include "string"
 
 using namespace std; 
+using namespace rbol ;
 MessageBuffer::MessageBuffer(string s) { 
 	this->str = s;
 	this->offset = 0;
