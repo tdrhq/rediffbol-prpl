@@ -535,7 +535,7 @@ static void rediffbol_alias_buddy(PurpleConnection *gc, const char *who,
 /* normalize a username (e.g. remove whitespace, add default domain, etc.)
  * for rediffbol, this is a noop.
  */
-static const char *rediffbol_normalize(const PurpleAccount *acct,
+const char *rediffbol_normalize(const PurpleAccount *acct,
                                       const char *input) {
   return NULL;
 }

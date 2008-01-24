@@ -4,6 +4,8 @@
 using namespace std; 
 usine namespace rbol ;
 
+#define CAP_DIR "RBOL/1.2.5"
+
 bool 
 GkGetLoginServersResponse::parsePacket(rbol::MessageBuffer &m) { 
 	type = m.readInt32() ; 
@@ -23,3 +25,22 @@ GkGetLoginServersResponse::parsePacket(rbol::MessageBuffer &m) {
 	}
 }
 
+list<string> 
+getDirectConnectionIP() { 
+	string list = cap[CAP_DIR] ;
+	for(int i = 0 ; i < list.size() ; i++ )
+		if ( list[i] == ',' ) list[i] = ' ' ;
+
+	istringstream iss(list) ;
+	
+	list<string> res ; 
+	string s ; 
+	while( iss >> s ) { 
+		res.push_back(s) ;
+	} 
+	return res ;
+}
+
+void libpurpleProcess(RediffBolConn *rb) { 
+	
+}

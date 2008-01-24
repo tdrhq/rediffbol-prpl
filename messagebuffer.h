@@ -43,11 +43,15 @@ namespace rbol{
 		
 		gboolean isEnd() ;
 		
-		gboolean getLength() ; 
+		int getLength() ; 
 		
 		void reset() ;
 		
 		void push(std::string s) ;
+
+		MessageBuffer tail() { 
+			return readMessageBuffer(left()) ;
+		}
 	} ;
 }
 

@@ -13,16 +13,20 @@ typedef bool(*GotConnectedCallback)(PurpleAccount*) ;
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond);
 
-PurpleAsyncConn::PurpleAsyncConn(RediffBolConn *conn, string ip, gint32 port ) 
+PurpleAsyncConn::PurpleAsyncConn(RediffBolConn *conn, string ip, gint32 port,
+	int pm ) 
 :awaiting("") 
 { 
 	rb_conn = conn ;
 	establish_connection(ip, port) ;
 	txbuf = purple_circ_buffer_new(0);
+	parsemode = pm ;
+	ref_counter = 1 ; 
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
 	purple_circ_buffer_destroy(txbuf) ;
+	close() ;
 }
 
 void 
@@ -35,13 +39,13 @@ PurpleAsyncConn::got_connected_cb(gint source) {
 	fd = source ; 
 	
 	/* so now this callback need not take care of connection issues */
-//	rb_conn->got_connected_cb(account) ;
-	
-	
 	rx_handler = purple_input_add(fd, PURPLE_INPUT_READ, 
 					  conn_read_cb, this) ;
-
+	rb_conn->got_connected_cb() ;
 }
+
+
+
 static void conn_got_connected(gpointer data, gint source, 
 			       const gchar * error_message) ;
 
@@ -63,6 +67,7 @@ PurpleAsyncConn::establish_connection(
 	rx_handler = NULL ;
 }
 
+
 static void conn_got_connected(gpointer data, gint source, 
 			       const gchar * error_message) { 
 
@@ -72,6 +77,8 @@ static void conn_got_connected(gpointer data, gint source,
 	conn->got_connected_cb(source) ;
 
 }
+
+
 
 /* shutdowns the connection, waits till all packets are sent. 
  /* TODO: fix  but returns immediately */
@@ -86,6 +93,8 @@ PurpleAsyncConn::close() {
 
 static void conn_write_cb( gpointer data, gint source, 
 			   PurpleInputCondition cond) ;
+
+
 
 void  
 PurpleAsyncConn::write(void* data, 
@@ -129,6 +138,8 @@ PurpleAsyncConn::write_cb() {
 	if ( writelen == 0 ) { 
 		purple_input_remove(tx_handler) ;
 		tx_handler = 0 ;
+		if ( ref_counter == 0 ) 
+			delete this ;
 		return ;
 	}
 
@@ -145,6 +156,8 @@ PurpleAsyncConn::write_cb() {
 
 
 }
+
+
 static void conn_write_cb( gpointer data, gint source, 
 			   PurpleInputCondition cond) { 
 	PurpleAsyncConn* conn = (PurpleAsyncConn*) data ; 
@@ -169,7 +182,8 @@ PurpleAsyncConn::read_cb() {
 	
 	awaiting.push(string(buf, len)) ;
 
-	/* todo: response parser */
+	Response* resp = parseResponse(awaiting) ; 
+	if ( resp != NULL )  rb_conn->executeResponse(resp) ;
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {

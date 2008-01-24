@@ -19,13 +19,18 @@ static Response* parseCSResponse(MessageBuffer buffer) ;
 using namespace rbol ; 
 using namespace std; 
 
-Response* 
-parseResponse(MessageBuffer &buffer, int requesttype ) { 
+
+#include "rediffbol.h" 
+
+bool 
+RediffBolConn::parseResponse(MessageBuffer &buffer, int requesttype ) { 
+	Response *_resp = NULL; 
 	try { 
 		switch(requesttype)  {
 		case GK_REQUEST: 
 			GkGetLoginServersResponse *resp  = new 
 				GkGetLoginServersResponse ; 
+			_resp = resp ;
 			resp->parseResponse(buffer) ;
 			return resp ;
 		case CS_REQUEST:
@@ -33,6 +38,7 @@ parseResponse(MessageBuffer &buffer, int requesttype ) {
 			break ; 
 		}
 	} catch( MessageBufferOverflowException e ) { 
+		if ( _resp ) delete _resp ; 
 		buffer.reset() ;
 		return NULL ;
 	}
@@ -41,35 +47,22 @@ parseResponse(MessageBuffer &buffer, int requesttype ) {
 
 }
 
-
-parseGeneric(struct MessageBuffer *buffer) { 
-	int size = messagebuffer_readInt(buffer) ;
-	GString *tmp =
-		messagebuffer_readStringn(buffer, size) ;
-	g_string_free(tmp, TRUE) ;
-		
-	if ( buffer->err) 
-		return NULL ;
-	return response_init_protected(0, 0, NULL) ;
-}
-
 static struct Response* 
 parseServerMessage(struct MessageBuffer *buffer) { 
 	int code = messagebuffer_readInt(buffer);
 	return parseGeneric(buffer) ; /* todo */ 
 }
 struct Response*
-parseCSResponse(struct MessageBuffer *buffer) { 
-	struct Response *resp = NULL ;
-	GString *header = NULL ;
-	GString *cmd = NULL ;
+parseCSResponse(MessageBuffer &buffer) { 
+	Response *resp = NULL ;
+	string header = NULL ;
+	string cmd = NULL ;
 
-	int type = messagebuffer_readInt(buffer) ;
-	if ( buffer->err) return NULL ;
+	int type = buffer.readInt() ;
 
 	switch(type) { 
 	case 1: 
-		if ( buffer->str->len == 12 ) {
+		if ( buffer.getLength() == 12 ) {
 			/* TODO: this is not a good way of checking for
 			   the length of the packet size */
 			gchar* hex_dump = purple_str_binary_to_ascii
@@ -79,11 +72,12 @@ parseCSResponse(struct MessageBuffer *buffer) {
 				     "Got keepalive response: \n%s\n",
 				     hex_dump) ;
 			g_free(hex_dump) ;
-			return response_init_protected(RESPONSE_ID_KEEPALIVE, 
-						       0, NULL) ;
+			buffer.readInt32() ;
+			buffer.readInt32(); 
+			return NULL ;
 		}
-		int subtype = messagebuffer_readInt(buffer) ;
-		if( buffer->err ) return NULL ;
+
+		int subtype = buffer.readInt() ;
 
 		if ( subtype == 0 ) { 
 			/* login response */
@@ -98,17 +92,25 @@ parseCSResponse(struct MessageBuffer *buffer) {
 		if ( !resp ) { 
 			purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 				     "Got subtype as %d\n", subtype) ;
-			resp = parseGeneric(buffer) ; ;
+			resp = new ResponseCSGeneric ; 
 		}
+
+		try { 
+			resp->parseResponse(buffer);
+		} catch ( MessageBufferOverflowException e ) { 
+			delete resp ; 
+			return NULL ;
+		}
+		
 		return resp ; 
 	case 3: 
-		header = messagebuffer_readString(buffer) ;
-		cmd = messagebuffer_readString(buffer) ;
+		header = buffer.readString(buffer) ;
+		cmd = buffer.readString(buffer) ;
 
-		if ( buffer-> err ) return NULL ;
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "cmd is %s\n", cmd->str) ;
 		resp = NULL ; 
+
 		if ( g_strcmp(cmd->str, "Contacts") == 0 ) { 
 			/* resp = parseContacts(buffer); */
 		} else if ( g_strcmp(cmd->str, "NewMailCount") == 0) { 
@@ -118,15 +120,30 @@ parseCSResponse(struct MessageBuffer *buffer) {
 		if ( !resp) { 
 			purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 				     "Unhandled\n"); 
-			resp = parseGeneric(buffer) ;
+			resp = new ResponseCSGeneric ;
 		}
-		g_string_free(header, TRUE) ;
-		g_string_free(cmd, TRUE);
+		
+		try { 
+			resp->parseResponse(buffer) ;
+		} catch (MessageBufferOverflowException e ) {
+			delete resp ; 
+			return NULL ; 
+		}
 		return resp ; 
 	case 2: 
 		/* server message */
-		resp = parseServerMessage(buffer) ; 
-		return resp ; 
+		int code = buffer.readInt32() ; 
+		int size = buffer.readInt32() ; 
+		
+		string message = buffer.readString() ; 
+		string reason = buffer.readString() ; 
+		int code2 = buffer.readInt() ; 
+
+		purple_debug(PURPLE_DEBUG_INFO, "SERVER MESSAGE: code=%d code2="
+			     "%d MESSAGE=%s | REASON=%s\n",
+			     code, code2, message.c_str() , reason.c_str() );
+
+		return NULL ;
 	}
 				
 		

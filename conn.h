@@ -16,13 +16,19 @@ namespace rbol {
 		MessageBuffer awaiting; 
 		guint tx_handler; 
 		guint rx_handler; 
-
+		
+		int ref_counter ;
 		int fd ;
+		int parse_mode ; 
 	public:
+		int getParseMode() { 
+			return parse_mode ; 
+		}
 		RediffBolConn *rb_conn ;
 		PurpleAsyncConn(RediffBolConn* conn, 
 				std::string ip, 
-				gint32 port) ;
+				gint32 port,
+			int pm) ;
 		bool establish_connection(
 			std::string ip, 
 			gint32 port) ;
@@ -44,6 +50,11 @@ namespace rbol {
 		static void conn_read_cb( gpointer data, gint source, 
 					  PurpleInputCondition cond) ;
 
+		void unref() { 
+			ref_counter -- ;
+			if ( ref_counter == 0 and !tx_handler ) 
+				delete this ;
+		}
 		
 	};
 }

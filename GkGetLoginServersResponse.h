@@ -5,22 +5,22 @@
 #include "messagebuffer.h" 
 
 #include <glib.h>
-
+#include <list>
+#include <map>
 namespace rbol { 
 	class GkGetLoginServersResponse  : public Response{ 
 		int type ; 
 		int subtype ;
 		int payloadsize ; 
-		map<string,string> cap ; 
+		std::map<std::string,std::string> cap ; 
 
 		
 	public:
 		GkGetLoginServersResponse() { 
-			buf = b ;
 		}
 
 		virtual bool parsePacket(rbol::MessageBuffer &m) ;
-
+		std::list<std::string> getDirectConnectionIP() ; 
 
 	};
 }
