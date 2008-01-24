@@ -10,9 +10,6 @@
 #include "account.h"
 #include "accountopt.h"
 #include "blist.h"
-#include "cmds.h"
-#include "conversation.h"
-#include "connection.h"
 #include "debug.h"
 #include "notify.h"
 #include "privacy.h"
@@ -27,22 +24,21 @@
 #include <ctype.h>
 
 
-typedef int bool ;
-#define true 1 
-#define false 0
-
 typedef void (*GcFunc)(PurpleConnection *from,
                        PurpleConnection *to,
                        gpointer userdata);
+namespace rbol { 
+	
+	class RediffBolConn { 
+	public: 
+		int fd ; 
+		PurpleAccount *account ;
 
-struct RediffBolConn { 
-	int fd ; 
-	PacketRecvCallback rx_cb ;
-	GotConnectedCallback got_connected_cb ;
-
-	guint tx_handler; 
-	guint rx_handler; 
-};
-
+		RediffBolConn(PurpleAccount*) ;
+		virtual void responseCallback(Response* resp) ;
+		PurpleAsyncConn* getAsyncConnection() ; 
+	};
+	
+}
 
 #endif

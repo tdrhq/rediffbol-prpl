@@ -44,7 +44,7 @@ namespace rbol{
 		
 		void reset() ;
 		
-		void push(string s) ;
+		void push(std::string s) ;
 	} ;
 }
 
