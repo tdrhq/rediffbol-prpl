@@ -95,3 +95,7 @@ MessageBuffer::reset() {
 	offset = 0 ;
 	err = 0 ;
 }
+
+void MessageBuffer::push(string s) { 
+	str += s ;
+}

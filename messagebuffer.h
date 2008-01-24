@@ -3,6 +3,7 @@
 
 #include <glib.h>
 #include <string>
+
 namespace rbol{ 
 	class MessageBufferOverflowException { 
 	public:
@@ -43,6 +44,7 @@ namespace rbol{
 		
 		void reset() ;
 		
+		void push(string s) ;
 	} ;
 }
 

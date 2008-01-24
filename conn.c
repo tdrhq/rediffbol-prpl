@@ -5,32 +5,33 @@
 typedef bool(*PacketRecvCallback)(struct RediffBolConn*, struct Request *) ; 
 typedef bool(*GotConnectedCallback)(PurpleAccount*) ;
 
-bool conn_establish_connection(
-	PurpleAccount* acct, 
-	const gchar* ip, 
+static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond);
+PurpleAsyncConn::PurpleAsyncConn(RediffBolConn *conn, string ip, gint32 port ) { 
+	rb_conn = conn ;
+	establish_connection(ip, port) ;
+}
+bool 
+PurpleAsyncConn::establish_connection(
+	const string ip, 
 	const int port,
-	PacketRecvCallback rx_cb,
 	) { 
 	
-	RediffBolConn * rb = acct->gc->proto_data ; 
-	
-	rb -> rx_cb = rx_cb ;
-
-	rb->fd = -1 ;
+	fd = -1 ;
 	
 	if ( purple_proxy_connect(NULL, acct, 
-				  ip, port, conn_got_connected, acct) ==NULL) {
+				  ip, port, conn_got_connected, this) ==NULL) {
 		return false ;
 	}
-	rb-> txbuf = purple_circ_buffer_init(0) ;
-	rb->tx_handler = NULL ; 
-	rb->rx_handler = NULL ;
+	txbuf = purple_circ_buffer_init(0) ;
+	
+	tx_handler = NULL ; 
+	rx_handler = NULL ;
 }
 
 static void conn_got_connected(gpointer data, gint source, 
 			       const gchar * error_message) { 
 
-	PurpleAccount *account = data; 
+	PurpleAsyncConn *conn = data; 
 	PurpleConnection * gc  = account->gc; 
 	RediffBolConn *rb = gc->proto_data; 
 
@@ -38,36 +39,37 @@ static void conn_got_connected(gpointer data, gint source,
 		/* todo */
 	}
 
-	rb->fd = source ; 
+	fd = source ; 
 	
 	/* so now this callback need not take care of connection issues */
-	rb->got_connected_cb(account) ;
+	rb_conn->got_connected_cb(account) ;
 	
 
-	rb->rx_handler = purple_input_add(rb->fd, PURPLE_INPUT_READ, 
-					  conn_read_cb, account) ;
+	conn->rx_handler = purple_input_add(rb->fd, PURPLE_INPUT_READ, 
+					  conn_read_cb, this) ;
 }
 
 /* shutdowns the connection, waits till all packets are sent. 
- /* TODO: fix*/  but returns immediately */
-static bool conn_close(PurpleAccount *account) { 
-	/* who cares .. just dump the connection for the time being */
+ /* TODO: fix  but returns immediately */
+static bool 
+PurpleAsyncConn::close() { 
 	
-	RediffBolConn* rb = account->gc->proto_data ;
-	
-	if (rb->fd > 0 ) 
-		close(rb->fd) ;
+	if (fd > 0 ) 
+		close(fd) ;
 	
 	purple_circ_buffer_destroy(rb->txbuf) ;
 }
 
+static void conn_write_cb( gpointer data, gint source, 
+			   PurpleInputCondition cond) ;
 
-static bool conn_write(PurpleAccount *account, const gchar* data, 
+bool 
+PurpleAsyncConn::write(const gchar* data, 
 	int datalen) { 
-	RediffBolConn* rb = account->gc->proto_data ;	
+	RediffBolConn* rb = rb_conn ;
 	int written ; 
 
-	if ( !rb->tx_handler) 
+	if ( !tx_handler) 
 		written = write(rb->fd, data, datalen) ;
 	else { 
 		written = -1 ;
@@ -82,11 +84,11 @@ static bool conn_write(PurpleAccount *account, const gchar* data,
 
 	if ( written < len ) { 
 
-		if ( ! rb->tx_handler) 
-			rb->tx_handler = purple_input_add(rb->fd, 
+		if ( ! tx_handler) 
+			tx_handler = purple_input_add(fd, 
 				  PURPLE_INPUT_WRITE, 
 				  conn_write_cb, 
-				  account);
+				  this);
 
 		purple_circ_buffer_append(rb->txbuf, data+written,
 					  len-written) ;
@@ -102,10 +104,10 @@ static void conn_write_cb( gpointer data, gint source,
 
 	int writelen , ret; 
 	
-	writelen = purple_circ_buffer_get_max_read(rb->txbuf) ; 
+	writelen = purple_circ_buffer_get_max_read(txbuf) ; 
 	if ( writelen == 0 ) { 
-		purple_input_remove(rb->tx_handler) ;
-		rb->tx_handler = 0 ;
+		purple_input_remove(tx_handler) ;
+		tx_handler = 0 ;
 		return ;
 	}
 
@@ -122,7 +124,24 @@ static void conn_write_cb( gpointer data, gint source,
 
 }
 
+void
+PurpleAsyncConn::read_cb(gint source) { 
+	char buf[1024] ;
+	len = read(fd, buf, sizeof(buf)) ;
+	if( len < 0 ) {
+		if ( errno == EAGAIN )
+			return ; /* safe */
+		
+		/* todo: register a connection error */
+		return ;
+	} else if ( len == 0 ) { 
+		/* todo: server closed conenction */ 
+	}
+	
+	awaiting.push(string(buf, len)) ;
 
+	/* todo: response parser */
+}
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {
 	
