@@ -27,7 +27,7 @@
 #include "account.h"
 #include "accountopt.h"
 #include "blist.h"
-#include "cmds.h"
+
 #include "conversation.h"
 #include "connection.h"
 #include "debug.h"
@@ -46,37 +46,11 @@
 //#include <libxml/xmlreader.h>
 #include "rediffbol.h"
 
+using namespace rbol ;
 #define REDIFFBOLPRPL_ID "prpl-rediffbol"
-
-GList * list = NULL ;
 
 static PurplePlugin *_null_protocol = NULL;
 
-RediffBolConn* r_create_conn(PurpleAccount *acct) { 
-	RediffBolConn *conn = g_new(RediffBolConn, 1) ;
-	
-	conn->easy_handle = NULL ; 
-	conn -> acct = acct ; 
-	conn->commands = g_async_queue_new() ;
-	conn->signals = g_async_queue_new() ;
-	conn->session_id = NULL ;
-	conn->login = NULL ; 
-	
-	conn->connection_state = RB_CONN_STATE_OFFLINE ; 
-	
-	list = g_list_append(list, conn) ;
-	return conn ; 
-}
-
-RediffBolConn* r_find_by_acct(PurpleAccount *acct) { 
-	GList *cur = list ; 
-	while ( cur ) { 
-		if ( ((RediffBolConn*)cur -> data) -> acct == acct )
-			return cur->data ; 
-		cur = cur->next ;
-	}
-	return NULL ; 
-}
 
 
 void parse_url_param(gchar *data, gchar* param, GString *tmp) { 
@@ -98,151 +72,12 @@ void parse_url_param(gchar *data, gchar* param, GString *tmp) {
 
 
 
-static gboolean update_messages (RediffBolConn *conn, GString *data) {
-	xmlnode *cur = xmlnode_from_str(data->str, data->len) ;
-	cur = xmlnode_get_child(cur, "TXTMSG") ;
-	
-	do { 
-		int len ;
-		const gchar *from = xmlnode_get_data( xmlnode_get_child(cur,"from") ) ;
-		const gchar *message = xmlnode_get_data(xmlnode_get_child(cur, "message") );
-		const gchar *senddate = xmlnode_get_data(xmlnode_get_child(cur, "senddate") );
-		
-		/* TODO: parse the time correctly */
-		serv_got_im(purple_account_get_connection(conn->acct), 
-			    from, message, 0,  time(NULL) );
-		
-	} while ( cur = xmlnode_get_next_twin(cur) ) ;
-	
-	
-	return true ;
-	
-	// have to stop sometime... !
-	
-}
-
-
-static gboolean  update_contacts (RediffBolConn *conn, GString *data ) { 
-	xmlnode *cur = xmlnode_from_str(data->str, data->len) ;
-	cur = xmlnode_get_child(cur, "Addressbook") ;
-	cur = xmlnode_get_child(cur, "Contact") ;
-	
-	do { 
-		int len ;
-		const gchar *nick = xmlnode_get_data( xmlnode_get_child(cur,"NickName") ) ;
-		const gchar *screen = xmlnode_get_data(xmlnode_get_child(cur, "Email") );
-		const gchar *status = xmlnode_get_data(xmlnode_get_child(cur, "STATUS") );
-		
-		// is this guy already on our friends list?
-		PurpleBuddy *buddy = purple_find_buddy( conn->acct, screen ) ;
-		if ( ! buddy ) { 
-			buddy = purple_buddy_new ( conn->acct, screen, nick) ;
-			PurpleGroup *red = purple_group_new ( "Rediff" ) ;
-			purple_blist_add_buddy( buddy, purple_buddy_get_contact(buddy) , 
-						red, NULL ) ;
-		}
-		
-		/* In any case, update his status */
-		char * s = g_ascii_strdown(status, strlen(status)) ;
-		purple_prpl_got_user_status(conn->acct, screen, s, NULL, NULL, NULL ) ;
-		g_free(s);
-		
-		
-	} while ( cur = xmlnode_get_next_twin(cur) ) ;
-	
-	
-	return true ;
-	
-	// have to stop sometime... !
-}
-
-static gboolean process_signals (RediffBolConn *conn) { 
-	RSignal *sig; 
-	while (  sig = g_async_queue_try_pop(conn->signals) ){ 
-		if ( sig->code == SIGNAL_UPDATE_CONTACTS_COMPLETED ) { 
-			update_contacts(conn, sig->data) ;
-			g_string_free((GString*) sig->data, false) ;
-		}
-		
-		if ( sig->code == SIGNAL_UPDATE_MESSAGES_COMPLETED ) {
-			update_messages(conn, sig->data) ;
-			g_string_free((GString*) sig->data, false) ;
-		}
-		
-		if ( sig -> code == SIGNAL_SHUTDOWN_COMPLETED ) { 
-			/* free up everything related to this connection*/
-			g_free (sig) ;
-			g_async_queue_unref(conn->commands);
-			g_async_queue_unref(conn->signals);
-			return false ;
-		}
-		g_free(sig) ;
-	}
-	
-	/* finally push commands onto the queue, if possible */
-	if ( g_async_queue_length(conn->commands) < 2 && ((rand() & 3) == 0 )) {
-		RCommand *comm = g_new(RCommand, 1) ;
-		comm->code = COMMAND_UPDATE_CONTACTS; 
-		comm->data = NULL ; 
-		
-		g_async_queue_push(conn->commands, comm) ;
-	} else 
-		printf("Queue is too big\n") ;
-	
-	/* push message updater onto the queue */
-	if ( g_async_queue_length(conn->commands) < 2 ) {
-		RCommand *comm = g_new(RCommand, 1) ;
-		comm->code = COMMAND_UPDATE_MESSAGES; 
-		comm->data = NULL  ; 
-		
-		g_async_queue_push(conn->commands, comm) ;
-	}
-	
-	/* finally check any updates on the current state */
-	if ( conn->connection_state & RB_CONN_STATE_UPDATED ) { 
-		conn->connection_state ^= RB_CONN_STATE_UPDATED ;
-		int state = 0 ; 
-		switch( conn->connection_state ) {
-		case RB_CONN_STATE_CONNECTED :
-			state=PURPLE_CONNECTED; break ; 
-		case RB_CONN_STATE_CONNECTING: 
-			state=PURPLE_CONNECTING; break ; 
-		}
-		purple_connection_set_state(purple_account_get_connection(conn->acct), state);
-	}
-	return true ;
-}
-
 typedef struct {
 	GcFunc fn;
 	PurpleConnection *from;
 	gpointer userdata;
 } GcFuncData;
 
-
-static gboolean 
-poll_timer(RediffBolConn * conn) {
-	//lets try and make a request to get the list friends list!		
-}
-
-
-static  
-RediffBolConn * start_connection(PurpleAccount* acct){
-	
-	if ( ! current_connection ) 
-		current_connection = g_private_new(NULL) ;
-	
-	
-	if ( ! g_thread_supported() ){ 
-		printf("gthread not supported!\n");
-		exit(0);
-	}
-	
-	RediffBolConn *ret =  r_create_conn(acct) ;
-	g_thread_create(connection_thread, (void*)ret, TRUE, NULL) ;
-	
-	purple_timeout_add_seconds(3, process_signals, ret) ;
-}
 
 
 /*
@@ -297,15 +132,6 @@ typedef struct {
 } ChatFuncData;
 
 static void call_chat_func(gpointer data, gpointer userdata) {
-	PurpleConnection *to = (PurpleConnection *)data;
-	ChatFuncData *cfdata = (ChatFuncData *)userdata;
-	
-	int id = cfdata->from_chat->id;
-	PurpleConversation *conv = purple_find_chat(to, id);
-	if (conv) {
-		PurpleConvChat *chat = purple_conversation_get_chat_data(conv);
-		cfdata->fn(cfdata->from_chat, chat, id, conv->name, cfdata->userdata);
-	}
 }
 
 static void foreach_gc_in_chat(ChatFunc fn, PurpleConnection *from,
@@ -356,16 +182,6 @@ static const char *rediffbol_list_icon(PurpleAccount *acct, PurpleBuddy *buddy)
 
 static const char *rediffbol_list_emblem(PurpleBuddy *buddy)
 {
-	const char* emblem;
-	
-	
-	PurplePresence *presence = purple_buddy_get_presence(buddy);
-	PurpleStatus *status = purple_presence_get_active_status(presence);
-	emblem = purple_status_get_name(status);
-	
-	purple_debug_info("rediffbol", "using emblem %s for %s's buddy %s\n",
-			  emblem, buddy->account->username, buddy->name);
-	return emblem;
 }
 
 static void rediffbol_tooltip_text(PurpleBuddy *buddy,
@@ -376,91 +192,62 @@ static void rediffbol_tooltip_text(PurpleBuddy *buddy,
 }
 
 static GList *rediffbol_status_types(PurpleAccount *acct)
-{
-	GList *types = NULL;
-	PurpleStatusType *type;
-	
-	purple_debug_info("rediffbol", "returning status types for %s: %s, %s, %s\n",
-			  acct->username,
-			  RB_STATUS_ONLINE, RB_STATUS_AWAY, RB_STATUS_OFFLINE);
-	
-	type = purple_status_type_new(PURPLE_STATUS_AVAILABLE, RB_STATUS_ONLINE,
-				      RB_STATUS_ONLINE, TRUE);
-	purple_status_type_add_attr(type, "message", ("Online"),
-				    purple_value_new(PURPLE_TYPE_STRING));
-	types = g_list_append(types, type);
-	
-	type = purple_status_type_new(PURPLE_STATUS_AWAY, RB_STATUS_AWAY,
-				      RB_STATUS_AWAY, TRUE);
-	purple_status_type_add_attr(type, "message", ("Away"),
-				    purple_value_new(PURPLE_TYPE_STRING));
-	types = g_list_append(types, type);
-	
-	type = purple_status_type_new(PURPLE_STATUS_OFFLINE, RB_STATUS_OFFLINE,
-				      RB_STATUS_OFFLINE, TRUE);
-	purple_status_type_add_attr(type, "message", ("Offline"),
-				    purple_value_new(PURPLE_TYPE_STRING));
-	types = g_list_append(types, type);
-	
-	type = purple_status_type_new(PURPLE_STATUS_AWAY, RB_STATUS_BUSY,
-				      RB_STATUS_BUSY, TRUE);
-	purple_status_type_add_attr(type, "message", ("Busy"),
-				    purple_value_new(PURPLE_TYPE_STRING));
-	types = g_list_append(types, type);
-	
-	return types;
+{        GList *types = NULL;
+        PurpleStatusType *type;
+//#define PURPLE_STATUS_AWAY "Away" 
+#define RB_STATUS_AWAY "away"
+//#define PURPLE_STATUS_ONLINE "Online" 
+#define RB_STATUS_ONLINE "online" 
+//#define PURPLE_STATUS_OFFLINE "Offline" 
+#define RB_STATUS_OFFLINE       "offline"
+ 
+        
+        type = purple_status_type_new(PURPLE_STATUS_AVAILABLE, RB_STATUS_ONLINE,
+                                      RB_STATUS_ONLINE, TRUE);
+        purple_status_type_add_attr(type, "message", ("Online"),
+                                    purple_value_new(PURPLE_TYPE_STRING));
+        types = g_list_append(types, type);
+        
+        type = purple_status_type_new(PURPLE_STATUS_AWAY, RB_STATUS_AWAY,
+                                      RB_STATUS_AWAY, TRUE);
+        purple_status_type_add_attr(type, "message", ("Away"),
+                                    purple_value_new(PURPLE_TYPE_STRING));
+        types = g_list_append(types, type);
+        
+        type = purple_status_type_new(PURPLE_STATUS_OFFLINE, RB_STATUS_OFFLINE,
+                                      RB_STATUS_OFFLINE, TRUE);
+        purple_status_type_add_attr(type, "message", ("Offline"),
+                                    purple_value_new(PURPLE_TYPE_STRING));
+        types = g_list_append(types, type);
+        
+        
+        return types;
+
 }
 
-static void rediffbol_login(PurpleAccount *acct)
+extern "C" void rediffbol_login(PurpleAccount *acct)
 {
-	PurpleConnection *gc = purple_account_get_connection(acct);
-	GList *offline_messages;
-	
-	purple_debug_info("rediffbol", "logging in %s\n", acct->username);
-	purple_connection_update_progress(gc, ("Connecting"),
+
+	purple_connection_update_progress(acct->gc, ("Connecting"),
 					  0,   /* which connection step this is */
 					  2);  /* total number of steps */
 	
-	printf("starting connection\n");
 
+	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "here here here\n");
+
+	RediffBolConn* conn = new RediffBolConn (acct) ;
+	conn->startLogin() ;
 
 }
 
 static void rediffbol_close(PurpleConnection *gc)
 {
-	/* notify other rediffbol accounts */
-	RCommand *comm = g_new(RCommand, 1 ) ;
-	comm->code = COMMAND_SHUTDOWN ; 
-	comm->data = NULL ;
 
-	RediffBolConn *conn = r_find_by_acct(gc->account) ;
-	g_async_queue_push(conn->commands, comm) ;
 }
 
 static int rediffbol_send_im(PurpleConnection *gc, const char *who,
 			     const char *message, PurpleMessageFlags flags)
 {
-	const char *from_username = gc->account->username;
-	PurpleMessageFlags receive_flags = ((flags & ~PURPLE_MESSAGE_SEND)
-					    | PURPLE_MESSAGE_RECV);
-	
-	RediffBolConn *conn = r_find_by_acct(gc->account) ;
-	
-	assert(conn) ;
-	// Push into the queue.
-	RCommand *comm = g_new(RCommand, 1) ;
-	comm->code = COMMAND_SEND_MESSAGE ; 
-	
-	RMessage * msg = g_new(RMessage, 1) ;
-	msg->to = g_string_new(who) ;
-	msg->content = g_string_new(message) ;
-	
-	comm->data = msg ; 
-	
-	g_async_queue_push(conn->commands, comm)  ; 
-	
-	purple_debug_info("rediffbol", "sending message from %s to %s: %s\n",
-			  from_username, who, message);
 	return 1;
 }
 
@@ -478,32 +265,12 @@ static void rediffbol_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 				PurpleGroup *group)
 {
 
-	RediffBolConn *conn = r_find_by_acct(gc->account) ;
-	
-	assert(conn) ;
-	RCommand *comm = g_new(RCommand, 1) ;
-	comm->code = COMMAND_ADD_BUDDY ; 
-	comm->data = g_strdup(buddy->name) ;
-	
-	g_async_queue_push(conn->commands, comm)  ; 
-	
-	purple_debug_info("rediffbol", "Adding %s", buddy->name);
-	return ;
 	
 }
 
 static void rediffbol_add_buddies(PurpleConnection *gc, GList *buddies,
 				  GList *groups) {
-	GList *buddy = buddies;
-	GList *group = groups;
-	
-	purple_debug_info("rediffbol", "adding multiple buddies\n");
-	
-	while (buddy && group) {
-		rediffbol_add_buddy(gc, (PurpleBuddy *)buddy->data, (PurpleGroup *)group->data);
-		buddy = g_list_next(buddy);
-		group = g_list_next(group);
-	}
+
 }
 
 static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
@@ -631,7 +398,7 @@ static PurplePluginProtocolInfo prpl_info =
 static void rediffbol_init(PurplePlugin *plugin)
 {
 	printf("rediff starting up\n"); 
-  purple_debug_info("rediffbol", "starting up\n");
+  purple_debug_info("rbol", "starting up\n");
   _null_protocol = plugin;
 }
 
@@ -671,4 +438,6 @@ static PurplePluginInfo info =
   NULL,
 };
 
+extern "C" { 
 PURPLE_INIT_PLUGIN(rediffbol, rediffbol_init, info);
+}

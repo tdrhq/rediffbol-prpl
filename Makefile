@@ -25,8 +25,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-CC := gcc
+CC := g++
 LIBTOOL := libtool
+SRC_FILES := rediffbol.cpp messagebuffer.cpp rediffbol_init.cpp conn.cpp 
+HEADERS := rediffbol.h messagebuffer.h conn.h 
 
 ifeq ($(PREFIX),)
   LIB_INSTALL_DIR = $(HOME)/.purple/plugins
@@ -47,8 +49,8 @@ install: all
 	mkdir -p $(LIB_INSTALL_DIR)
 	cp librediffbol.so $(LIB_INSTALL_DIR)
 
-librediffbol.so: rediffbol.c thread.c
-	$(CC) -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS)  $(shell curl-config --cflags --libs) $(CFLAGS) $(shell pkg-config --cflags --libs libxml-2.0) rediffbol.c thread.c 
+librediffbol.so: $(SRC_FILES) $(HEADERS) 
+	$(CC) -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS)  $(shell curl-config --cflags --libs) $(CFLAGS) $(shell pkg-config --cflags --libs libxml-2.0) $(SRC_FILES)
 
 clean:
 	rm -rf *.o *.c~ *.h~ *.so *.la .libs

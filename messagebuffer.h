@@ -24,7 +24,9 @@ namespace rbol{
 			offset = err = 0 ;
 		}
 		gint32 readInt32();
-		
+		gint32 readInt() {
+			return readInt32 () ;
+		}
 		int left();
 		void seek(int len) ;
 		

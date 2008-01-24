@@ -2,33 +2,33 @@
 #ifndef __REQUEST__H__ 
 #define __REQUEST__H__ 
 namespace rbol { 
-	const char* GKRequestHeader             = "Gatekeeper2" ;
-	const char* GKCmdGetLoginServers        = "GetLoginServers" ;
-	const char* CSRequestHeader             = "Server1.2" ;
-	const char* CSCmdSignIn                         = "SignIn" ;
-	const char* CSCmdGetOfflineMsgs         = "GetOfflineMsgs" ;
-	const char* CSCmdSetOnlineStatus        = "SetOnlineStatus" ;
-	const char* CSCmdTextMessage            = "TextMessage" ;
-	const char* CSPeerRequestHeader         = "ClientPeer1.2" ;
-	const char* CSCmdGetChatRooms           = "GetChatRoomsRequest" ;
-	const char* CSCmdJoinChatRoom           = "JoinChatRoom" ;
-	const char* CSCmdKeepAlive                      = "KeepAlive" ;
-	const char* CSCmdDelOfflineMsg          = "DelOfflineMsg" ;
-	const char* CSCmdGetContactId           = "GetContactId" ;
-	const char* CSCmdLeaveChatRoom          = "LeaveChatRoom" ;
-	const char* CSCmdGetAddRequests         = "GetAddRequests" ;
-	const char* CSCmdAcceptAdd                      = "AcceptAdd" ;
-	const char* CSCmdAcceptAdd2                     = "AcceptAdd2" ;
-	const char* CSCmdBlockUser                      = "BlockUser" ;
-	const char* CSCmdAllowUser                      = "AllowUser" ;
-	const char* CSCmdDelAddRequest          = "DelAddRequest" ;
-	const char* CSCmdDelContact             = "DelContact2" ;
-	const char* CSCmdAddGroup               = "AddGroup" ;
-	const char* CSCmdRemoveGroup            = "RemoveGroup" ;
-	const char* CSCmdMoveContact            = "MoveContactBetweenGroups" ;
-	const char* CSCmdAddContact             = "AddContact2" ;
-	const char* CSCmdCheckUserType          = "CheckUserType" ;
-	const char* CSCmdChatRoomMessage        = "ChatRoomMessage" ;
+	static const char* GKRequestHeader             = "Gatekeeper2" ;
+	static const char* GKCmdGetLoginServers        = "GetLoginServers" ;
+	static const char* CSRequestHeader             = "Server1.2" ;
+	static const char* CSCmdSignIn                         = "SignIn" ;
+	static const char* CSCmdGetOfflineMsgs         = "GetOfflineMsgs" ;
+	static const char* CSCmdSetOnlineStatus        = "SetOnlineStatus" ;
+	static const char* CSCmdTextMessage            = "TextMessage" ;
+	static const char* CSPeerRequestHeader         = "ClientPeer1.2" ;
+	static const char* CSCmdGetChatRooms           = "GetChatRoomsRequest" ;
+	static const char* CSCmdJoinChatRoom           = "JoinChatRoom" ;
+	static const char* CSCmdKeepAlive                      = "KeepAlive" ;
+	static const char* CSCmdDelOfflineMsg          = "DelOfflineMsg" ;
+	static const char* CSCmdGetContactId           = "GetContactId" ;
+	static const char* CSCmdLeaveChatRoom          = "LeaveChatRoom" ;
+	static const char* CSCmdGetAddRequests         = "GetAddRequests" ;
+	static const char* CSCmdAcceptAdd                      = "AcceptAdd" ;
+	static const char* CSCmdAcceptAdd2                     = "AcceptAdd2" ;
+	static const char* CSCmdBlockUser                      = "BlockUser" ;
+	static const char* CSCmdAllowUser                      = "AllowUser" ;
+	static const char* CSCmdDelAddRequest          = "DelAddRequest" ;
+	static const char* CSCmdDelContact             = "DelContact2" ;
+	static const char* CSCmdAddGroup               = "AddGroup" ;
+	static const char* CSCmdRemoveGroup            = "RemoveGroup" ;
+	static const char* CSCmdMoveContact            = "MoveContactBetweenGroups" ;
+	static const char* CSCmdAddContact             = "AddContact2" ;
+	static const char* CSCmdCheckUserType          = "CheckUserType" ;
+	static const char* CSCmdChatRoomMessage        = "ChatRoomMessage" ;
 
 }
 #endif

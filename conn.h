@@ -35,7 +35,7 @@ namespace rbol {
 
 		~PurpleAsyncConn() ;
 		
-		void write(gpointer data, int len) ; 
+		void write(const void* data, int len) ; 
 		void write(const Response* resp) ;
 
 		/* internal callbacks */
@@ -45,10 +45,10 @@ namespace rbol {
 		bool close() ;
 		void got_connected_cb(int source) ;
 		/* static callbacks */
-		static void conn_write_cb( gpointer data, gint source, 
-					   PurpleInputCondition cond) ;
-		static void conn_read_cb( gpointer data, gint source, 
-					  PurpleInputCondition cond) ;
+//		static void conn_write_cb( gpointer data, gint source, 
+		//				   PurpleInputCondition cond) ;
+		//static void conn_read_cb( gpointer data, gint source, 
+		//		  PurpleInputCondition cond) ;
 
 		void unref() { 
 			ref_counter -- ;

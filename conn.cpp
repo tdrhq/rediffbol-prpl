@@ -20,7 +20,7 @@ PurpleAsyncConn::PurpleAsyncConn(RediffBolConn *conn, string ip, gint32 port,
 	rb_conn = conn ;
 	establish_connection(ip, port) ;
 	txbuf = purple_circ_buffer_new(0);
-	parsemode = pm ;
+	parse_mode = pm ;
 	ref_counter = 1 ; 
 }
 
@@ -55,6 +55,7 @@ PurpleAsyncConn::establish_connection(
 	const int port
 	) { 
 	
+	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "establishinc connection\n");
 	fd = -1 ;
 	
 	if ( purple_proxy_connect(NULL, rb_conn->account, 
@@ -97,10 +98,11 @@ static void conn_write_cb( gpointer data, gint source,
 
 
 void  
-PurpleAsyncConn::write(void* data, 
+PurpleAsyncConn::write(const void* data, 
 	int datalen) { 
 	RediffBolConn* rb = rb_conn ;
 	int written ; 
+
 
 	if ( !tx_handler) 
 		written = ::write(rb->fd, data, datalen) ;
@@ -182,8 +184,7 @@ PurpleAsyncConn::read_cb() {
 	
 	awaiting.push(string(buf, len)) ;
 
-	Response* resp = parseResponse(awaiting) ; 
-	if ( resp != NULL )  rb_conn->executeResponse(resp) ;
+	rb_conn->parseResponse(awaiting);
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {

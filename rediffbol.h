@@ -37,16 +37,21 @@ namespace rbol {
 ;
         static const char*  CAP_HTTP             = "RBOL/1.2.5+HTTP" ;
 	static const char* DEFAULT_USERAGENT = "Rediff Bol8.0 build 315" ;
-	
+
+	class PurpleAsyncConn ;
+
 	class RediffBolConn { 
 	public: 
 		int fd ; 
 		PurpleAccount *account ;
 		PurpleAsyncConn *connection ; 
-		string userAgent ;
+		std::string userAgent ;
 
 		RediffBolConn(PurpleAccount *acct) { 
+			purple_debug(PURPLE_DEBUG_INFO, "rbol" , "creating a connection\n");
+
 			account  = acct; 
+			account -> gc -> proto_data = this ;
 			connection = NULL ;
 			userAgent = DEFAULT_USERAGENT ;
 		}
@@ -57,18 +62,18 @@ namespace rbol {
 		PurpleAsyncConn* getAsyncConnection() ; 
 
 		void connectToGK() ;
-		void connectToCS() ;
+		void connectToCS(std::string ip) ;
 		void got_connected_cb() ;
 
 		/**
 		 * there was an error in the network. This should also
 		 * set the state to offline and/or reconnect if required.
 		 */
-		void setStateNetworkError(string msg) ;
+		void setStateNetworkError(std::string msg) ;
 
-		bool parseResponse(MessageBuffer &buffer, int requesttype) ;
-		bool parseGkResponse(MessageBuffer &buffer) ;
-		bool parseCSResponse(MessageBuffer &buffer) ;
+		void parseResponse(MessageBuffer &buffer) ;
+		void parseGkResponse(MessageBuffer &buffer) ;
+		void parseCSResponse(MessageBuffer &buffer) ;
 
 		void startLogin() ;
 	};
