@@ -188,5 +188,5 @@ PurpleAsyncConn::read_cb() {
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {
-	
+	((PurpleAsyncConn*)data)->read_cb() ;
 }

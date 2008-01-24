@@ -50,7 +50,7 @@ install: all
 	cp librediffbol.so $(LIB_INSTALL_DIR)
 
 librediffbol.so: $(SRC_FILES) $(HEADERS) 
-	$(CC) -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS)  $(shell curl-config --cflags --libs) $(CFLAGS) $(shell pkg-config --cflags --libs libxml-2.0) $(SRC_FILES)
+	$(CC) --debug -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS)  $(shell curl-config --cflags --libs) $(CFLAGS) $(shell pkg-config --cflags --libs libxml-2.0) $(SRC_FILES)
 
 clean:
 	rm -rf *.o *.c~ *.h~ *.so *.la .libs
