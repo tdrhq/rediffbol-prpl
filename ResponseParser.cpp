@@ -14,63 +14,34 @@
  * Return's NULL if we didn't get a valid Response 
  */
 
-static struct Response* parseGKResponse(struct MessageBuffer *buffer) ;
-static struct Response* parseCSResponse(struct MessageBuffer *buffer) ;
+static Response* parseGKResponse(MessageBuffer buffer) ;
+static Response* parseCSResponse(MessageBuffer buffer) ;
+using namespace rbol ; 
+using namespace std; 
 
-struct Response* 
-responseparser_parseResponse(GString* response, int requesttype) { 
-	struct MessageBuffer *buffer = messagebuffer_init(response->str) ;
-	struct Response *resp = NULL ;
-
-	switch(requesttype) { 
-	case GK_REQUEST :
-		resp = parseGKResponse(buffer) ;
-		break;
-	case CS_REQUEST:
-		resp = parseCSResponse(buffer) ;
-		break ; 
-	default:
-		return NULL ; 
+Response* 
+parseResponse(MessageBuffer &buffer, int requesttype ) { 
+	try { 
+		switch(requesttype)  {
+		case GK_REQUEST: 
+			GkGetLoginServersResponse *resp  = new 
+				GkGetLoginServersResponse ; 
+			resp->parseResponse(buffer) ;
+			return resp ;
+		case CS_REQUEST:
+			return parseCSResponse(buffer) ;
+			break ; 
+		}
+	} catch( MessageBufferOverflowException e ) { 
+		buffer.reset() ;
+		return NULL ;
 	}
-	return resp ;
+
+	return NULL ;
 
 }
 
-struct Response*
-parseGKResponse(struct MessageBuffer* buffer) { 
-	int i ;
-	int type = messagebuffer_readInt(buffer) ;
-	if ( buffer->err ) return NULL ; 
-	int subtype = messagebuffer_readInt(buffer) ;
-	if ( buffer->err ) return NULL ;
-	int payloadsize = messagebuffer_readInt(buffer) ;
-	if ( buffer->err ) return NULL ;
 
-	int numentries = messagebuffer_readInt(buffer) ;
-	if ( buffer->err) return NULL ;
-
-	for(i = 0 ; i < numentries ; i++ ) {
-		int subentries = messagebuffer_readInt(buffer) ; 
-		int j ;
-		for(j = 0 ; j < subentries; j ++) {
-			GString *capability = messagebuffer_readString(buffer);
-			GString *valuestr = messagebuffer_readString(buffer);
-			
-			/* gah don't store it */
-			g_string_free(capability, TRUE) ;
-			g_string_free(valuestr, TRUE) ;
-		}		
-	}
-	if ( buffer->err ) return NULL ;
-	
-	/* else create the response */
-	struct GkGetLoginServersResponse *resp = 
-		gkgetloginserversresponse_init(type, subtype, NULL);
-	
-	return (struct Response*)resp ; 
-}
-
-static struct Response*
 parseGeneric(struct MessageBuffer *buffer) { 
 	int size = messagebuffer_readInt(buffer) ;
 	GString *tmp =

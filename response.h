@@ -2,6 +2,7 @@
 #define _RB_RESPONSE_H_
 #include <glib.h>
 
+
 #define RESPONSE_ID_GKGETLOGINSERVERS    1 
 #define RESPONSE_ID_LOGIN                2 
 #define RESPONSE_ID_CONTACTS             3 
@@ -23,17 +24,22 @@
 #define RESPONSE_ID_ACCEPTADD            19 
 
 
-struct Response ;
-typedef void(*RESPONSE_DESTRUCTOR)(struct Response*) ;
 
-struct Response { 
+class Response { 
 	int responseId; 
-	RESPONSE_DESTRUCTOR *destructor ; 
-	void* data[1] ; 
+public:
+	virtual int getResponseId()  {
+		return responseId ; 
+	}
+
+	/* this is the actual processing call. This _will_ interact
+	*  with libpurple and make changes. */
+	virtual void libpurpleProcess(RediffBolConn* rb) = 0 ; 
+
+	virtual bool parsePacket(MessageBuffer &m) = 0;
+	virtual ~Response() {} ;
 } ;
 
-extern struct Response* 
-response_init_protected(int respId, int datalen, RESPONSE_DESTRUCTOR *rd) ;
 
 extern void response_free(struct Response *r) ;
 

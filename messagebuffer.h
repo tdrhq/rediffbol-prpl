@@ -20,6 +20,9 @@ namespace rbol{
 		MessageBuffer (std::string s) ;
 		~MessageBuffer() ;
 		
+		MessageBuffer() { 
+			offset = err = 0 ;
+		}
 		gint32 readInt32();
 		
 		int left();

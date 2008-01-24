@@ -2,24 +2,27 @@
 #define _GKGETLOGINSERVERSRESPONSE_
 
 #include "response.h" 
+#include "messagebuffer.h" 
+
 #include <glib.h>
 
-struct GkGetLoginServersResponse { 
-	struct Response r ; 
-	int type ; 
-	int subtype ;
-	
-	/* to be neat and clean, we gotta do this */
-	struct MessageBuffer *capabilities ;
-};
+namespace rbol { 
+	class GkGetLoginServersResponse  : public Response{ 
+		int type ; 
+		int subtype ;
+		int payloadsize ; 
+		map<string,string> cap ; 
 
-extern struct GkGetLoginServersResponse *
-gkgetloginserversresponse_init(int type, int subtype, GHashTable *map) ;
+		
+	public:
+		GkGetLoginServersResponse() { 
+			buf = b ;
+		}
 
-extern void 
-gkgetloginserversresponse_destroy(struct GkGetLoginServersResponse* r) ;
+		virtual bool parsePacket(rbol::MessageBuffer &m) ;
 
-extern void
-gkgetloginserversresponse_capability(GString *cap, GString *val) ;
+
+	};
+}
 
 #endif
