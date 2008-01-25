@@ -24,6 +24,7 @@ namespace rbol{
 			offset = err = 0 ;
 		}
 		gint32 readInt32();
+		gint32 peekInt32() ;
 		gint32 readInt() {
 			return readInt32 () ;
 		}
@@ -53,6 +54,9 @@ namespace rbol{
 
 		MessageBuffer tail() { 
 			return readMessageBuffer(left()) ;
+		}
+		std::string peek() { 
+			return str.substr(offset)  ;
 		}
 	} ;
 }

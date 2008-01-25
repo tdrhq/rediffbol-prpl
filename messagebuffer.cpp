@@ -29,6 +29,16 @@ MessageBuffer::readInt32() {
 	return i ;
 }
 
+gint32 
+MessageBuffer::peekInt32() {
+	if ( this->left() < 4 ) { 
+		throw MessageBufferOverflowException() ;
+	}
+	int i = *((gint32*) (this->str.c_str()+this->offset));
+	return i ;
+}
+
+
 void 
 MessageBuffer::seek(int len) { 
 	if ( this->offset + len >= this->str.length()) 

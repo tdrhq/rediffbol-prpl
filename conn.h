@@ -52,7 +52,7 @@ namespace rbol {
 
 		void unref() { 
 			ref_counter -- ;
-			if ( ref_counter == 0 and !tx_handler ) 
+			if ( ref_counter == 0  ) 
 				delete this ;
 		}
 		

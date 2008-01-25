@@ -22,10 +22,18 @@ PurpleAsyncConn::PurpleAsyncConn(RediffBolConn *conn, string ip, gint32 port,
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm ;
 	ref_counter = 1 ; 
+	rx_handler = NULL ;
+	tx_handler = NULL ;
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
-	purple_circ_buffer_destroy(txbuf) ;
+	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
+		     "In here\n") ;
+	if ( txbuf ) purple_circ_buffer_destroy(txbuf) ;
+	if ( tx_handler ) 
+		purple_input_remove(tx_handler) ;
+	if ( rx_handler )
+		purple_input_remove(rx_handler) ;
 	close() ;
 }
 
@@ -89,7 +97,6 @@ PurpleAsyncConn::close() {
 	if (fd > 0 ) 
 		::close(fd) ;
 	
-	purple_circ_buffer_destroy(txbuf) ;
 }
 
 static void conn_write_cb( gpointer data, gint source, 
@@ -140,8 +147,6 @@ PurpleAsyncConn::write_cb() {
 	if ( writelen == 0 ) { 
 		purple_input_remove(tx_handler) ;
 		tx_handler = 0 ;
-		if ( ref_counter == 0 ) 
-			delete this ;
 		return ;
 	}
 
