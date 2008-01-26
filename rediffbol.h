@@ -26,7 +26,7 @@
 
 #include "request.h"
 #include "conn.h"
-
+#include <vector>
 typedef void (*GcFunc)(PurpleConnection *from,
                        PurpleConnection *to,
                        gpointer userdata);
@@ -41,6 +41,12 @@ namespace rbol {
 	class PurpleAsyncConn ;
 
 	class RediffBolConn { 
+	private:
+		void parseCSLoginResponse(MessageBuffer buffer) ;
+		void parseCSContacts(MessageBuffer &buffer) ;
+		void parseContactStatusChange(MessageBuffer &buffer);
+		std::vector<std::string> roster ; 
+		std::string session ;
 	public: 
 		int fd ; 
 		PurpleAccount *account ;
@@ -62,8 +68,10 @@ namespace rbol {
 		PurpleAsyncConn* getAsyncConnection() ; 
 
 		void connectToGK() ;
-		void connectToCS(std::string ip) ;
+		void connectToCS() ;
 		void got_connected_cb() ;
+
+		void sendMessage(std::string to, std::string message) ;
 
 		/**
 		 * there was an error in the network. This should also

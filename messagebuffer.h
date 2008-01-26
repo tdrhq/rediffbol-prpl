@@ -53,7 +53,7 @@ namespace rbol{
 		void push(std::string s) ;
 
 		MessageBuffer tail() { 
-			return readMessageBuffer(left()) ;
+			return MessageBuffer(str.substr(offset)) ;
 		}
 		std::string peek() { 
 			return str.substr(offset)  ;

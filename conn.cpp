@@ -18,28 +18,37 @@ PurpleAsyncConn::PurpleAsyncConn(RediffBolConn *conn, string ip, gint32 port,
 :awaiting("") 
 { 
 	rb_conn = conn ;
-	establish_connection(ip, port) ;
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm ;
 	ref_counter = 1 ; 
 	rx_handler = NULL ;
 	tx_handler = NULL ;
+	establish_connection(ip, port) ;
+	
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
 		     "In here\n") ;
-	if ( txbuf ) purple_circ_buffer_destroy(txbuf) ;
-	if ( tx_handler ) 
+	if ( txbuf ) {
+		purple_circ_buffer_destroy(txbuf) ;
+		txbuf = NULL; 
+	}
+	if ( tx_handler ) { 
 		purple_input_remove(tx_handler) ;
-	if ( rx_handler )
+		tx_handler = NULL ;
+	}
+	if ( rx_handler ) { 
 		purple_input_remove(rx_handler) ;
+		rx_handler = NULL ;
+	}
 	close() ;
 }
 
 void 
 PurpleAsyncConn::got_connected_cb(gint source) { 
 
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", "got connected\n") ;
 	if ( source < 0 ) { 
 		/* todo */
 	}
@@ -69,6 +78,8 @@ PurpleAsyncConn::establish_connection(
 	if ( purple_proxy_connect(NULL, rb_conn->account, 
 				  ip.c_str(), 
 				  port, conn_got_connected, this) ==NULL) {
+		purple_debug(PURPLE_DEBUG_ERROR, "rbol", 
+			     "connection failed\n") ;
 		return false ;
 	}
 	
@@ -94,8 +105,10 @@ static void conn_got_connected(gpointer data, gint source,
 bool 
 PurpleAsyncConn::close() { 
 	
-	if (fd > 0 ) 
+	if (fd > 0 ) {
 		::close(fd) ;
+		fd = 0 ; 
+	}
 	
 }
 
@@ -185,9 +198,17 @@ PurpleAsyncConn::read_cb() {
 		return ;
 	} else if ( len == 0 ) { 
 		/* todo: server closed conenction */ 
+		
+		purple_debug(PURPLE_DEBUG_ERROR, "rbol",
+			     "pathetic, the server has closed the connection\n");
+		purple_input_remove(rx_handler) ;
+		purple_input_remove(tx_handler) ;
+		rx_handler = NULL ;
+		tx_handler = NULL ;
+		return ;
 	}
 	
-	awaiting.push(string(buf, len)) ;
+	awaiting.push(string(buf, buf+len)) ;
 
 	rb_conn->parseResponse(awaiting);
 }

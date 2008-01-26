@@ -248,6 +248,8 @@ static void rediffbol_close(PurpleConnection *gc)
 static int rediffbol_send_im(PurpleConnection *gc, const char *who,
 			     const char *message, PurpleMessageFlags flags)
 {
+	RediffBolConn *rb = (RediffBolConn*) gc->proto_data ; 
+	rb->sendMessage(who, message) ;
 	return 1;
 }
 
