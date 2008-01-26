@@ -202,22 +202,24 @@ void RediffBolConn::got_connected_cb() {
 }
 
 void RediffBolConn::parseResponse(MessageBuffer &buffer) try { 
-	purple_debug(PURPLE_DEBUG_INFO, "rbol", 
-		     "got a response\n") ;
-
-
-	if ( buffer.peekInt32() + 4 > buffer.left()) return ;
-	
-	int size = buffer.readInt32() ;
-	MessageBuffer buf = buffer.readMessageBuffer(size) ;
-	hex_dump(buf.peek(), "response") ;
-	buffer = buffer.tail () ;
-
-	/* try and parse to see what we've got */
-	if ( connection->getParseMode()) 
-		parseGkResponse(buf) ;
-	else 
-		parseCSResponse(buf);
+	while ( buffer.left() >= 4 ) { 
+		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
+			     "got a response\n") ;
+		
+		
+		if ( buffer.peekInt32() + 4 > buffer.left()) return ;
+		
+		int size = buffer.readInt32() ;
+		MessageBuffer buf = buffer.readMessageBuffer(size) ;
+		hex_dump(buf.peek(), "response") ;
+		buffer = buffer.tail () ;
+		
+		/* try and parse to see what we've got */
+		if ( connection->getParseMode()) 
+			parseGkResponse(buf) ;
+		else 
+			parseCSResponse(buf);
+	}
 
 	
 }
