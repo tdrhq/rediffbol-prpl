@@ -25,6 +25,8 @@ namespace rbol{
 		}
 		gint32 readInt32();
 		gint32 peekInt32() ;
+		gint32 readLEInt() ;
+
 		gint32 readInt() {
 			return readInt32 () ;
 		}

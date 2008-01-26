@@ -1,6 +1,7 @@
 
 #include "messagebuffer.h" 
 #include "string"
+#include "util.h"
 
 using namespace std; 
 using namespace rbol ;
@@ -108,4 +109,13 @@ MessageBuffer::reset() {
 
 void MessageBuffer::push(string s) { 
 	str += s ;
+}
+
+
+int MessageBuffer::readLEInt() { 
+	char a = readByte () ;
+	char b = readByte() ;
+	char c = readByte() ;
+	char d = readByte() ; 
+	return bytesToLEInt(a, b, c, d) ;
 }

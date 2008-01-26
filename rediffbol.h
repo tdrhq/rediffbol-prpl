@@ -45,8 +45,10 @@ namespace rbol {
 		void parseCSLoginResponse(MessageBuffer buffer) ;
 		void parseCSContacts(MessageBuffer &buffer) ;
 		void parseContactStatusChange(MessageBuffer &buffer);
+		void parseTextMessage(MessageBuffer &buffer) ;
 		std::vector<std::string> roster ; 
 		std::string session ;
+		int keep_alive_counter ; 
 	public: 
 		int fd ; 
 		PurpleAccount *account ;
@@ -60,6 +62,7 @@ namespace rbol {
 			account -> gc -> proto_data = this ;
 			connection = NULL ;
 			userAgent = DEFAULT_USERAGENT ;
+			keep_alive_counter = 0 ;
 		}
 
 		std::list<std::string> iplist ; 
@@ -72,7 +75,7 @@ namespace rbol {
 		void got_connected_cb() ;
 
 		void sendMessage(std::string to, std::string message) ;
-
+		void sendKeepAlive() ;
 		/**
 		 * there was an error in the network. This should also
 		 * set the state to offline and/or reconnect if required.
