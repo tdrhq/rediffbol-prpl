@@ -8,7 +8,6 @@
 #include <set>
 #include "encode.h"
 #include "util.h"
-#include "packet_handler.h"
 #include <connection.h>
 
 
@@ -263,7 +262,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	if ( errorcode != 0 ) { 
 		char err[100];
 		sprintf(err, "CS Login error %d\n", errorcode) ;
-		setStateNetworkError(PURPLE_CONNECTION_ERROR_AUTHENTICATION_FAILED , err) ;
+		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR , err) ;
 		return ;
 	}
 
@@ -782,7 +781,7 @@ void RediffBolConn::parseTextMessage( MessageBuffer &buffer) {
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol",
 		     "got message %s\n", final_message.c_str()) ;
-	serv_got_im(purple_account_get_connection(conn->account) ,
+	serv_got_im(purple_account_get_connection(account) ,
 		    senderstr.c_str() ,final_message.c_str(), 
 		    (PurpleMessageFlags) 0, time(NULL) ) ;
 

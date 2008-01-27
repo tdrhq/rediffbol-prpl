@@ -404,7 +404,6 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,
 };
 
-#include "packet_handler.h" 
 
 static void rediffbol_init(PurplePlugin *plugin)
 {
