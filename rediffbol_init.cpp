@@ -225,7 +225,7 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
 
 }
 
-extern "C" void rediffbol_login(PurpleAccount *acct)
+static void rediffbol_login(PurpleAccount *acct)
 {
 
 	purple_connection_update_progress(acct->gc, ("Connecting"),
@@ -249,7 +249,9 @@ extern "C" void rediffbol_login(PurpleAccount *acct)
 static void rediffbol_close(PurpleConnection *gc)
 {
 	RediffBolConn *conn = (RediffBolConn*) gc->proto_data ; 
-	delete conn ;
+	if ( conn) delete conn ;
+	else purple_debug(PURPLE_DEBUG_WARNING, "rbol", 
+			  "oh! how did this get destroyed already?") ;
 }
 
 static int rediffbol_send_im(PurpleConnection *gc, const char *who,

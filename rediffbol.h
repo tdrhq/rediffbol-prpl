@@ -69,6 +69,8 @@ namespace rbol {
 		std::vector<std::string> roster ; 
 		std::string session ;
 		int keep_alive_counter ; 
+
+		int connection_state ; 
 	public: 
 		PurpleAccount *account ;
 		PurpleAsyncConn *connection ; 
@@ -82,8 +84,10 @@ namespace rbol {
 			connection = NULL ;
 			userAgent = DEFAULT_USERAGENT ;
 			keep_alive_counter = 0 ;
+			connection_state = 0 ;
 		}
 
+		~RediffBolConn() ; 
 		std::list<std::string> iplist ; 
 
 
@@ -97,7 +101,7 @@ namespace rbol {
 		void sendMessage(std::string to, std::string message) ;
 		void sendKeepAlive() ;
 		void sendOfflineMessagesRequest() ;
-
+		void deleteOfflineMessage(std::string id) ;
 
 		void readCallback(MessageBuffer &buffer) ;
 		void parseGkResponse(MessageBuffer &buffer) ;

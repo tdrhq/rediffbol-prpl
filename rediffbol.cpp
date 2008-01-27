@@ -143,10 +143,13 @@ void RediffBolConn::connectToCS() {
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "CS packet size: %d\n",
 		     out.str().length()) ;
 
-	hex_dump(out.str(), string("Sending CS packet")) ;
+	hex_dump(out.str(), string("Sending CS acket")) ;
 	connection->write(out.str().data(), out.str().length()) ;
 }
-		
+
+RediffBolConn::~RediffBolConn() { 
+	if ( connection ) delete connection ;
+}		
 void RediffBolConn::gotConnected() { 
 	/* what's my state? */
 	if ( connection->getParseMode() ) 
@@ -227,8 +230,8 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 
 	
 	srand(time(NULL));
-	//string ip = res[ rand() % res.size() ] ;
-	string ip = res[0] ;
+	string ip = res[ rand() % res.size() ] ;
+	//string ip = res[0] ;
 
 	//connection->unref() ;
 	delete connection ;
@@ -251,6 +254,12 @@ gboolean keep_alive_timer(gpointer data) {
 }
 
 void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) { 
+	if ( connection_state >= 2 ) { 
+		purple_debug(PURPLE_DEBUG_ERROR, "rbol", 
+			     "Uh? Why am I getting a connection packet" 
+			     " when I'm connected!?\n") ;
+		return ;
+	}
 	map<string, string> optionsmap ; 
 	vector<string> roster ; 
 	map<string, vector<string> > groups ;
@@ -266,6 +275,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 		return ;
 	}
 
+	connection_state = 2 ; 
 	string names [3] ;
 
 	for(int i = 0 ; i < 3; i++) 
@@ -488,10 +498,10 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 
 		int subtype = buffer.readInt() ;
 
-		if ( subtype == 0 ) { 
+		if ( subtype == 0 and connection_state < 2 ) { 
 			parseCSLoginResponse(buffer) ;
 			return ;
-		} else if (subtype == 1 ) { 
+		} else if (subtype == 1 or subtype == 0) { 
 			parseOfflineMessages(buffer) ;
 			return ;
 		} else if ( subtype == 7 ) { 
@@ -655,7 +665,7 @@ void RediffBolConn::sendKeepAlive(){
 
 void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) { 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , 
-		     "parsing offline messages" ); 
+		     "parsing offline messages\n" ); 
 	int payloadsize = buffer.readInt() ;
 	buffer = buffer.readMessageBuffer(payloadsize) ;
 	int numentries = buffer.readInt() ;
@@ -671,7 +681,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 		int timestamp = buffer.readInt() ;
 
 		if ( msgtype == 0 ) { 
-			string msg = buffer.readStringn(buffer.getLength()) ;
+			string msg = msgbuf.readStringn(msgbuf.getLength()) ;
 
 			serv_got_im(purple_account_get_connection(account),
 				    sender.c_str(), msg.c_str(), 
@@ -680,24 +690,24 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 			string final_message ; 
 
 			
-			while ( !buffer.isEnd() ) { 
-				int len = buffer.readLEInt() ;
+			while ( !msgbuf.isEnd() ) { 
+				int len = msgbuf.readLEInt() ;
 				
 				if ( len == 0 ) { 
-					int fontstrlen = buffer.readLEInt() ; 
-					string  font = buffer.readStringn(fontstrlen) ;
-					string fontinfo = buffer.readStringn(13);
+					int fontstrlen = msgbuf.readLEInt() ; 
+					string  font = msgbuf.readStringn(fontstrlen) ;
+					string fontinfo = msgbuf.readStringn(13);
 					
-					int messagelen = buffer.readLEInt() ;
-					string message = buffer.readStringn(messagelen) ;
+					int messagelen = msgbuf.readLEInt() ;
+					string message = msgbuf.readStringn(messagelen) ;
 					hex_dump(message, "message before ASCII encoding\n") ;
 					message = encode( message, "UTF-16BE", "US-ASCII") ;
 					final_message += message ; 
 					
 				} else if ( len == 1 ) { 
-					int smileycode = buffer.readLEInt() ;
-					int smileylen = buffer.readLEInt() ;
-					string smiley = buffer.readStringn(smileylen) ;
+					int smileycode = msgbuf.readLEInt() ;
+					int smileylen = msgbuf.readLEInt() ;
+					string smiley = msgbuf.readStringn(smileylen) ;
 				} else { 
 					purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
 						     "Unknown message type.. \n") ;
@@ -712,7 +722,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 		} /* else */ 
 
 
-
+		deleteOfflineMessage(msgid) ;
 	}
 	
 }
@@ -724,7 +734,7 @@ void RediffBolConn::sendOfflineMessagesRequest() {
 
 	out<<intToDWord(totalsize-4) ;
 	out<<intToDWord(0) ;
-	out<<intToDWord(0) ;
+	out<<intToDWord(1) ;
 	out<<intToDWord(strlen(CSRequestHeader) );
 	out<<CSRequestHeader ;
 	out<<intToDWord(strlen(CSCmdGetOfflineMsgs)) ;
@@ -789,3 +799,24 @@ void RediffBolConn::parseTextMessage( MessageBuffer &buffer) {
 
 }
 
+
+void RediffBolConn::deleteOfflineMessage(string id) {
+	int totalsize = 24+strlen(CSRequestHeader) + 
+		strlen(CSCmdDelOfflineMsg) + id.length() ; 
+
+	ostringstream out ;
+	out<<intToDWord(totalsize-4) ;
+	out<<intToDWord(3) ; 
+	out<<intToDWord(strlen(CSRequestHeader)) ;
+
+	out<<CSRequestHeader ; 
+
+	out<<intToDWord(strlen(CSCmdDelOfflineMsg)) ;
+	out<<CSCmdDelOfflineMsg; 
+
+	out<<intToDWord(4+id.length()) ; 
+	out<<intToDWord(id.length()) ;
+	out<<id ; 
+
+	connection->write(out.str().data(), out.str().length()) ;
+}

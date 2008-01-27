@@ -38,12 +38,8 @@ namespace rbol {
 		}
 
 		PurpleAsyncConn(PurpleAsyncConnHandler* conn, 
-				std::string ip, 
-				gint32 port,
-			int pm) ;
-		bool establish_connection(
-			std::string ip, 
-			gint32 port) ;
+				std::string ip, gint32 port, int pm) ;
+		bool establish_connection(std::string ip, gint32 port) ;
 
 		~PurpleAsyncConn() ;
 		
@@ -54,7 +50,7 @@ namespace rbol {
 		void read_cb() ;
 
 		bool close() ;
-		void got_connected_cb(int source) ;
+		void got_connected_cb(int source, const gchar* ) ;
 		/* static callbacks */
 //		static void conn_write_cb( gpointer data, gint source, 
 		//				   PurpleInputCondition cond) ;
@@ -63,8 +59,6 @@ namespace rbol {
 
 		void unref() { 
 			ref_counter -- ;
-			if ( ref_counter == 0  ) 
-				delete this ;
 		}
 		
 	};
