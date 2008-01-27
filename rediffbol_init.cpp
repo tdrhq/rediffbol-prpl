@@ -397,11 +397,14 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,
 };
 
+#include "packet_handler.h" 
+
 static void rediffbol_init(PurplePlugin *plugin)
 {
 	printf("rediff starting up\n"); 
   purple_debug_info("rbol", "starting up\n");
   _null_protocol = plugin;
+  INIT_PACKET_HANDLER("MyTest", MyTest) ;
 }
 
 static void rediffbol_destroy(PurplePlugin *plugin) {

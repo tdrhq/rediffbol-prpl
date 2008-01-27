@@ -42,10 +42,20 @@ namespace rbol {
 
 	class RediffBolConn { 
 	private:
+		
+		/* Response Parsers */
+
+		/* Login Responses */
 		void parseCSLoginResponse(MessageBuffer buffer) ;
+
+		/* Responses affecting contacts */
 		void parseCSContacts(MessageBuffer &buffer) ;
 		void parseContactStatusChange(MessageBuffer &buffer);
+
+		/* basic message handling */
 		void parseTextMessage(MessageBuffer &buffer) ;
+		void parseOfflineMessages(MessageBuffer &buffer) ;
+
 		std::vector<std::string> roster ; 
 		std::string session ;
 		int keep_alive_counter ; 
@@ -76,6 +86,8 @@ namespace rbol {
 
 		void sendMessage(std::string to, std::string message) ;
 		void sendKeepAlive() ;
+		void sendOfflineMessagesRequest() ;
+
 		/**
 		 * there was an error in the network. This should also
 		 * set the state to offline and/or reconnect if required.

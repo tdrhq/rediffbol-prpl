@@ -93,7 +93,7 @@ void RediffBolConn::connectToGK() {
 	hex_dump(t, "Gk message") ;
 	printf("here2\n");
 
-	connection->write((const void*)s.str().c_str(), s.str().size()) ;
+	connection->write((const void*)s.str().data(), s.str().size()) ;
 	printf("here\n");
 
 }
@@ -190,7 +190,7 @@ void RediffBolConn::connectToCS() {
 		     out.str().length()) ;
 
 	hex_dump(out.str(), string("Sending CS packet")) ;
-	connection->write(out.str().c_str(), out.str().length()) ;
+	connection->write(out.str().data(), out.str().length()) ;
 }
 		
 void RediffBolConn::got_connected_cb() { 
@@ -239,8 +239,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 	int type = buffer.readInt32() ; 
         int subtype = buffer.readInt32() ;
         int payloadsize = buffer.readInt32() ; 
-        
-
+	
         int numentries = buffer.readInt32();
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol",
@@ -432,6 +431,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	string id = buffer.readString() ;
 
 	sendKeepAlive() ;
+	sendOfflineMessagesRequest() ;
 
 	purple_timeout_add_seconds(30, keep_alive_timer, this) ;
 }
@@ -538,7 +538,8 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 			parseCSLoginResponse(buffer) ;
 			return ;
 		} else if (subtype == 1 ) { 
-			/* offline messages */
+			parseOfflineMessages(buffer) ;
+			return ;
 		} else if ( subtype == 7 ) { 
 			/* chat room response */
 		} else if ( subtype == 62 ) { 
@@ -692,5 +693,88 @@ void RediffBolConn::sendKeepAlive(){
 
 	write_int(out, 0) ;
 
-	connection->write(out.str().c_str(), out.str().length()) ;
+	connection->write(out.str().data(), out.str().length()) ;
+}
+
+void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) { 
+	purple_debug(PURPLE_DEBUG_INFO, "rbol" , 
+		     "parsing offline messages" ); 
+	int payloadsize = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(payloadsize) ;
+	int numentries = buffer.readInt() ;
+
+	for(int i = 0 ; i < numentries; i ++) { 
+		string msgid = buffer.readString() ;
+		string sender = buffer.readString() ;
+		
+		int msgsize = buffer.readInt() ;
+		MessageBuffer msgbuf = buffer.readMessageBuffer(msgsize) ;
+		
+		int msgtype = buffer.readInt() ;
+		int timestamp = buffer.readInt() ;
+
+		if ( msgtype == 0 ) { 
+			string msg = buffer.readStringn(buffer.getLength()) ;
+
+			serv_got_im(purple_account_get_connection(account),
+				    sender.c_str(), msg.c_str(), 
+				    PurpleMessageFlags(0), time(NULL)) ;
+		} else {
+			string final_message ; 
+
+			
+			while ( !buffer.isEnd() ) { 
+				int len = buffer.readLEInt() ;
+				
+				if ( len == 0 ) { 
+					int fontstrlen = buffer.readLEInt() ; 
+					string  font = buffer.readStringn(fontstrlen) ;
+					string fontinfo = buffer.readStringn(13);
+					
+					int messagelen = buffer.readLEInt() ;
+					string message = buffer.readStringn(messagelen) ;
+					hex_dump(message, "message before ASCII encoding\n") ;
+					message = encode( message, "UTF-16BE", "US-ASCII") ;
+					final_message += message ; 
+					
+				} else if ( len == 1 ) { 
+					int smileycode = buffer.readLEInt() ;
+					int smileylen = buffer.readLEInt() ;
+					string smiley = buffer.readStringn(smileylen) ;
+				} else { 
+					purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
+						     "Unknown message type.. \n") ;
+					continue ; 
+				}
+			}
+
+			serv_got_im(purple_account_get_connection(account),
+				    sender.c_str(), final_message.c_str() ,
+				    PurpleMessageFlags(0), time(NULL) );
+				  
+		} /* else */ 
+
+
+
+	}
+	
+}
+
+
+void RediffBolConn::sendOfflineMessagesRequest() { 
+	ostringstream out ; 
+	int totalsize = 24 + strlen(CSRequestHeader) + strlen(CSCmdGetOfflineMsgs) ; 
+
+	out<<intToDWord(totalsize-4) ;
+	out<<intToDWord(0) ;
+	out<<intToDWord(0) ;
+	out<<intToDWord(strlen(CSRequestHeader) );
+	out<<CSRequestHeader ;
+	out<<intToDWord(strlen(CSCmdGetOfflineMsgs)) ;
+	out<<CSCmdGetOfflineMsgs ; 
+	
+
+	out<<intToDWord(0) ;
+	
+	connection->write(out.str().data(), out.str().length()) ;
 }
