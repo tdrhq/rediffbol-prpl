@@ -235,6 +235,12 @@ extern "C" void rediffbol_login(PurpleAccount *acct)
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "here here here\n");
 
+	if ( acct->gc->proto_data ) { 
+		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
+			     "Closing an exisiting connection before "
+			     "reconnecting.\n") ;
+	}
+
 	RediffBolConn* conn = new RediffBolConn (acct) ;
 	conn->startLogin() ;
 
@@ -242,7 +248,8 @@ extern "C" void rediffbol_login(PurpleAccount *acct)
 
 static void rediffbol_close(PurpleConnection *gc)
 {
-
+	RediffBolConn *conn = (RediffBolConn*) gc->proto_data ; 
+	delete conn ;
 }
 
 static int rediffbol_send_im(PurpleConnection *gc, const char *who,
@@ -404,7 +411,6 @@ static void rediffbol_init(PurplePlugin *plugin)
 	printf("rediff starting up\n"); 
   purple_debug_info("rbol", "starting up\n");
   _null_protocol = plugin;
-  INIT_PACKET_HANDLER("MyTest", MyTest) ;
 }
 
 static void rediffbol_destroy(PurplePlugin *plugin) {

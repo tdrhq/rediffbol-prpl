@@ -18,8 +18,8 @@ namespace rbol {
 	PacketHandlerFn  getPacketHandler(int subtype) ;
 	PacketHandlerFn  getPacketHandler(std::string cmd) ;
 
-#define INIT_PACKET_HANDLER(a, name) { void name(rbol::MessageBuffer&, RediffBolConn*); \
-		rbol::setPacketHandler(a, name) ; }
+#define INIT_PACKET_HANDLER(a, name) { extern void rbol::name(rbol::MessageBuffer&, rbol::RediffBolConn*); \
+		rbol::setPacketHandler(a, rbol::name) ; }
 }
 
 #endif

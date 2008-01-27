@@ -8,6 +8,9 @@
 #include <set>
 #include "encode.h"
 #include "util.h"
+#include "packet_handler.h"
+#include <connection.h>
+
 
 using namespace std;
 using namespace rbol ; 
@@ -15,7 +18,7 @@ using namespace rbol ;
 
 //void RediffBolConn::connectToGK() ;
 //void RediffBolConn::connectToCS() ;
-void hex_dump (const string a,const string message) { 
+void rbol::hex_dump (const string a,const string message) { 
 	if ( a.size() == 0 ) return ;
 	gchar* hex_dump = purple_str_binary_to_ascii
 		((const unsigned char*) a.data(), 
@@ -97,54 +100,6 @@ void RediffBolConn::connectToGK() {
 	printf("here\n");
 
 }
-void RediffBolConn::parseTextMessage( MessageBuffer &buffer) { 
-	int payloadsize = buffer.readInt() ;
-	buffer = buffer.readMessageBuffer(payloadsize) ;
-
-	string senderstr = buffer.readString() ;
-	string recipient  = buffer.readString() ;
-
-	int subpayloadsize = buffer.readInt();
-
-	buffer = buffer.readMessageBuffer(subpayloadsize) ;
-	
-	string final_message ; 
-
-
-	while ( !buffer.isEnd() ) { 
-		int len = buffer.readLEInt() ;
-
-		if ( len == 0 ) { 
-			int fontstrlen = buffer.readLEInt() ; 
-			string  font = buffer.readStringn(fontstrlen) ;
-			string fontinfo = buffer.readStringn(13);
-			
-			int messagelen = buffer.readLEInt() ;
-			string message = buffer.readStringn(messagelen) ;
-			hex_dump(message, "message before ASCII encoding\n") ;
-			message = encode( message, "UTF-16BE", "US-ASCII") ;
-			final_message += message ; 
-
-		} else if ( len == 1 ) { 
-			int smileycode = buffer.readLEInt() ;
-			int smileylen = buffer.readLEInt() ;
-			string smiley = buffer.readStringn(smileylen) ;
-		} else { 
-			purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
-				     "Unknown message type.. \n") ;
-			continue ; 
-		}
-	}
-
-	purple_debug(PURPLE_DEBUG_INFO, "rbol",
-		     "got message %s\n", final_message.c_str()) ;
-	serv_got_im(purple_account_get_connection(account) ,
-		    senderstr.c_str() ,final_message.c_str(), 
-		    (PurpleMessageFlags) 0, time(NULL) ) ;
-
-	
-
-}
 void RediffBolConn::connectToCS() { 
 
 	ostringstream out ; 
@@ -193,7 +148,7 @@ void RediffBolConn::connectToCS() {
 	connection->write(out.str().data(), out.str().length()) ;
 }
 		
-void RediffBolConn::got_connected_cb() { 
+void RediffBolConn::gotConnected() { 
 	/* what's my state? */
 	if ( connection->getParseMode() ) 
 		connectToGK() ;
@@ -201,7 +156,7 @@ void RediffBolConn::got_connected_cb() {
 
 }
 
-void RediffBolConn::parseResponse(MessageBuffer &buffer) try { 
+void RediffBolConn::readCallback(MessageBuffer &buffer) try { 
 	while ( buffer.left() >= 4 ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "got a response\n") ;
@@ -308,7 +263,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	if ( errorcode != 0 ) { 
 		char err[100];
 		sprintf(err, "CS Login error %d\n", errorcode) ;
-		setStateNetworkError(err) ;
+		setStateNetworkError(PURPLE_CONNECTION_ERROR_AUTHENTICATION_FAILED , err) ;
 		return ;
 	}
 
@@ -546,7 +501,7 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 			/* join chat room response */
 		}
 
-		
+
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "Got subtype as %d\n", subtype) ;
 
@@ -575,11 +530,9 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 			return ;
 		} else if ( cmd == "TextMessage" ) { 
 			parseTextMessage(buffer) ;
-			return ; 
+			return;
 		}
 	     
-		
-
 		int len = buffer.readInt() ;
 		string dump = buffer.readStringn(len) ;
 		
@@ -606,9 +559,14 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 
 }
 
-void RediffBolConn::setStateNetworkError(string msg) {
+void RediffBolConn::setStateNetworkError(int  reason,
+					 string msg) {
 	/* can't do anything now */
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , msg.c_str()) ;
+	connection->close () ;
+	purple_connection_error_reason(account->gc, 
+		    (PurpleConnectionError)reason, msg.c_str()) ;
+
 } 
 
 /**
@@ -778,3 +736,57 @@ void RediffBolConn::sendOfflineMessagesRequest() {
 	
 	connection->write(out.str().data(), out.str().length()) ;
 }
+
+PurpleAccount* RediffBolConn::getProxyAccount() { 
+	return account ;
+}
+
+void RediffBolConn::parseTextMessage( MessageBuffer &buffer) { 
+	int payloadsize = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(payloadsize) ;
+	
+	string senderstr = buffer.readString() ;
+	string recipient  = buffer.readString() ;
+	
+	int subpayloadsize = buffer.readInt();
+
+	buffer = buffer.readMessageBuffer(subpayloadsize) ;
+	
+	string final_message ; 
+
+
+	while ( !buffer.isEnd() ) { 
+		int len = buffer.readLEInt() ;
+
+		if ( len == 0 ) { 
+			int fontstrlen = buffer.readLEInt() ; 
+			string  font = buffer.readStringn(fontstrlen) ;
+			string fontinfo = buffer.readStringn(13);
+			
+			int messagelen = buffer.readLEInt() ;
+			string message = buffer.readStringn(messagelen) ;
+			hex_dump(message, "message before ASCII encoding\n") ;
+			message = encode( message, "UTF-16BE", "US-ASCII") ;
+			final_message += message ; 
+
+		} else if ( len == 1 ) { 
+			int smileycode = buffer.readLEInt() ;
+			int smileylen = buffer.readLEInt() ;
+			string smiley = buffer.readStringn(smileylen) ;
+		} else { 
+			purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
+				     "Unknown message type.. \n") ;
+			continue ; 
+		}
+	}
+
+	purple_debug(PURPLE_DEBUG_INFO, "rbol",
+		     "got message %s\n", final_message.c_str()) ;
+	serv_got_im(purple_account_get_connection(conn->account) ,
+		    senderstr.c_str() ,final_message.c_str(), 
+		    (PurpleMessageFlags) 0, time(NULL) ) ;
+
+	
+
+}
+

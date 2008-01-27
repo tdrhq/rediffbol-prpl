@@ -17,7 +17,8 @@ int rbol::setPacketHandler(int subtype, PacketHandlerFn fn) {
 }
 
 PacketHandlerFn rbol::getPacketHandler(string s ) {
-	assert( packet_handler.count(s) ) ;
+	//assert( packet_handler.count(s) ) ;
+	if ( packet_handler.count(s) == 0 ) return NULL ;
 	return packet_handler[s] ;
 }
 

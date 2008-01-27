@@ -4,20 +4,21 @@
 #include "conn.h"
 #include <glib.h>
 #include <errno.h>
+#include <debug.h>
 
 using namespace rbol ;
 using namespace std; 
 
-typedef bool(*PacketRecvCallback)(struct RediffBolConn*, struct Request *) ; 
-typedef bool(*GotConnectedCallback)(PurpleAccount*) ;
+#include <connection.h>
+
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond);
 
-PurpleAsyncConn::PurpleAsyncConn(RediffBolConn *conn, string ip, gint32 port,
-	int pm ) 
-:awaiting("") 
+PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
+				 string ip, gint32 port,
+				 int pm ) :awaiting("") 
 { 
-	rb_conn = conn ;
+	handler = _handler ;
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm ;
 	ref_counter = 1 ; 
@@ -58,7 +59,7 @@ PurpleAsyncConn::got_connected_cb(gint source) {
 	/* so now this callback need not take care of connection issues */
 	rx_handler = purple_input_add(fd, PURPLE_INPUT_READ, 
 					  conn_read_cb, this) ;
-	rb_conn->got_connected_cb() ;
+	handler->gotConnected() ;
 }
 
 
@@ -75,7 +76,7 @@ PurpleAsyncConn::establish_connection(
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "establishinc connection\n");
 	fd = -1 ;
 	
-	if ( purple_proxy_connect(NULL, rb_conn->account, 
+	if ( purple_proxy_connect(NULL, handler->getProxyAccount(), 
 				  ip.c_str(), 
 				  port, conn_got_connected, this) ==NULL) {
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol", 
@@ -92,8 +93,6 @@ static void conn_got_connected(gpointer data, gint source,
 			       const gchar * error_message) { 
 
 	PurpleAsyncConn *conn = (PurpleAsyncConn*)data; 
-	RediffBolConn *rb = conn->rb_conn; 
-
 	conn->got_connected_cb(source) ;
 
 }
@@ -120,12 +119,11 @@ static void conn_write_cb( gpointer data, gint source,
 void  
 PurpleAsyncConn::write(const void* data, 
 	int datalen) { 
-	RediffBolConn* rb = rb_conn ;
 	int written ; 
 
 
 	if ( !tx_handler) 
-		written = ::write(rb->fd, data, datalen) ;
+		written = ::write(fd, data, datalen) ;
 	else { 
 		written = -1 ;
 		errno = EAGAIN ; 
@@ -149,6 +147,8 @@ PurpleAsyncConn::write(const void* data,
 					  datalen-written) ;
 
 	}
+
+	handler->writeCallback() ;
 }
 
 
@@ -181,7 +181,6 @@ PurpleAsyncConn::write_cb() {
 static void conn_write_cb( gpointer data, gint source, 
 			   PurpleInputCondition cond) { 
 	PurpleAsyncConn* conn = (PurpleAsyncConn*) data ; 
-	RediffBolConn * rb = conn->rb_conn  ;
 
 	conn->write_cb() ; 
 }
@@ -210,7 +209,7 @@ PurpleAsyncConn::read_cb() {
 	
 	awaiting.push(string(buf, buf+len)) ;
 
-	rb_conn->parseResponse(awaiting);
+	handler->readCallback(awaiting);
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {

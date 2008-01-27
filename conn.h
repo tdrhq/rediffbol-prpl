@@ -6,26 +6,38 @@
 #include <libpurple/circbuffer.h>
 #include "messagebuffer.h"
 #include <string>
-#include "rediffbol.h"
-#include "response.h"
+#include "PurpleAsyncConnHandler.h" 
 
 namespace rbol {
 	class PurpleAsyncConn { 
 	private:
+
+		/* buffers */
 		PurpleCircBuffer *txbuf ;
 		MessageBuffer awaiting; 
+
+		/* handlers */
 		guint tx_handler; 
 		guint rx_handler; 
 		
+		/* some deprecated counter */
 		int ref_counter ;
+
+		/* the purple connection socket */
 		int fd ;
+
+		/* store some information for the parent */
 		int parse_mode ; 
+
+		/* super handler */
+		PurpleAsyncConnHandler *handler ;
+
 	public:
 		int getParseMode() { 
 			return parse_mode ; 
 		}
-		RediffBolConn *rb_conn ;
-		PurpleAsyncConn(RediffBolConn* conn, 
+
+		PurpleAsyncConn(PurpleAsyncConnHandler* conn, 
 				std::string ip, 
 				gint32 port,
 			int pm) ;
@@ -36,7 +48,6 @@ namespace rbol {
 		~PurpleAsyncConn() ;
 		
 		void write(const void* data, int len) ; 
-		void write(const Response* resp) ;
 
 		/* internal callbacks */
 		void write_cb() ;
