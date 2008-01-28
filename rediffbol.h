@@ -23,7 +23,7 @@
 #include "xmlnode.h"
 #include <ctype.h>
 #include <connection.h>
-
+#include <map>
 
 #include "request.h"
 #include "conn.h"
@@ -84,6 +84,9 @@ namespace rbol {
 
 		void softDestroy() ;
 
+		std::map<std::string, std::string> nickname; 
+		std::map<std::string, std::string> status_text ;
+
 	public: 
 		PurpleAccount *account ;
 		PurpleAsyncConn *connection ; 
@@ -124,6 +127,9 @@ namespace rbol {
 		void sendGetAddRequest() ;
 		void setStatus(std::string status, std::string message) ;
 		void startLogin() ;
+
+		std::string getBuddyNickname(std::string buddyname) ; 
+		std::string getBuddyStatusMessage(std::string buddyname) ;
 		virtual void closeCallback() ;
 	};
 	

@@ -492,8 +492,12 @@ void RediffBolConn::parseContactStatusChange(MessageBuffer &buffer) {
 	
 	purple_prpl_got_user_status(account, name1.c_str(), 
 				    sstatus.c_str(),
-				    NULL,
+				    "message",
+				    msg.c_str(),
 				    NULL);
+
+	status_text[name1] = msg ;
+		     
 	
 }
 void RediffBolConn::parseCSResponse(MessageBuffer &buffer) { 
@@ -922,4 +926,11 @@ void RediffBolConn::sendGetAddRequest() {
 	out<<intToDWord(0) ;
 	
 	connection->write(out.str()) ;
+}
+
+string RediffBolConn::getBuddyNickname(std::string buddyname) { 
+	return nickname[buddyname] ;
+}
+std::string RediffBolConn::getBuddyStatusMessage(std::string buddyname) { 
+	return status_text[buddyname] ;
 }

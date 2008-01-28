@@ -264,9 +264,12 @@ static int rediffbol_send_im(PurpleConnection *gc, const char *who,
 
 
 static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
-	const char *msg = purple_status_get_attr_string(status, "message");
+	const char *_msg = purple_status_get_attr_string(status, "message");
+	std::string msg = (_msg?_msg:"") ;
+
 	purple_debug_info("rediffbol", "setting %s's status to %s: %s\n",
-			  acct->username, purple_status_get_name(status), msg);
+			  acct->username, purple_status_get_name(status), 
+			  msg.c_str());
 	
 
 	PurpleStatusType *stype = purple_status_get_type (status) ;
@@ -277,23 +280,23 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 	RediffBolConn* rb = (RediffBolConn*) acct->gc->proto_data ;
 	if ( primitive == PURPLE_STATUS_AVAILABLE or
 	     primitive == PURPLE_STATUS_MOBILE ) { 
-		rb->setStatus("Online", "") ;
+		rb->setStatus("Online", msg) ;
 		return ;
 	}
 
 	if ( primitive == PURPLE_STATUS_AWAY  ) { 
-		rb->setStatus("Away", "") ;
+		rb->setStatus("Away", msg) ;
 		return ;
 	}
 
 	if ( primitive == PURPLE_STATUS_UNAVAILABLE
 		or primitive == PURPLE_STATUS_EXTENDED_AWAY) {
-		rb->setStatus("Busy", "" ) ;
+		rb->setStatus("Busy", msg ) ;
 		return ;
 	}
 
 	if ( primitive == PURPLE_STATUS_INVISIBLE ) { 
-		rb->setStatus("Invisible", "") ;
+		rb->setStatus("Invisible", msg) ;
 		return ;
 	}
 }
@@ -351,6 +354,13 @@ static void rediffbol_set_buddy_icon(PurpleConnection *gc,
 			  gc->account->username, purple_imgstore_get_filename(img));
 }
 
+static char *rediffbol_status_text(PurpleBuddy *b) { 
+	RediffBolConn *rb = (RediffBolConn*) b->account->gc->proto_data ;
+	std::string message = rb->getBuddyStatusMessage(b->name)  ;
+	if ( message != "" ) return g_strdup(message.c_str() ) ;
+	else return NULL ;
+}
+
 /*
  * prpl stuff. see prpl.h for more information.
  */
@@ -371,7 +381,7 @@ static PurplePluginProtocolInfo prpl_info =
 	},
 	rediffbol_list_icon,                  /* list_icon */
 	rediffbol_list_emblem,                /* list_emblem */
-	NULL,                /* status_text */
+	rediffbol_status_text,                /* status_text */
 	NULL,               /* tooltip_text */
 	rediffbol_status_types,               /* status_types */
 	NULL,            /* blist_node_menu */
