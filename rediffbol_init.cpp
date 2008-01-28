@@ -243,6 +243,8 @@ static void rediffbol_login(PurpleAccount *acct)
 
 	RediffBolConn* conn = new RediffBolConn (acct) ;
 	conn->startLogin() ;
+	
+	using std::string ;
 
 }
 

@@ -409,7 +409,15 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 
 	string id = buffer.readString() ;
 
+	PurpleStatus * status = purple_account_get_active_status(account) ;
+	string msg = purple_status_get_attr_string(status, "message") ;
+	string status_id = purple_status_get_id(status) ;
+	setStatus(status_id, msg) ;
+
 	sendKeepAlive() ;
+
+	/* first fix my current status */
+	
 	sendOfflineMessagesRequest() ;
 	sendGetAddRequest() ;
 
