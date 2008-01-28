@@ -44,7 +44,7 @@ namespace rbol {
 		~PurpleAsyncConn() ;
 		
 		void write(const void* data, int len) ; 
-
+		void write(std::string s) ;
 		/* internal callbacks */
 		void write_cb() ;
 		void read_cb() ;

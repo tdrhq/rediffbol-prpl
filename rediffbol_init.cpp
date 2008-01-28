@@ -268,7 +268,34 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 	purple_debug_info("rediffbol", "setting %s's status to %s: %s\n",
 			  acct->username, purple_status_get_name(status), msg);
 	
+
+	PurpleStatusType *stype = purple_status_get_type (status) ;
+	assert(stype) ;
+	PurpleStatusPrimitive primitive = purple_status_type_get_primitive(
+		stype) ;
 	
+	RediffBolConn* rb = (RediffBolConn*) acct->gc->proto_data ;
+	if ( primitive == PURPLE_STATUS_AVAILABLE or
+	     primitive == PURPLE_STATUS_MOBILE ) { 
+		rb->setStatus("Online", "") ;
+		return ;
+	}
+
+	if ( primitive == PURPLE_STATUS_AWAY  ) { 
+		rb->setStatus("Away", "") ;
+		return ;
+	}
+
+	if ( primitive == PURPLE_STATUS_UNAVAILABLE
+		or primitive == PURPLE_STATUS_EXTENDED_AWAY) {
+		rb->setStatus("Busy", "" ) ;
+		return ;
+	}
+
+	if ( primitive == PURPLE_STATUS_INVISIBLE ) { 
+		rb->setStatus("Invisible", "") ;
+		return ;
+	}
 }
 
 

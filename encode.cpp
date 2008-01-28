@@ -52,5 +52,5 @@ string rbol::encode(const string a, const string from, const string to) {
 
 
 string rbol::encode_from_iso(const string a, const string to) { 
-	return encode(a, string("US-ASCII"), to) ;
+	return encode(a, string("UTF-8"), to) ;
 }

@@ -17,6 +17,8 @@ using namespace rbol ;
 
 //void RediffBolConn::connectToGK() ;
 //void RediffBolConn::connectToCS() ;
+
+
 void rbol::hex_dump (const string a,const string message) { 
 	if ( a.size() == 0 ) return ;
 	gchar* hex_dump = purple_str_binary_to_ascii
@@ -28,6 +30,19 @@ void rbol::hex_dump (const string a,const string message) {
 		     message.c_str(), a.length(),
 		     hex_dump) ;
 	g_free(hex_dump) ; 
+}
+
+void RediffBolConn::softDestroy() { 
+	if ( isInvalid() ) return ;
+
+	if ( connection ) delete connection ;
+	if ( keep_alive_timer_handle ) {
+		purple_timeout_remove(keep_alive_timer_handle)  ;
+		keep_alive_timer_handle = 0 ; 
+	}
+
+	setInvalid() ;
+	
 }
 void RediffBolConn::startLogin() { 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "starting login\n");
@@ -148,7 +163,7 @@ void RediffBolConn::connectToCS() {
 }
 
 RediffBolConn::~RediffBolConn() { 
-	if ( connection ) delete connection ;
+	softDestroy() ; 
 }		
 void RediffBolConn::gotConnected() { 
 	/* what's my state? */
@@ -396,8 +411,9 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 
 	sendKeepAlive() ;
 	sendOfflineMessagesRequest() ;
+	sendGetAddRequest() ;
 
-	purple_timeout_add_seconds(30, keep_alive_timer, this) ;
+	keep_alive_timer_handle = purple_timeout_add_seconds(30, keep_alive_timer, this) ;
 }
 string getStatusFromID(int status) { 
 	if ( status == 2 ) { 
@@ -411,6 +427,7 @@ string getStatusFromID(int status) {
 	
 }
 void RediffBolConn::parseCSContacts(MessageBuffer &buffer) { 
+	assert(!isInvalid()) ;
 	int payloadsize = buffer.readInt() ;
 	int numcontacts = buffer.readInt() ; 
 	map<string, vector<string> > contacts; 
@@ -454,6 +471,7 @@ void RediffBolConn::parseCSContacts(MessageBuffer &buffer) {
 }
 
 void RediffBolConn::parseContactStatusChange(MessageBuffer &buffer) { 
+	assert(!isInvalid());
 	int payloadsize = buffer.readInt() ;
 	buffer = buffer.readMessageBuffer(payloadsize) ;
 
@@ -484,6 +502,7 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 	   entire packets contents and remove it from the buffer 
 	*/
 
+	assert(!isInvalid()) ;
 	int type = buffer.readInt() ; 
 	
 	string header = "" ;
@@ -571,10 +590,13 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 void RediffBolConn::setStateNetworkError(int  reason,
 					 string msg) {
 	/* can't do anything now */
+	assert(!isInvalid()) ;
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , msg.c_str()) ;
-	connection->close () ;
+	softDestroy() ;
 	purple_connection_error_reason(account->gc, 
 		    (PurpleConnectionError)reason, msg.c_str()) ;
+
+
 
 } 
 
@@ -583,6 +605,7 @@ void RediffBolConn::setStateNetworkError(int  reason,
  */
 
 void RediffBolConn::sendMessage(string to, string message) { 
+	assert(!isInvalid()) ;
 	string fonttype = "Dialog" ; /* confused :( */
 
 	string sender = account->username ;
@@ -644,6 +667,8 @@ void RediffBolConn::sendMessage(string to, string message) {
 }
 
 void RediffBolConn::sendKeepAlive(){
+	assert(!isInvalid()) ;
+
 	int size = 24 + strlen(CSRequestHeader) + strlen(CSCmdKeepAlive) ;
 
 	ostringstream out ; 
@@ -701,7 +726,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 					int messagelen = msgbuf.readLEInt() ;
 					string message = msgbuf.readStringn(messagelen) ;
 					hex_dump(message, "message before ASCII encoding\n") ;
-					message = encode( message, "UTF-16BE", "US-ASCII") ;
+					message = encode( message, "UTF-16BE", "UTF-8") ;
 					final_message += message ; 
 					
 				} else if ( len == 1 ) { 
@@ -729,6 +754,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 
 
 void RediffBolConn::sendOfflineMessagesRequest() { 
+	assert(!isInvalid()) ;
 	ostringstream out ; 
 	int totalsize = 24 + strlen(CSRequestHeader) + strlen(CSCmdGetOfflineMsgs) ; 
 
@@ -775,7 +801,7 @@ void RediffBolConn::parseTextMessage( MessageBuffer &buffer) {
 			int messagelen = buffer.readLEInt() ;
 			string message = buffer.readStringn(messagelen) ;
 			hex_dump(message, "message before ASCII encoding\n") ;
-			message = encode( message, "UTF-16BE", "US-ASCII") ;
+			message = encode( message, "UTF-16BE", "UTF-8") ;
 			final_message += message ; 
 
 		} else if ( len == 1 ) { 
@@ -801,6 +827,7 @@ void RediffBolConn::parseTextMessage( MessageBuffer &buffer) {
 
 
 void RediffBolConn::deleteOfflineMessage(string id) {
+	assert(!isInvalid()) ;
 	int totalsize = 24+strlen(CSRequestHeader) + 
 		strlen(CSCmdDelOfflineMsg) + id.length() ; 
 
@@ -819,4 +846,78 @@ void RediffBolConn::deleteOfflineMessage(string id) {
 	out<<id ; 
 
 	connection->write(out.str().data(), out.str().length()) ;
+}
+#include <ctype.h>
+#include <algorithm>
+void RediffBolConn::setStatus(string status, string message) { 
+	
+	assert(!isInvalid()) ;
+
+
+	string t = status ;
+	transform(t.begin(), t.end(), t.begin(), ::tolower );
+
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", 
+		     "Setting status [%s] [%s] [%s]\n", status.c_str(), 
+		     message.c_str(), t.c_str()) ;
+
+	if ( message == "" ) message = status ; 
+
+	int code ; 
+	if ( t == "online" or t == "available" ) 
+		code = 1 ;
+	else if ( t == "away" ) 
+		code = 2 ; 
+	else if ( t == "busy" ) 
+		code = 3 ;
+	else if ( t == "invisible" )
+		code = 4 ;
+	else return ; 
+
+	int size = 28 + strlen(CSRequestHeader) + strlen(CSCmdSetOnlineStatus) ;
+	
+	ostringstream out ; 
+	out << intToDWord(size-4) ;
+	out<<intToDWord(3) ;
+	out<<intToDWord(strlen(CSRequestHeader))  ;
+	out<<CSRequestHeader ; 
+	out<<intToDWord(strlen(CSCmdSetOnlineStatus)) ;
+	out<<CSCmdSetOnlineStatus ; 
+
+	size = 8 + message.length() ; 
+	
+	out<<intToDWord(size) ;
+	out<<intToDWord(code) ; 
+	out<<intToDWord(message.length()) ;
+	out<<message ;
+
+	connection->write(out.str()) ;
+	
+}
+
+void RediffBolConn::closeCallback() { 
+	/* aargh.. server has closed the connection */
+	assert(!isInvalid()) ;
+	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
+			     "Pathetic, the server has closed the connection");
+}
+
+
+void RediffBolConn::sendGetAddRequest() { 
+	assert(!isInvalid()) ;
+	int size = 24+strlen(CSRequestHeader) + strlen(CSCmdGetAddRequests) ;
+
+	ostringstream out ;
+	out<<intToDWord(size-4) ;
+	out<<intToDWord(0);
+	out<<intToDWord(2) ;
+
+	out<<intToDWord(strlen(CSRequestHeader)) ;
+	out<<CSRequestHeader ; 
+	out<<intToDWord(strlen(CSCmdGetAddRequests));
+	out<<CSCmdGetAddRequests;
+
+	out<<intToDWord(0) ;
+	
+	connection->write(out.str()) ;
 }

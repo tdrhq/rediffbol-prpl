@@ -69,8 +69,21 @@ namespace rbol {
 		std::vector<std::string> roster ; 
 		std::string session ;
 		int keep_alive_counter ; 
-
+		guint keep_alive_timer_handle ; 
 		int connection_state ; 
+
+		bool _is_invalid ; 
+		
+		bool isInvalid() { 
+			return _is_invalid ; 
+		}
+		
+		void setInvalid() { 
+			_is_invalid = true ;
+		}
+
+		void softDestroy() ;
+
 	public: 
 		PurpleAccount *account ;
 		PurpleAsyncConn *connection ; 
@@ -85,6 +98,8 @@ namespace rbol {
 			userAgent = DEFAULT_USERAGENT ;
 			keep_alive_counter = 0 ;
 			connection_state = 0 ;
+			keep_alive_timer_handle = 0 ;
+			_is_invalid = false ;
 		}
 
 		~RediffBolConn() ; 
@@ -106,8 +121,10 @@ namespace rbol {
 		void readCallback(MessageBuffer &buffer) ;
 		void parseGkResponse(MessageBuffer &buffer) ;
 		void parseCSResponse(MessageBuffer &buffer) ;
-
+		void sendGetAddRequest() ;
+		void setStatus(std::string status, std::string message) ;
 		void startLogin() ;
+		virtual void closeCallback() ;
 	};
 	
 }
