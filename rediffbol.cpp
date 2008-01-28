@@ -117,7 +117,7 @@ void RediffBolConn::connectToCS() {
 
 	ostringstream out ; 
 	string name = account->username ;
-	name += "@rediffmail.com" ;
+	name = fixEmail(name);
 	string pass = account->password ; 
 
 	int credsize = name.length() + pass.length() ; 
@@ -243,7 +243,6 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
         } 
 
 	
-	srand(time(NULL));
 	string ip = res[ rand() % res.size() ] ;
 	//string ip = res[0] ;
 
@@ -621,7 +620,7 @@ void RediffBolConn::sendMessage(string to, string message) {
 	string fonttype = "Dialog" ; /* confused :( */
 
 	string sender = account->username ;
-	sender += "@rediffmail.com" ;
+	sender = fixEmail(sender);
 
 	fonttype = encode_from_iso(fonttype, "UTF-16BE") ;
 	message = encode_from_iso(message, "UTF-16BE") ;
@@ -955,4 +954,10 @@ void RediffBolConn::parseNewMailsResponse(MessageBuffer &buffer) {
 	purple_notify_emails(account->gc, num, FALSE, NULL, NULL, &to, 
 			     &url, /* replace with rediffmail URL sometime */
 			     NULL, NULL) ;
+}
+
+string RediffBolConn::fixEmail(string original) { 
+	if ( find(original.begin(), original.end(), '/') == original.end() ) 
+		return original + "@rediffmail.com"  ;
+	else return original ;
 }

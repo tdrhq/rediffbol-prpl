@@ -128,7 +128,7 @@ namespace rbol {
 		void sendGetAddRequest() ;
 		void setStatus(std::string status, std::string message) ;
 		void startLogin() ;
-
+		std::string fixEmail(std::string a) ;
 		std::string getBuddyNickname(std::string buddyname) ; 
 		std::string getBuddyStatusMessage(std::string buddyname) ;
 		virtual void closeCallback() ;
