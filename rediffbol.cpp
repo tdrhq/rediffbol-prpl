@@ -17,6 +17,7 @@ using namespace rbol ;
 //void RediffBolConn::connectToGK() ;
 //void RediffBolConn::connectToCS() ;
 
+#define SAFE(a) (a?a:"")
 
 void rbol::hex_dump (const string a,const string message) { 
 	if ( a.size() == 0 ) return ;
@@ -408,8 +409,8 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	string id = buffer.readString() ;
 
 	PurpleStatus * status = purple_account_get_active_status(account) ;
-	string msg = purple_status_get_attr_string(status, "message") ;
-	string status_id = purple_status_get_id(status) ;
+	string msg = SAFE(purple_status_get_attr_string(status, "message")) ;
+	string status_id = SAFE(purple_status_get_id(status)) ;
 	setStatus(status_id, msg) ;
 
 	sendKeepAlive() ;
@@ -567,7 +568,10 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		} else if (cmd == "ContactStatusChange2" ) { 
 			parseContactStatusChange(buffer) ;
 			return ;
-		} else if ( cmd == "TextMessage" ) { 
+		} else if ( cmd == "ContactAddRequest" ){ 
+			parseContactAddRequest(buffer) ;
+			return ;
+		}else if ( cmd == "TextMessage" ) { 
 			parseTextMessage(buffer) ;
 			return;
 		}
@@ -957,7 +961,87 @@ void RediffBolConn::parseNewMailsResponse(MessageBuffer &buffer) {
 }
 
 string RediffBolConn::fixEmail(string original) { 
-	if ( find(original.begin(), original.end(), '/') == original.end() ) 
+	if ( find(original.begin(), original.end(), '@') == original.end() ) 
 		return original + "@rediffmail.com"  ;
 	else return original ;
+}
+
+void RediffBolConn::parseContactAddRequest(MessageBuffer &buffer) {
+	int size = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(size) ;
+	string to = buffer.readString() ;
+	string reqId = buffer.readString() ;
+	string from = buffer.readString() ;
+	string from2 = buffer.readString() ;
+	
+	
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", "Received an AddRequest %s %s %s\n", 
+		     to.c_str(), from.c_str(), from2.c_str()) ;
+
+	
+}
+
+
+void RediffBolConn::sendDelContactRequest(string idToDel, string group) { 
+	idToDel = fixEmail(idToDel) ;
+	int size = 28 + strlen(CSRequestHeader) + strlen(CSCmdDelContact) 
+		+ group.length() + idToDel.length() ; 
+
+	ostringstream out ; 
+	out<<intToDWord(size-4) ;
+	out<<intToDWord(3) ;
+	out<<intToDWord(strlen(CSRequestHeader)) ;
+	out<<CSRequestHeader ; 
+
+	out<<intToDWord(strlen(CSCmdDelContact)) ;
+	out<<CSCmdDelContact ; 
+	
+	size = 8 + group.length() + idToDel.length() ;
+	out<<intToDWord(size) ;
+
+	out<<intToDWord(group.length()) ;
+	out<<group ;
+
+	out<<intToDWord(idToDel.length());
+	out<<idToDel ; 
+
+	hex_dump(out.str(), "delete request") ;
+	connection->write(out.str()) ;
+}
+
+void RediffBolConn::sendAddContactRequest( 
+					  std::string remoteid, 
+					  std::string group) { 
+	string localid = fixEmail(SAFE(account->username) );
+	remoteid = fixEmail(remoteid) ;
+
+	int size = 36 + strlen(CSRequestHeader) + strlen(CSCmdAddContact)
+		+ localid.length() + remoteid.length() + group.length() ;
+
+	ostringstream out;
+	out<<intToDWord(size-4) ;
+	out<<intToDWord(3) ;
+
+	out<<intToDWord(strlen(CSRequestHeader)) ; 
+	out<<CSRequestHeader ; 
+
+	out<<intToDWord(strlen(CSCmdAddContact)) ;
+	out<<CSCmdAddContact ; 
+
+	size = 16  +localid.length() + remoteid.length() + group.length() ; 
+	out<<intToDWord(size) ;
+	out<<intToDWord(localid.length()) ; 
+	out<<localid; 
+	
+	out<<intToDWord(group.length()) ;
+	out<<group ;
+
+	out<<intToDWord(remoteid.length()) ;
+	out<<remoteid; 
+
+	out<<intToDWord(0) ;
+	
+	hex_dump(out.str(), "AddRequest") ;
+	connection->write(out.str()) ;
+	
 }

@@ -86,6 +86,7 @@ namespace rbol {
 
 		std::map<std::string, std::string> nickname; 
 		std::map<std::string, std::string> status_text ;
+		std::map<std::string, std::string> group; 
 
 	public: 
 		PurpleAccount *account ;
@@ -125,7 +126,11 @@ namespace rbol {
 		void parseGkResponse(MessageBuffer &buffer) ;
 		void parseCSResponse(MessageBuffer &buffer) ;
 		void parseNewMailsResponse(MessageBuffer &buffer) ;
+		void parseContactAddRequest(MessageBuffer &buffer );
+		void sendDelContactRequest(std::string, std::string) ;
 		void sendGetAddRequest() ;
+		void sendAddContactRequest(std::string remoteid, 
+					   std::string group) ;
 		void setStatus(std::string status, std::string message) ;
 		void startLogin() ;
 		std::string fixEmail(std::string a) ;

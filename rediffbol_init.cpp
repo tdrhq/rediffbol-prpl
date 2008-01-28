@@ -43,6 +43,8 @@
 #include "xmlnode.h"
 #include <ctype.h>
 
+#define SAFE(a) (a?a:"")
+
 //#include <libxml/xmlreader.h>
 #include "rediffbol.h"
 
@@ -308,7 +310,10 @@ static void rediffbol_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 				PurpleGroup *group)
 {
 
-	
+	RediffBolConn *conn = (RediffBolConn*) gc->proto_data ; 
+
+	conn->sendAddContactRequest( SAFE(buddy->name), 
+				    SAFE(group->name) ) ;
 }
 
 static void rediffbol_add_buddies(PurpleConnection *gc, GList *buddies,
@@ -319,7 +324,11 @@ static void rediffbol_add_buddies(PurpleConnection *gc, GList *buddies,
 static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 				   PurpleGroup *group)
 {
-	
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", 
+		     "Deleteing %s under %s\n", buddy->name,
+		     group->name) ;
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ; 
+	conn->sendDelContactRequest(SAFE(buddy->name), SAFE(group->name)) ;
 }
 
 static void rediffbol_remove_buddies(PurpleConnection *gc, GList *buddies,
@@ -400,7 +409,7 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,              /* change_passwd */
 	rediffbol_add_buddy,                  /* add_buddy */
 	NULL,                /* add_buddies */
-	NULL,               /* remove_buddy */
+	rediffbol_remove_buddy,               /* remove_buddy */
 	NULL,             /* remove_buddies */
 	NULL,                 /* add_permit */
 	NULL,                   /* add_deny */
