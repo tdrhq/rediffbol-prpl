@@ -50,7 +50,7 @@ install: all
 	cp librediffbol.so $(LIB_INSTALL_DIR)
 
 librediffbol.so: $(SRC_FILES) $(HEADERS) 
-	$(CC) --debug -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS) $(CFLAGS)  $(SRC_FILES)  
+	$(CC) --debug -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS) $(CFLAGS)  $(SRC_FILES) -fPIC 
 
 clean:
 	rm -rf *.o *.c~ *.h~ *.so *.la .libs *.cpp~
