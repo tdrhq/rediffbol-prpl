@@ -966,17 +966,83 @@ string RediffBolConn::fixEmail(string original) {
 	else return original ;
 }
 
+struct AddRequest { 
+	string localid ;
+	string from ;
+	string from2 ; 
+	string reqId; 
+};
+
+void RediffBolConn::sendAcceptAddRequest(void * data) { 
+
+	AddRequest *_r = (AddRequest*) data ;
+	AddRequest &req = *_r ; 
+
+	string localid = SAFE(account->username) ;
+	string group = "Friends" ; 
+
+	int size = 38 + strlen(CSRequestHeader) + strlen(CSCmdAcceptAdd2) +
+		localid.length() + req.reqId.length() + group.length()
+		+req.from.length() ;
+	
+	ostringstream out ; 
+	out<<intToDWord(size-4);
+	out<<intToDWord(3) ;
+	out<<intToDWord(strlen(CSRequestHeader)) ;
+	out<<CSRequestHeader ; 
+
+	out<<intToDWord(strlen(CSCmdAcceptAdd2)) ;
+	out<<CSCmdAcceptAdd2 ; 
+
+	size = 18 + localid.length() + req.reqId.length()  + group.length() 
+		+ req.from.length() ;
+
+	out<<intToDWord(size) ;
+	
+	out<<intToDWord(localid.length()) ;
+	out<<localid ;
+
+	out<<intToDWord(req.reqId.length()) ;
+	out<<req.reqId ; 
+
+	out<<intToDWord(group.length()) ;
+	out<<group; 
+
+	out<<intToDWord(req.from.length()) ;
+	out<<req.from ;
+
+	out<<intToDWord(1) ;
+	out<<intToDWord(1) ; 
+
+	connection->write(out.str()) ;
+}
+
+
 void RediffBolConn::parseContactAddRequest(MessageBuffer &buffer) {
 	int size = buffer.readInt() ;
 	buffer = buffer.readMessageBuffer(size) ;
-	string to = buffer.readString() ;
-	string reqId = buffer.readString() ;
-	string from = buffer.readString() ;
-	string from2 = buffer.readString() ;
+	AddRequest *ar = new AddRequest ; 
+	ar->localid = buffer.readString() ;
+	ar->reqId = buffer.readString() ;
+	ar->from = buffer.readString() ;
+	ar->from2 = buffer.readString() ;
 	
 	
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "Received an AddRequest %s %s %s\n", 
-		     to.c_str(), from.c_str(), from2.c_str()) ;
+		     ar->localid.c_str(), ar->from.c_str(), ar->from2.c_str()) ;
+
+
+
+	purple_account_request_authorization(account, 
+					     ar->from.c_str(), 
+					     ar->localid.c_str(), 
+					     ar->from2.c_str(),
+					     NULL,
+					     false, 
+					     NULL, NULL, 
+					     /* contact_add_request_authorize_cb,
+						contact_add_request_deny_cb,*/
+					     ar) ;
 
 	
 }

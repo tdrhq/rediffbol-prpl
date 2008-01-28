@@ -137,6 +137,7 @@ namespace rbol {
 		std::string getBuddyNickname(std::string buddyname) ; 
 		std::string getBuddyStatusMessage(std::string buddyname) ;
 		virtual void closeCallback() ;
+		void sendAcceptAddRequest(void *);
 	};
 	
 }
