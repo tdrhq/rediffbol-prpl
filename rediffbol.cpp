@@ -874,7 +874,8 @@ void RediffBolConn::setStatus(string status, string message) {
 		code = 4 ;
 	else return ; 
 
-	int size = 28 + strlen(CSRequestHeader) + strlen(CSCmdSetOnlineStatus) ;
+	int size = 28 + strlen(CSRequestHeader) + strlen(CSCmdSetOnlineStatus) 
+		+ message.length() ;
 	
 	ostringstream out ; 
 	out << intToDWord(size-4) ;
@@ -891,6 +892,7 @@ void RediffBolConn::setStatus(string status, string message) {
 	out<<intToDWord(message.length()) ;
 	out<<message ;
 
+	hex_dump(out.str(), "status change request") ;
 	connection->write(out.str()) ;
 	
 }
