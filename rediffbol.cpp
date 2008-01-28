@@ -558,10 +558,11 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 
 
 		if ( cmd ==  "Contacts") { 
-			 parseCSContacts(buffer); 
-			 return ; 
+			parseCSContacts(buffer); 
+			return ; 
 		} else if ( cmd ==  "NewMailCount") { 
-			/* resp = parseNewMailCount */
+			parseNewMailsResponse(buffer);
+			return ;
 		} else if ( cmd == "ContactStatusChange" ) { 
 			/* ignore? */
 		} else if (cmd == "ContactStatusChange2" ) { 
@@ -940,4 +941,18 @@ string RediffBolConn::getBuddyNickname(std::string buddyname) {
 }
 std::string RediffBolConn::getBuddyStatusMessage(std::string buddyname) { 
 	return status_text[buddyname] ;
+}
+
+void RediffBolConn::parseNewMailsResponse(MessageBuffer &buffer) { 
+	int payloadsize = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(payloadsize) ;
+	
+	string str = buffer.readString() ;
+	int num = atoi(str.c_str()) ;
+
+	const char* to = purple_account_get_username(account) ;
+	static const char *url = "http://www.rediffmail.com" ;
+	purple_notify_emails(account->gc, num, FALSE, NULL, NULL, &to, 
+			     &url, /* replace with rediffmail URL sometime */
+			     NULL, NULL) ;
 }

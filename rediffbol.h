@@ -124,6 +124,7 @@ namespace rbol {
 		void readCallback(MessageBuffer &buffer) ;
 		void parseGkResponse(MessageBuffer &buffer) ;
 		void parseCSResponse(MessageBuffer &buffer) ;
+		void parseNewMailsResponse(MessageBuffer &buffer) ;
 		void sendGetAddRequest() ;
 		void setStatus(std::string status, std::string message) ;
 		void startLogin() ;
