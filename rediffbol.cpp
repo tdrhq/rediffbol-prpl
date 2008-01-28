@@ -1,7 +1,6 @@
 
 #include "rediffbol.h"
 #include <typeinfo>
-#include "GkGetLoginServersResponse.h"
 #include "request.h" 
 #include "sstream" 
 #include <vector>
