@@ -53,4 +53,4 @@ librediffbol.so: $(SRC_FILES) $(HEADERS)
 	$(CC) --debug -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS) $(CFLAGS)  $(SRC_FILES)  
 
 clean:
-	rm -rf *.o *.c~ *.h~ *.so *.la .libs
+	rm -rf *.o *.c~ *.h~ *.so *.la .libs *.cpp~
