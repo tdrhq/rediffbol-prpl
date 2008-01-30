@@ -372,6 +372,24 @@ static char *rediffbol_status_text(PurpleBuddy *b) {
 	else return NULL ;
 }
 
+static unsigned int rediffbol_send_typing(PurpleConnection *gc, 
+					  const char*name, 
+					  PurpleTypingState typing) {
+
+
+	purple_debug_info("rbol", "%s %d\n", gc->account->username,
+                    int(typing));
+
+	RediffBolConn * conn = (RediffBolConn*) gc->proto_data ; 
+
+	if ( typing == PURPLE_TYPING or typing == PURPLE_TYPED ) {
+		conn->sendTypingNotification(SAFE(name)); 
+	} else { 
+		purple_debug_info("rbol", "I can't handle this "
+				  "typing notification\n") ;
+	}
+
+}
 /*
  * prpl stuff. see prpl.h for more information.
  */
@@ -402,7 +420,7 @@ static PurplePluginProtocolInfo prpl_info =
 	rediffbol_close,                      /* close */
 	rediffbol_send_im,                    /* send_im */
 	NULL,                   /* set_info */
-	NULL,                /* send_typing */
+	rediffbol_send_typing,                /* send_typing */
 	NULL,                   /* get_info */
 	rediffbol_set_status,                 /* set_status */
 	NULL,                   /* set_idle */

@@ -29,6 +29,7 @@ namespace rbol {
 	static const char* CSCmdAddContact             = "AddContact2" ;
 	static const char* CSCmdCheckUserType          = "CheckUserType" ;
 	static const char* CSCmdChatRoomMessage        = "ChatRoomMessage" ;
+	static const char* CSCmdTypingNotify           = "TypingNotify" ;
 
 }
 #endif

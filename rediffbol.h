@@ -88,6 +88,7 @@ namespace rbol {
 		std::map<std::string, std::string> status_text ;
 		std::map<std::string, std::string> group; 
 
+		
 	public: 
 		PurpleAccount *account ;
 		PurpleAsyncConn *connection ; 
@@ -150,6 +151,9 @@ namespace rbol {
 		void parseOfflineAddContactResponse(MessageBuffer &buffer) ;
 		void parseGetContactIdResponse(MessageBuffer &buffer);
 		void parseMessageFromMobileUser(MessageBuffer &buffer);
+		
+		void sendTypingNotification(std::string user) ;
+		void parseTypingNoficiationResponse(MessageBuffer &buffer);
 
 	};
 	

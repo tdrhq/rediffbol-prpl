@@ -583,6 +583,9 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		} else if ( cmd == "MessageFromMobileUser" ) {
 			parseMessageFromMobileUser(buffer);
 			return ;
+		} else if ( cmd == "TypingNotify" ) { 
+			parseTypingNoficiationResponse(buffer);
+			return ;
 		}
 	     
 		int len = buffer.readInt() ;
@@ -618,7 +621,7 @@ void RediffBolConn::setStateNetworkError(int  reason,
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , msg.c_str()) ;
 	softDestroy() ;
 	purple_connection_error_reason(account->gc, 
-		    (PurpleConnectionError)reason, msg.c_str()) ;
+	      (PurpleConnectionError)reason, (msg+"\n").c_str()) ;
 
 
 
@@ -729,6 +732,9 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 		int msgtype = buffer.readInt() ;
 		int timestamp = buffer.readInt() ;
 
+		purple_debug_info("rbol", "Got offline message time as %d",
+				  timestamp) ;
+		
 		if ( msgtype == 0 ) { 
 			string msg = msgbuf.readStringn(msgbuf.getLength()) ;
 
@@ -766,7 +772,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 
 			serv_got_im(purple_account_get_connection(account),
 				    sender.c_str(), final_message.c_str() ,
-				    PurpleMessageFlags(0), time(NULL) );
+				    PurpleMessageFlags(0), timestamp );
 				  
 		} /* else */ 
 
@@ -1222,4 +1228,44 @@ void RediffBolConn::parseMessageFromMobileUser(MessageBuffer &buffer) {
 		    from.c_str() ,message.c_str(), 
 		    (PurpleMessageFlags) 0, time(NULL) ) ;
 	
+}
+
+void RediffBolConn::sendTypingNotification(string to) { 
+	string name = fixEmail(account->username);
+	int size = 28 + strlen(CSPeerRequestHeader) + 
+		strlen(CSCmdTypingNotify) + name.length() 
+		+ to.length() ;
+	
+	ostringstream out ; 
+	out<<intToDWord(size-4) ;
+	out<<intToDWord(3) ;
+
+	out<<intToDWord(strlen(CSPeerRequestHeader)) ;
+	out<<CSPeerRequestHeader; 
+
+	out<<intToDWord(strlen(CSCmdTypingNotify)) ;
+	out<<CSCmdTypingNotify ;
+
+	out<<intToDWord(8+name.length()+to.length()) ;
+	out<<intToDWord(name.length()) ;
+	out<<name;
+	out<<intToDWord(to.length()) ;
+	out<<to; 
+
+	assert(out.str().length() == size ) ;
+	hex_dump(out.str(), "typing notification request") ;
+
+	connection->write(out.str());
+		
+}
+void RediffBolConn::parseTypingNoficiationResponse(MessageBuffer &buffer) {
+	int size = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(size) ;
+	string from = buffer.readString() ;
+	string to = buffer.readString() ;
+
+	serv_got_typing(account->gc, 
+			from.c_str(), 
+			60, 
+			PURPLE_TYPING) ;
 }
