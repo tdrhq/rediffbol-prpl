@@ -75,7 +75,6 @@ namespace rbol {
 		guint keep_alive_timer_handle ; 
 		int connection_state ; 
 
-		bool isInvalid() ;
 		void setInvalid() ; 
 
 
@@ -84,10 +83,12 @@ namespace rbol {
 		std::map<std::string, std::string> nickname; 
 		std::map<std::string, std::string> status_text ;
 		std::map<std::string, std::string> group; 
-
+		std::set<std::string> groups; 
 		std::string _parseChatMessage(MessageBuffer &buffer) ;
 		
 	public: 
+		bool isInvalid() ;
+
 		PurpleAccount *account ;
 		PurpleAsyncConn *connection ; 
 		std::string userAgent ;
@@ -120,9 +121,13 @@ namespace rbol {
 		void sendGetAddRequest() ;
 		void sendAddContactRequest(std::string remoteid, 
 					   std::string group) ;
+		void sendChangeBuddyGroupRequest(std::string buddy, 
+						 std::string from_group, 
+						 std::string to_group) ;
+
 		void setStatus(std::string status, std::string message) ;
 		void startLogin() ;
-		std::string fixEmail(std::string a) ;
+		static std::string fixEmail(std::string a) ;
 		std::string getBuddyNickname(std::string buddyname) ; 
 		std::string getBuddyStatusMessage(std::string buddyname) ;
 		virtual void closeCallback() ;
@@ -141,7 +146,12 @@ namespace rbol {
 		
 		void sendTypingNotification(std::string user) ;
 		void parseTypingNoficiationResponse(MessageBuffer &buffer);
+		void sendAddRemoveGroupRequest(std::string groupname, 
+					       bool Remove = false) ;
 
+		void loadAvatar(std::string username) ; 
+		void _loadAvatarCompleted(std::string name,
+					  std::string data) ;
 	};
 	
 }

@@ -213,7 +213,12 @@ static void conn_write_cb( gpointer data, gint source,
 #include <iostream>
 void
 PurpleAsyncConn::read_cb() { 
-	cerr<<"In here\n";
+
+	if ( isInvalid() ) { 
+		purple_debug_warning("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
+		return ;
+	}
+
 	char buf[1024] ;
 	int len = read(fd, buf, sizeof(buf)) ;
 	if( len < 0 ) {

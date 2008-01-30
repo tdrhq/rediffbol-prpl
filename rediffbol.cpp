@@ -415,6 +415,8 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 
 		int groupentries = buffer.readInt() ;
 
+		this->groups.insert(groupname1) ;
+
 		purple_debug(PURPLE_DEBUG_INFO , "rbol", "Group %s %s %d\n" ,
 			     groupname1.c_str(), groupname2.c_str(),
 			     groupentries) ;
@@ -458,6 +460,9 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	
 	sendOfflineMessagesRequest() ;
 	sendGetAddRequest() ;
+
+	for(int i = 0 ; i < roster.size(); i ++) 
+		loadAvatar(roster[i]) ;
 
 	keep_alive_timer_handle = purple_timeout_add_seconds(30, keep_alive_timer, this) ;
 }
@@ -1341,4 +1346,82 @@ void RediffBolConn::parseTypingNoficiationResponse(MessageBuffer &buffer) {
 			from.c_str(), 
 			60, 
 			PURPLE_TYPING) ;
+}
+
+void RediffBolConn::sendChangeBuddyGroupRequest(std::string buddy, 
+				 std::string from_group, 
+						std::string to_group) {
+
+	if ( groups.count(to_group) == 0 ) { 
+		sendAddRemoveGroupRequest(to_group) ;
+	}
+
+	string username = fixEmail(SAFE(account->username)) ;
+	int size = 36 + strlen(CSRequestHeader) + 
+		strlen(CSCmdMoveContact) + 
+		username.length() + 
+		buddy.length() + 
+		from_group.length() + 
+		to_group.length() ;
+
+	ostringstream out ; 
+	out<<intToDWord(size-4) ;
+	out<<intToDWord(3) ;
+	out<<intToDWord(strlen(CSRequestHeader)) ;
+	out<<CSRequestHeader ; 
+
+	out<<intToDWord(strlen(CSCmdMoveContact)) ;
+	out<<CSCmdMoveContact ;
+
+	size = 16 + username.length() + buddy.length() + 
+		from_group.length() + to_group.length() ; 
+
+	out<<intToDWord(size) ;
+	out<<intToDWord(username.length()) ;
+	out<<username ; 
+
+	out<<intToDWord(buddy.length()) ;
+	out<<buddy ; 
+
+	out<<intToDWord(from_group.length()) ;
+	out<<from_group ; 
+
+	out<<intToDWord(to_group.length()) ;
+	out<<to_group ; 
+
+		
+	hex_dump(out.str(), "move buddy request") ;
+	connection->write(out.str()) ;
+}
+
+void RediffBolConn::sendAddRemoveGroupRequest(string groupname, bool Remove) { 
+	string cmd = CSCmdAddGroup ; 
+	if ( Remove ) cmd = CSCmdRemoveGroup ;
+
+	string username = fixEmail(SAFE(account->username)) ;
+
+	int size = 28 + strlen(CSRequestHeader) 
+		+ cmd.length() + groupname.length() + username.length() ;
+
+	ostringstream out ; 
+	out<<intToDWord(size-4) ;
+	out<<intToDWord(3) ;
+	out<<intToDWord(strlen(CSRequestHeader)) ;
+	out<<CSRequestHeader ; 
+
+	out<<intToDWord(cmd.length()) ;
+	out<<cmd ; 
+
+
+	size = 8 + username.length() + groupname.length() ;
+	out<<intToDWord(size) ; 
+
+	out<<intToDWord(username.length()) ;
+	out<<username ; 
+	
+	out<<intToDWord(groupname.length()) ;
+	out<<groupname ; 
+	
+	hex_dump(out.str(), "Group Add/Remove request") ;
+	connection->write(out.str()) ;
 }

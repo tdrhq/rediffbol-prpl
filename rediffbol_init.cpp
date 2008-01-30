@@ -51,98 +51,6 @@
 using namespace rbol ;
 #define REDIFFBOLPRPL_ID "prpl-rediffbol"
 
-void parse_url_param(gchar *data, gchar* param, GString *tmp) { 
-	char *end=NULL, *beg =data ;
-	while ( beg ) { 
-		end = strchr(beg, '&') ;
-		if ( !end ) end = beg + strlen(beg) ;
-		
-		gchar * mid = g_strstr_len( beg, end-beg, "=") ;
-		if ( ! mid ) continue ; 
-		if ( strncmp ( beg, param, strlen(param) ) == 0 ){
-			g_string_overwrite_len(tmp, 0, mid+1, (end-mid-1) );
-			return ; 
-		}
-		if ( ! *end ) return ;
-		beg = end + 1 ; 
-	}
-}
-
-
-
-typedef struct {
-	GcFunc fn;
-	PurpleConnection *from;
-	gpointer userdata;
-} GcFuncData;
-
-
-
-/*
- *
- * stores offline messages that haven't been delivered yet. maps username
- *
- * (char *) to GList * of GOfflineMessages. initialized in rediffbol_init.
- */
-GHashTable* goffline_messages = NULL;
-
-typedef struct {
-	char *from;
-	char *message;
-	time_t mtime;
-	PurpleMessageFlags flags;
-} GOfflineMessage;
-
-/*
- * helpers
- */
-static PurpleConnection *get_rediffbol_gc(const char *username) {
-	PurpleAccount *acct = purple_accounts_find(username, REDIFFBOLPRPL_ID);
-	if (acct && purple_account_is_connected(acct))
-		return acct->gc;
-	else
-		return NULL;
-}
-
-static void call_if_rediffbol(gpointer data, gpointer userdata) {
-	PurpleConnection *gc = (PurpleConnection *)(data);
-	GcFuncData *gcfdata = (GcFuncData *)userdata;
-	
-	if (!strcmp(gc->account->protocol_id, REDIFFBOLPRPL_ID))
-		gcfdata->fn(gcfdata->from, gc, gcfdata->userdata);
-}
-
-static void foreach_rediffbol_gc(GcFunc fn, PurpleConnection *from,
-				 gpointer userdata) {
-	GcFuncData gcfdata = { fn, from, userdata };
-	g_list_foreach(purple_connections_get_all(), call_if_rediffbol,
-		       &gcfdata);
-}
-
-
-typedef void(*ChatFunc)(PurpleConvChat *from, PurpleConvChat *to,
-                        int id, const char *room, gpointer userdata);
-
-typedef struct {
-	ChatFunc fn;
-	PurpleConvChat *from_chat;
-	gpointer userdata;
-} ChatFuncData;
-
-static void call_chat_func(gpointer data, gpointer userdata) {
-}
-
-static void foreach_gc_in_chat(ChatFunc fn, PurpleConnection *from,
-                               int id, gpointer userdata) {
-	PurpleConversation *conv = purple_find_chat(from, id);
-	ChatFuncData cfdata = { fn,
-				purple_conversation_get_chat_data(conv),
-				userdata };
-	
-	g_list_foreach(purple_connections_get_all(), call_chat_func,
-		       &cfdata);
-}
-
 
 
 /* 
@@ -155,7 +63,7 @@ static void rediffbol_input_user_info(PurplePluginAction *action)
 	purple_debug_info("rediffbol", "showing 'Set User Info' dialog for %s\n",
 			  acct->username);
 	
-  purple_account_request_change_user_info(acct);
+	purple_account_request_change_user_info(acct);
 }
 
 /* this is set to the actions member of the PurplePluginInfo struct at the
@@ -201,19 +109,19 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
  
         
         type = purple_status_type_new(PURPLE_STATUS_AVAILABLE, RB_STATUS_ONLINE,
-                                      RB_STATUS_ONLINE, TRUE);
+                                      NULL, TRUE);
         purple_status_type_add_attr(type, "message", ("Online"),
                                     purple_value_new(PURPLE_TYPE_STRING));
         types = g_list_append(types, type);
         
         type = purple_status_type_new(PURPLE_STATUS_AWAY, RB_STATUS_AWAY,
-                                      RB_STATUS_AWAY, TRUE);
+                                      NULL, TRUE);
         purple_status_type_add_attr(type, "message", ("Away"),
                                     purple_value_new(PURPLE_TYPE_STRING));
         types = g_list_append(types, type);
         
         type = purple_status_type_new(PURPLE_STATUS_OFFLINE, RB_STATUS_OFFLINE,
-                                      RB_STATUS_OFFLINE, TRUE);
+                                      NULL, TRUE);
         purple_status_type_add_attr(type, "message", ("Offline"),
                                     purple_value_new(PURPLE_TYPE_STRING));
         types = g_list_append(types, type);
@@ -231,8 +139,6 @@ static void rediffbol_login(PurpleAccount *acct)
 					  2);  /* total number of steps */
 	
 
-	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "here here here\n");
-
 	if ( acct->gc->proto_data ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "Closing an exisiting connection before "
@@ -243,9 +149,6 @@ static void rediffbol_login(PurpleAccount *acct)
 
 	RediffBolConn* conn = new RediffBolConn (acct) ;
 	conn->startLogin() ;
-	
-	using std::string ;
-
 }
 
 static void rediffbol_close(PurpleConnection *gc)
@@ -255,7 +158,7 @@ static void rediffbol_close(PurpleConnection *gc)
 		delete conn ;
 		gc->proto_data = NULL ;
 	}
-	else purple_debug(PURPLE_DEBUG_WARNING, "rbol", 
+	else purple_debug_error("rbol", 
 			  "oh! how did this get destroyed already?") ;
 }
 
@@ -283,6 +186,8 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 		stype) ;
 	
 	RediffBolConn* rb = (RediffBolConn*) acct->gc->proto_data ;
+	if ( ! rb ) return ;
+
 	if ( primitive == PURPLE_STATUS_AVAILABLE or
 	     primitive == PURPLE_STATUS_MOBILE ) { 
 		rb->setStatus("Online", msg) ;
@@ -360,11 +265,11 @@ static void rediffbol_alias_buddy(PurpleConnection *gc, const char *who,
 
 
 /* normalize a username (e.g. remove whitespace, add default domain, etc.)
- * for rediffbol, this is a noop.
  */
 const char *rediffbol_normalize(const PurpleAccount *acct,
                                       const char *input) {
-  return NULL;
+	std::string ret = RediffBolConn::fixEmail(SAFE(input)) ;
+	return strdup(ret.c_str()) ;
 }
 
 static void rediffbol_set_buddy_icon(PurpleConnection *gc,
@@ -400,6 +305,28 @@ static unsigned int rediffbol_send_typing(PurpleConnection *gc,
 	}
 
 }
+
+static void rediffbol_group_buddy(PurpleConnection *gc, 
+				  const char* who, 
+				  const char* old_group, 
+				  const char* new_group ) { 
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ;
+	conn->sendChangeBuddyGroupRequest(SAFE(who), 
+					  SAFE(old_group),
+					  SAFE(new_group)) ;
+}
+
+static void rediffbol_remove_group(PurpleConnection *gc, 
+				   PurpleGroup* group) { 
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ;
+	conn->sendAddRemoveGroupRequest(SAFE(group->name), true) ;
+}
+
+static gboolean rediffbol_offline_message(const PurpleBuddy * buddy) { 
+	/* all buddies support offline messages */
+	return true ;
+}
+
 /*
  * prpl stuff. see prpl.h for more information.
  */
@@ -456,13 +383,13 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,                /* get_cb_info */
 	NULL,                                /* get_cb_away */
 	rediffbol_alias_buddy,                /* alias_buddy */
-	NULL,                /* group_buddy */
+	rediffbol_group_buddy,                /* group_buddy */
 	NULL,               /* rename_group */
 	NULL,                                /* buddy_free */
 	NULL,               /* convo_closed */
 	rediffbol_normalize,                  /* normalize */
 	rediffbol_set_buddy_icon,             /* set_buddy_icon */
-	NULL,               /* remove_group */
+	rediffbol_remove_group,               /* remove_group */
 	NULL,                                /* get_cb_real_name */
 	NULL,             /* set_chat_topic */
 	NULL,                                /* find_blist_chat */
@@ -472,7 +399,7 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,           /* can_receive_file */
 	NULL,                                /* send_file */
 	NULL,                                /* new_xfer */
-	NULL,            /* offline_message */
+	rediffbol_offline_message,            /* offline_message */
 	NULL,                                /* whiteboard_prpl_ops */
 	NULL,                                /* send_raw */
 	NULL,                                /* roomlist_room_serialize */
