@@ -534,11 +534,14 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		} else if (subtype == 1 or subtype == 0) { 
 			parseOfflineMessages(buffer) ;
 			return ;
+		} else if ( subtype == 2 ) {
+			parseOfflineAddContactResponse(buffer); 
+			return ;
 		} else if ( subtype == 7 ) { 
 			/* chat room response */
 		} else if ( subtype == 62 ) { 
 			/* join chat room response */
-		}
+		} 
 
 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
@@ -1092,6 +1095,35 @@ void RediffBolConn::parseContactAddRequest(MessageBuffer &buffer) {
 	
 }
 
+void RediffBolConn::parseOfflineAddContactResponse(MessageBuffer &buffer) { 
+	buffer = buffer.readMessageBuffer(buffer.readInt()) ;
+
+	int numentries = buffer.readInt() ; 
+	if ( numentries == 0 ) return ; 
+
+	for(int i = 0 ; i < numentries; i ++) { 
+		string reqId = buffer.readString() ;
+		string from = buffer.readString() ;
+		int unknown = buffer.readInt() ;
+		string addreqto = buffer.readString() ;
+
+		AddRequest* ar = new AddRequest ; 
+		ar->conn = this ; 
+		ar->reqId = reqId ; 
+		ar->from = from; 
+		ar->localid = addreqto ; 
+
+		purple_account_request_authorization(account,
+						     ar->from.c_str(), 
+						     ar->localid.c_str(),
+						     ar->from2.c_str(),
+						     NULL,
+						     false,
+						     contact_add_request_authorize_cb,
+						     contact_add_request_deny_cb,
+						     ar);
+	}
+}
 
 void RediffBolConn::sendDelContactRequest(string idToDel, string group) { 
 	idToDel = fixEmail(idToDel) ;
