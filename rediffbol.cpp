@@ -580,6 +580,9 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		}else if ( cmd == "TextMessage" ) { 
 			parseTextMessage(buffer) ;
 			return;
+		} else if ( cmd == "MessageFromMobileUser" ) {
+			parseMessageFromMobileUser(buffer);
+			return ;
 		}
 	     
 		int len = buffer.readInt() ;
@@ -1206,4 +1209,17 @@ void RediffBolConn::parseGetContactIdResponse(MessageBuffer &buffer){
 	string contactid = buffer.readString() ;
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
 		     "Contact = %s", contactid.c_str()) ;
+}
+
+void RediffBolConn::parseMessageFromMobileUser(MessageBuffer &buffer) {
+	int size = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(size) ;
+	string to = buffer.readString() ;
+	string from = buffer.readString() ;
+	string message = buffer.readString() ;
+
+	serv_got_im(purple_account_get_connection(account) ,
+		    from.c_str() ,message.c_str(), 
+		    (PurpleMessageFlags) 0, time(NULL) ) ;
+	
 }
