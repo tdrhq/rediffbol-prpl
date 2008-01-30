@@ -43,6 +43,7 @@ PurpleAsyncConn::~PurpleAsyncConn() {
 		purple_input_remove(rx_handler) ;
 		rx_handler = NULL ;
 	}
+	handler = NULL ;
 	close() ;
 }
 

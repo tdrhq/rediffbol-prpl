@@ -35,11 +35,11 @@ void rbol::hex_dump (const string a,const string message) {
 void RediffBolConn::softDestroy() { 
 	if ( isInvalid() ) return ;
 
-	if ( connection ) delete connection ;
 	if ( keep_alive_timer_handle ) {
 		purple_timeout_remove(keep_alive_timer_handle)  ;
 		keep_alive_timer_handle = 0 ; 
 	}
+	if ( connection ) delete connection ;
 
 	setInvalid() ;
 	

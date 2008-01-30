@@ -253,7 +253,10 @@ static void rediffbol_login(PurpleAccount *acct)
 static void rediffbol_close(PurpleConnection *gc)
 {
 	RediffBolConn *conn = (RediffBolConn*) gc->proto_data ; 
-	if ( conn) delete conn ;
+	if ( conn) { 
+		delete conn ;
+		gc->proto_data = NULL ;
+	}
 	else purple_debug(PURPLE_DEBUG_WARNING, "rbol", 
 			  "oh! how did this get destroyed already?") ;
 }
