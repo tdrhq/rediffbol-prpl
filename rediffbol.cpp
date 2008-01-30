@@ -8,6 +8,8 @@
 #include "encode.h"
 #include "util.h"
 #include <connection.h>
+#include "FontParser.h"
+
 
 
 using namespace std;
@@ -181,6 +183,7 @@ void RediffBolConn::gotConnected() {
 }
 
 void RediffBolConn::readCallback(MessageBuffer &buffer) try { 
+	assert(!isInvalid() );
 	while ( buffer.left() >= 4 ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "got a response\n") ;
@@ -291,6 +294,11 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 
 	if ( errorcode != 0 ) { 
 		char err[100];
+
+		if ( errorcode == 1 ) { 
+			setStateNetworkError(PURPLE_CONNECTION_ERROR_AUTHENTICATION_FAILED, "Authentication failed") ;
+			return ;
+		}
 		sprintf(err, "CS Login error %d\n", errorcode) ;
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR , err) ;
 		return ;
@@ -642,6 +650,10 @@ void RediffBolConn::sendMessage(string to, string message) {
 	assert(!isInvalid()) ;
 	string fonttype = "Dialog" ; /* confused :( */
 
+	char *tmp = purple_unescape_html(message.c_str()) ;
+	message = tmp ; 
+	g_free(tmp);
+
 	string sender = account->username ;
 	sender = fixEmail(sender);
 
@@ -799,22 +811,57 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 			string fontinfo = buffer.readStringn(13);
 			
 			int messagelen = buffer.readLEInt() ;
-			string message = escape_html_entities(
-				buffer.readStringn(messagelen) );
+			//string message = escape_html_entities(
+			//	buffer.readStringn(messagelen) );
 			
-			
+			string message = buffer.readStringn(messagelen) ;
+
+
+
 			
 			hex_dump(message, "message before ASCII encoding\n") ;
 			message = encode( message, "UTF-16BE", "UTF-8") ;
-
-			final_message += "<font name='"; 
+			font = encode(font, "UTF-16BE", "UTF-8") ;
+			message = escape_html_entities (message) ;
+			FontParser fp (font, fontinfo) ;
+			final_message += "<font face='"; 
 			final_message += font ; 
+			final_message += "' size='";
+
+			ostringstream fs ; 
+			fs << double(fp.getSize ())/8 ;
+
+			final_message += fs.str();
+			final_message += "' color='" ;
+			final_message += fp.getColor() ;
+			final_message += "' >"; 
+
+			if ( fp.isItalic()) final_message += "<em>" ;
+			if ( fp.isBold()) final_message += "<b>" ;
+
 			final_message += message ; 
+
+			if ( fp.isBold()) final_message += "</b>"; 
+			if ( fp.isItalic()) final_message += "</em>"; 
+
+			final_message += "</font>";
 
 		} else if ( len == 1 ) { 
 			int smileycode = buffer.readLEInt() ;
 			int smileylen = buffer.readLEInt() ;
 			string smiley = buffer.readStringn(smileylen) ;
+
+			purple_debug_info("rbol", "Got smiley %s %d\n",
+					  smiley.c_str(), smileycode) ;
+			const char* codes[] = { 
+				"0:-)", ">:-(", "(B)", ":s", ":`(",
+				">:|" , "(D)" , ":-$", "8-|","#:)",
+				":^)" , ":D"  , ":-(" , "^o)", ":((",
+				":-z", ":-)", ":-O", "\\:)" , ":p",
+				";-)"} ;
+			
+			if ( smileycode < sizeof(codes)/sizeof(codes[0])) 
+				final_message += codes[smileycode] ;
 		} else { 
 			purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
 				     "Unknown message type.. \n") ;

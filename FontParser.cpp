@@ -11,7 +11,8 @@ FontParser::FontParser(string fontname, string fontdata) {
 }
 
 int FontParser::getSize() { 
-	return (int)(0xff & data[1]) ;
+	int v =  (int)(0xff & data[1]) ;
+	return v ;
 }
 
 string FontParser::getColor()  { 
@@ -37,7 +38,8 @@ bool FontParser::isItalic()  {
 }
 
 bool FontParser::isBold() { 
-	return data[7] & 0xff; 
+	int bold = data[7] & 0xff; 
+	return (bold == 75) ;
 }
 
 bool FontParser::isStrikedOut() { 
