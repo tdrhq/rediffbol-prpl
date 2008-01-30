@@ -967,23 +967,49 @@ string RediffBolConn::fixEmail(string original) {
 }
 
 struct AddRequest { 
+	RediffBolConn* conn ;
 	string localid ;
 	string from ;
 	string from2 ; 
 	string reqId; 
 };
 
-void RediffBolConn::sendAcceptAddRequest(void * data) { 
+void RediffBolConn::sendDenyAddRequest(string localid, 
+				       string reqId, 
+				       string from, string from2, 
+				       string group) { 
+	int size = 24 + strlen(CSRequestHeader) 
+		+ strlen(CSCmdDelAddRequest) 
+		+ reqId.length() ;
 
-	AddRequest *_r = (AddRequest*) data ;
-	AddRequest &req = *_r ; 
+	ostringstream out ; 
+	out<<intToDWord(size-4) ;
+	out<<intToDWord(3) ;
+	out<<intToDWord(strlen(CSRequestHeader));
+	out<<CSRequestHeader ; 
 
-	string localid = SAFE(account->username) ;
-	string group = "Friends" ; 
+	out<<intToDWord(strlen(CSCmdDelAddRequest)) ;
+	out<<CSCmdDelAddRequest ;
 
+	out<<intToDWord(reqId.length()+4) ;
+	out<<intToDWord(reqId.length()) ;
+	out<<reqId ;
+
+	connection->write(out.str()) ;
+}
+void RediffBolConn::sendAcceptAddRequest(string localid, 
+					 string reqId, 
+					 string from, string from2,
+					 string group) { 
+
+	assert(!isInvalid());
 	int size = 38 + strlen(CSRequestHeader) + strlen(CSCmdAcceptAdd2) +
-		localid.length() + req.reqId.length() + group.length()
-		+req.from.length() ;
+		localid.length() + reqId.length() + group.length()
+		+from.length() ;
+	
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", "Accepting [%s] [%s] [%s] [%s] [%s]\n", 
+		     localid.c_str(), reqId.c_str(), from.c_str(),
+		     from2.c_str(), group.c_str()) ;
 	
 	ostringstream out ; 
 	out<<intToDWord(size-4);
@@ -994,29 +1020,48 @@ void RediffBolConn::sendAcceptAddRequest(void * data) {
 	out<<intToDWord(strlen(CSCmdAcceptAdd2)) ;
 	out<<CSCmdAcceptAdd2 ; 
 
-	size = 18 + localid.length() + req.reqId.length()  + group.length() 
-		+ req.from.length() ;
+	size = 18 + localid.length() + reqId.length()  + group.length() 
+		+ from.length() ;
 
 	out<<intToDWord(size) ;
 	
 	out<<intToDWord(localid.length()) ;
 	out<<localid ;
 
-	out<<intToDWord(req.reqId.length()) ;
-	out<<req.reqId ; 
+	out<<intToDWord(reqId.length()) ;
+	out<<reqId ; 
 
 	out<<intToDWord(group.length()) ;
 	out<<group; 
 
-	out<<intToDWord(req.from.length()) ;
-	out<<req.from ;
+	out<<intToDWord(from.length()) ;
+	out<<from ;
 
 	out<<intToDWord(1) ;
 	out<<intToDWord(1) ; 
 
+	hex_dump(out.str(), "Accepting Addrequest") ;
 	connection->write(out.str()) ;
 }
 
+
+static void contact_add_request_authorize_cb(void *data) {
+	AddRequest *ar = (AddRequest*) data ; 
+
+	ar->conn->sendAcceptAddRequest(ar->localid, ar->reqId, ar->from, 
+				       ar->from2, "Friends");
+	delete ar ; 
+}
+
+static void contact_add_request_deny_cb(void *data) { 
+	AddRequest* ar = ((AddRequest*) data) ; ;
+
+	ar->conn->sendDenyAddRequest(string(ar->localid), 
+				     string(ar->reqId), 
+				     string(ar->from),
+				     string(ar->from2), string("Friends")) ;
+	delete ar ;
+}
 
 void RediffBolConn::parseContactAddRequest(MessageBuffer &buffer) {
 	int size = buffer.readInt() ;
@@ -1026,7 +1071,7 @@ void RediffBolConn::parseContactAddRequest(MessageBuffer &buffer) {
 	ar->reqId = buffer.readString() ;
 	ar->from = buffer.readString() ;
 	ar->from2 = buffer.readString() ;
-	
+	ar->conn = this ; 
 	
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "Received an AddRequest %s %s %s\n", 
 		     ar->localid.c_str(), ar->from.c_str(), ar->from2.c_str()) ;
@@ -1039,9 +1084,9 @@ void RediffBolConn::parseContactAddRequest(MessageBuffer &buffer) {
 					     ar->from2.c_str(),
 					     NULL,
 					     false, 
-					     NULL, NULL, 
-					     /* contact_add_request_authorize_cb,
-						contact_add_request_deny_cb,*/
+
+					     contact_add_request_authorize_cb,
+					     contact_add_request_deny_cb,
 					     ar) ;
 
 	
@@ -1110,4 +1155,10 @@ void RediffBolConn::sendAddContactRequest(
 	hex_dump(out.str(), "AddRequest") ;
 	connection->write(out.str()) ;
 	
+}
+
+void RediffBolConn::readError() { 
+	assert(!isInvalid()) ; 
+	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
+			     "Failed reading through socket");
 }
