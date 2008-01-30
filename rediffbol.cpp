@@ -19,6 +19,13 @@ using namespace rbol ;
 
 #define SAFE(a) (a?a:"")
 
+static string escape_html_entities(string text) {
+	char *ret = g_markup_escape_text(text.data(), text.length()) ;
+	string _ret = SAFE(ret) ;
+	g_free(ret) ;
+	return _ret ;
+}
+
 void rbol::hex_dump (const string a,const string message) { 
 	if ( a.size() == 0 ) return ;
 	gchar* hex_dump = purple_str_binary_to_ascii
@@ -742,34 +749,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 				    sender.c_str(), msg.c_str(), 
 				    PurpleMessageFlags(0), time(NULL)) ;
 		} else {
-			string final_message ; 
-
-			
-			while ( !msgbuf.isEnd() ) { 
-				int len = msgbuf.readLEInt() ;
-				
-				if ( len == 0 ) { 
-					int fontstrlen = msgbuf.readLEInt() ; 
-					string  font = msgbuf.readStringn(fontstrlen) ;
-					string fontinfo = msgbuf.readStringn(13);
-					
-					int messagelen = msgbuf.readLEInt() ;
-					string message = msgbuf.readStringn(messagelen) ;
-					hex_dump(message, "message before ASCII encoding\n") ;
-					message = encode( message, "UTF-16BE", "UTF-8") ;
-					final_message += message ; 
-					
-				} else if ( len == 1 ) { 
-					int smileycode = msgbuf.readLEInt() ;
-					int smileylen = msgbuf.readLEInt() ;
-					string smiley = msgbuf.readStringn(smileylen) ;
-				} else { 
-					purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
-						     "Unknown message type.. \n") ;
-					continue ; 
-				}
-			}
-
+			string final_message = _parseChatMessage(msgbuf) ; 
 			serv_got_im(purple_account_get_connection(account),
 				    sender.c_str(), final_message.c_str() ,
 				    PurpleMessageFlags(0), timestamp );
@@ -806,17 +786,7 @@ PurpleAccount* RediffBolConn::getProxyAccount() {
 	return account ;
 }
 
-void RediffBolConn::parseTextMessage( MessageBuffer &buffer) { 
-	int payloadsize = buffer.readInt() ;
-	buffer = buffer.readMessageBuffer(payloadsize) ;
-	
-	string senderstr = buffer.readString() ;
-	string recipient  = buffer.readString() ;
-	
-	int subpayloadsize = buffer.readInt();
-
-	buffer = buffer.readMessageBuffer(subpayloadsize) ;
-	
+string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) { 
 	string final_message ; 
 
 
@@ -829,9 +799,16 @@ void RediffBolConn::parseTextMessage( MessageBuffer &buffer) {
 			string fontinfo = buffer.readStringn(13);
 			
 			int messagelen = buffer.readLEInt() ;
-			string message = buffer.readStringn(messagelen) ;
+			string message = escape_html_entities(
+				buffer.readStringn(messagelen) );
+			
+			
+			
 			hex_dump(message, "message before ASCII encoding\n") ;
 			message = encode( message, "UTF-16BE", "UTF-8") ;
+
+			final_message += "<font name='"; 
+			final_message += font ; 
 			final_message += message ; 
 
 		} else if ( len == 1 ) { 
@@ -844,6 +821,22 @@ void RediffBolConn::parseTextMessage( MessageBuffer &buffer) {
 			continue ; 
 		}
 	}
+	
+	return final_message ; 
+	
+}
+void RediffBolConn::parseTextMessage( MessageBuffer &buffer) { 
+	int payloadsize = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(payloadsize) ;
+	
+	string senderstr = buffer.readString() ;
+	string recipient  = buffer.readString() ;
+	
+	int subpayloadsize = buffer.readInt();
+
+	buffer = buffer.readMessageBuffer(subpayloadsize) ;
+	
+	string final_message = _parseChatMessage(buffer) ;
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol",
 		     "got message %s\n", final_message.c_str()) ;

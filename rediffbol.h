@@ -88,6 +88,7 @@ namespace rbol {
 		std::map<std::string, std::string> status_text ;
 		std::map<std::string, std::string> group; 
 
+		std::string _parseChatMessage(MessageBuffer &buffer) ;
 		
 	public: 
 		PurpleAccount *account ;
