@@ -541,7 +541,10 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 			/* chat room response */
 		} else if ( subtype == 62 ) { 
 			/* join chat room response */
-		} 
+		} else if ( subtype == 14 ) { 
+			parseGetContactIdResponse(buffer) ;
+			return ;
+		}
 
 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
@@ -1193,4 +1196,14 @@ void RediffBolConn::readError() {
 	assert(!isInvalid()) ; 
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 			     "Failed reading through socket");
+}
+
+void RediffBolConn::parseGetContactIdResponse(MessageBuffer &buffer){
+	/* I don't know what to do with this, since BP has not implemented it*/
+	int size = buffer.readInt() ;
+	buffer = buffer.readMessageBuffer(size) ;
+	
+	string contactid = buffer.readString() ;
+	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
+		     "Contact = %s", contactid.c_str()) ;
 }

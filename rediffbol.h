@@ -148,7 +148,7 @@ namespace rbol {
 					std::string from2,
 					  std::string group);
 		void parseOfflineAddContactResponse(MessageBuffer &buffer) ;
-	
+		void parseGetContactIdResponse(MessageBuffer &buffer);
 
 	};
 	
