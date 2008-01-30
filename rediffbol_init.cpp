@@ -315,6 +315,7 @@ static void rediffbol_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 
 	RediffBolConn *conn = (RediffBolConn*) gc->proto_data ; 
 
+	if ( !conn ) return ; 
 	conn->sendAddContactRequest( SAFE(buddy->name), 
 				    SAFE(group->name) ) ;
 }
@@ -331,6 +332,7 @@ static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 		     "Deleteing %s under %s\n", buddy->name,
 		     group->name) ;
 	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ; 
+	if ( !conn) return  ;
 	conn->sendDelContactRequest(SAFE(buddy->name), SAFE(group->name)) ;
 }
 
@@ -370,6 +372,8 @@ static void rediffbol_set_buddy_icon(PurpleConnection *gc,
 
 static char *rediffbol_status_text(PurpleBuddy *b) { 
 	RediffBolConn *rb = (RediffBolConn*) b->account->gc->proto_data ;
+	if ( ! rb) return NULL ;
+
 	std::string message = rb->getBuddyStatusMessage(b->name)  ;
 	if ( message != "" ) return g_strdup(message.c_str() ) ;
 	else return NULL ;
