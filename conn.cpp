@@ -11,6 +11,15 @@ using namespace std;
 
 #include <connection.h>
 
+std::set<PurpleAsyncConn*> PurpleAsyncConn::valid_PurpleAsyncConns; 
+
+bool PurpleAsyncConn::isInvalid() {
+	return valid_PurpleAsyncConns.count(this) == 0 ;
+}
+bool PurpleAsyncConn::setInvalid() {
+	return	valid_PurpleAsyncConns.erase(this);
+}
+
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond);
 
@@ -18,6 +27,7 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 				 string ip, gint32 port,
 				 int pm ) :awaiting("") 
 { 
+	valid_PurpleAsyncConns.insert(this) ;
 	handler = _handler ;
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm ;
@@ -29,29 +39,20 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
-	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
-		     "In here\n") ;
-	if ( txbuf ) {
-		purple_circ_buffer_destroy(txbuf) ;
-		txbuf = NULL; 
-	}
-	if ( tx_handler ) { 
-		purple_input_remove(tx_handler) ;
-		tx_handler = NULL ;
-	}
-	if ( rx_handler ) { 
-		purple_input_remove(rx_handler) ;
-		rx_handler = NULL ;
-	}
-	handler = NULL ;
 	close() ;
 }
 
 void 
 PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) { 
 
+	if ( isInvalid() ) { 
+		purple_debug_info("rbol", "oops, connection is no longer valid!\n");
+		return ;
+	}
+
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "got connected\n") ;
 	if ( source < 0 ) { 
+		close() ;
 		handler->connectionError(error) ;
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol", 
 			     error) ;
@@ -107,6 +108,23 @@ static void conn_got_connected(gpointer data, gint source,
  /* TODO: fix  but returns immediately */
 bool 
 PurpleAsyncConn::close() { 
+	setInvalid() ;
+	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
+		     "In here\n") ;
+	if ( txbuf ) {
+		purple_circ_buffer_destroy(txbuf) ;
+		txbuf = NULL; 
+	}
+	if ( tx_handler ) { 
+		purple_input_remove(tx_handler) ;
+		tx_handler = NULL ;
+	}
+	if ( rx_handler ) { 
+		purple_input_remove(rx_handler) ;
+		rx_handler = NULL ;
+	}
+	handler = NULL ;
+	
 	
 	if (fd > 0 ) {
 		::close(fd) ;
@@ -136,8 +154,10 @@ PurpleAsyncConn::write(const void* data,
 	if ( written < 0 && errno == EAGAIN ) 
 		written = 0 ; 
 	else if ( written <= 0 ) { 
-		
 		written = 0 ; 
+		close() ;
+		handler->readError() ;
+		return ;
 	}
 
 	if ( written < datalen ) { 
@@ -201,6 +221,7 @@ PurpleAsyncConn::read_cb() {
 			return ; /* safe */
 		
 		/* todo: register a connection error */
+		close();
 		handler->readError() ;
 		cerr<<"out here\n" ;
 		return ;

@@ -29,7 +29,7 @@
 #include "conn.h"
 #include <vector>
 #include "PurpleAsyncConnHandler.h"
-
+#include <set>
 typedef void (*GcFunc)(PurpleConnection *from,
                        PurpleConnection *to,
                        gpointer userdata);
@@ -38,14 +38,17 @@ namespace rbol {
 	static const char* CAP_DIR = "RBOL/1.2.5" ;
         static const char* CAP_HTTP_CONNECT = "RBOL/1.2.5+HTTP_CONNECT" ;
         static const char*  CAP_HTTP = "RBOL/1.2.5+HTTP" ;
-	static const char* DEFAULT_USERAGENT = "Rediff Bol8.0 build 315" ;
+//	static const char* DEFAULT_USERAGENT = "Rediff Bol8.0 build 315" ;
+	static const char* DEFAULT_USERAGENT = "libpurple:rediffbol-prpl"; 
 	extern void hex_dump (const std::string a,const std::string message) ;
 	
 	class PurpleAsyncConn ;
 
 	class RediffBolConn : public PurpleAsyncConnHandler { 
 	private:
-		
+
+		static std::set<RediffBolConn* > valid_connections ;
+
 		/* Response Parsers */
 
 		/* Login Responses */
@@ -72,15 +75,9 @@ namespace rbol {
 		guint keep_alive_timer_handle ; 
 		int connection_state ; 
 
-		bool _is_invalid ; 
-		
-		bool isInvalid() { 
-			return _is_invalid ; 
-		}
-		
-		void setInvalid() { 
-			_is_invalid = true ;
-		}
+		bool isInvalid() ;
+		void setInvalid() ; 
+
 
 		void softDestroy() ;
 
@@ -95,18 +92,7 @@ namespace rbol {
 		PurpleAsyncConn *connection ; 
 		std::string userAgent ;
 
-		RediffBolConn(PurpleAccount *acct) { 
-			purple_debug(PURPLE_DEBUG_INFO, "rbol" , "creating a connection\n");
-
-			account  = acct; 
-			account -> gc -> proto_data = this ;
-			connection = NULL ;
-			userAgent = DEFAULT_USERAGENT ;
-			keep_alive_counter = 0 ;
-			connection_state = 0 ;
-			keep_alive_timer_handle = 0 ;
-			_is_invalid = false ;
-		}
+		RediffBolConn(PurpleAccount *acct) ; 
 
 		~RediffBolConn() ; 
 		std::list<std::string> iplist ; 

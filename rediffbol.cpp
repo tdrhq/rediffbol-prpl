@@ -21,6 +21,28 @@ using namespace rbol ;
 
 #define SAFE(a) (a?a:"")
 
+set<RediffBolConn*> RediffBolConn::valid_connections ; 
+
+bool RediffBolConn::isInvalid() { 
+	return valid_connections.count(this) == 0 ;
+}
+
+RediffBolConn::RediffBolConn(PurpleAccount *acct) { 
+	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "creating a connection\n");
+	
+	account  = acct; 
+	account -> gc -> proto_data = this ;
+	connection = NULL ;
+	userAgent = DEFAULT_USERAGENT ;
+	keep_alive_counter = 0 ;
+	connection_state = 0 ;
+	keep_alive_timer_handle = 0 ;
+}
+
+void RediffBolConn::setInvalid() { 
+	valid_connections.erase(this) ;
+}
+
 static string escape_html_entities(string text) {
 	char *ret = g_markup_escape_text(text.data(), text.length()) ;
 	string _ret = SAFE(ret) ;
@@ -48,12 +70,12 @@ void RediffBolConn::softDestroy() {
 		purple_timeout_remove(keep_alive_timer_handle)  ;
 		keep_alive_timer_handle = 0 ; 
 	}
-	if ( connection ) delete connection ;
-
 	setInvalid() ;
 	
 }
 void RediffBolConn::startLogin() { 
+	valid_connections.insert(this) ;
+
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "starting login\n");
 
 	connection = new PurpleAsyncConn(this, 
@@ -173,6 +195,8 @@ void RediffBolConn::connectToCS() {
 
 RediffBolConn::~RediffBolConn() { 
 	softDestroy() ; 
+
+	if ( connection ) delete connection ;
 }		
 void RediffBolConn::gotConnected() { 
 	/* what's my state? */
@@ -698,7 +722,9 @@ void RediffBolConn::sendMessage(string to, string message) {
 	//out.write(fonttype.data(), fontstrsize) ;
 
 	char fontBytes[] = {
-		0x00, 0x78, 0xff, 0xff, 0x05, 0x01, 0x00, 0x32, 0x00,
+		0x00, 
+		0x78, /* font size, scaled up by 10 */ 
+		0xff, 0xff, 0x05, 0x01, 0x00, 0x32, 0x00,
 		0x49, 0x33, 0x33, 0x33, 0x00, 0x00
 		} ;
 
@@ -823,7 +849,11 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 			message = encode( message, "UTF-16BE", "UTF-8") ;
 			font = encode(font, "UTF-16BE", "UTF-8") ;
 			message = escape_html_entities (message) ;
+
+
 			FontParser fp (font, fontinfo) ;
+
+#ifdef REDIFFBOL_ENABLE_INCOMING_FONT_SUPPORT
 			final_message += "<font face='"; 
 			final_message += font ; 
 			final_message += "' size='";
@@ -835,6 +865,7 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 			final_message += "' color='" ;
 			final_message += fp.getColor() ;
 			final_message += "' >"; 
+#endif
 
 			if ( fp.isItalic()) final_message += "<em>" ;
 			if ( fp.isBold()) final_message += "<b>" ;
@@ -844,7 +875,9 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 			if ( fp.isBold()) final_message += "</b>"; 
 			if ( fp.isItalic()) final_message += "</em>"; 
 
+#ifdef REDIFFBOL_ENABLE_INCOMING_FONT_SUPPORT 
 			final_message += "</font>";
+#endif
 
 		} else if ( len == 1 ) { 
 			int smileycode = buffer.readLEInt() ;

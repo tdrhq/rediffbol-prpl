@@ -7,10 +7,23 @@
 #include "messagebuffer.h"
 #include <string>
 #include "PurpleAsyncConnHandler.h" 
+#include <set>
 
 namespace rbol {
 	class PurpleAsyncConn { 
 	private:
+		/*
+		 * After starting a connection with purple_proxy_connect,
+		 * there is a time lag before we get connected, and hence
+		 * before the got_connected callback is called. In that
+		 * time I might have "close"d this connection, from which
+		 * point it becomes invalid. After that I cannot even 
+		 * trust that this object *exists* in memory. 
+		 */
+		static std::set<PurpleAsyncConn*> valid_PurpleAsyncConns; 
+
+		bool isInvalid() ;
+		bool setInvalid() ;
 
 		/* buffers */
 		PurpleCircBuffer *txbuf ;
@@ -51,12 +64,6 @@ namespace rbol {
 
 		bool close() ;
 		void got_connected_cb(int source, const gchar* ) ;
-		/* static callbacks */
-//		static void conn_write_cb( gpointer data, gint source, 
-		//				   PurpleInputCondition cond) ;
-		//static void conn_read_cb( gpointer data, gint source, 
-		//		  PurpleInputCondition cond) ;
-
 		void unref() { 
 			ref_counter -- ;
 		}

@@ -51,10 +51,6 @@
 using namespace rbol ;
 #define REDIFFBOLPRPL_ID "prpl-rediffbol"
 
-static PurplePlugin *_null_protocol = NULL;
-
-
-
 void parse_url_param(gchar *data, gchar* param, GString *tmp) { 
 	char *end=NULL, *beg =data ;
 	while ( beg ) { 
@@ -243,6 +239,8 @@ static void rediffbol_login(PurpleAccount *acct)
 			     "reconnecting.\n") ;
 	}
 
+//	acct->gc->flags = PurpleConnectionFlags((int) acct->gc->flags | PURPLE_CONNECTION_HTML | PURPLE_CONNECTION_NO_URLDESC);
+
 	RediffBolConn* conn = new RediffBolConn (acct) ;
 	conn->startLogin() ;
 	
@@ -305,6 +303,11 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 	if ( primitive == PURPLE_STATUS_INVISIBLE ) { 
 		rb->setStatus("Invisible", msg) ;
 		return ;
+	}
+
+	if ( primitive == PURPLE_STATUS_OFFLINE ) { 
+		purple_debug_info("rbol", "uh, ok, so I have to set my status to offline\n") ;
+		return;
 	}
 }
 
@@ -482,14 +485,12 @@ static PurplePluginProtocolInfo prpl_info =
 
 static void rediffbol_init(PurplePlugin *plugin)
 {
-	printf("rediff starting up\n"); 
-  purple_debug_info("rbol", "starting up\n");
-  _null_protocol = plugin;
+	purple_debug_info("rbol", "starting up\n");
 }
 
 static void rediffbol_destroy(PurplePlugin *plugin) {
-  printf("shutting down\n");
-  purple_debug_info("rediffbol", "shutting down\n");
+
+	purple_debug_info("rediffbol", "shutting down\n");
 }
 
 
@@ -505,11 +506,11 @@ static PurplePluginInfo info =
   PURPLE_PRIORITY_DEFAULT,                                 /* priority */
   REDIFFBOLPRPL_ID,                                             /* id */
   "RediffBol",                                              /* name */
-  "0.3",                                                   /* version */
+  "0.2",                                                   /* version */
   "RediffBol Protocol Plugin",                                  /* summary */
   "RediffBol Protocol Plugin",                                  /* description */
   "Arnold Noronha <arnold+rb@cmi.ac.in>",                     /* author */
-  "http://www.cmi.ac.in/rediffbol",  /* homepage */
+  "http://rediffbol-prpl.sourceforge.net",  /* homepage */
   NULL,                                                    /* load */
   NULL,                                                    /* unload */
   rediffbol_destroy,                                        /* destroy */
