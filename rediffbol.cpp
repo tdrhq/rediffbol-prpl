@@ -552,7 +552,15 @@ void RediffBolConn::parseContactStatusChange(MessageBuffer &buffer) {
 				    NULL);
 
 	status_text[name1] = msg ;
-		     
+
+	/* attempt to ask libpurple to update status message too */
+
+	PurpleBuddy *b = purple_find_buddy(account, name1.c_str()) ;
+	if ( b == NULL ) return ;
+	PurplePresence *pres = purple_buddy_get_presence(b) ;
+	PurpleStatus * pstatus = purple_presence_get_active_status(pres);
+
+	purple_blist_update_buddy_status(b, pstatus) ;
 	
 }
 void RediffBolConn::parseCSResponse(MessageBuffer &buffer) { 
@@ -1452,4 +1460,11 @@ string RediffBolConn::getSessionString() const {
 
 string RediffBolConn::getVisibleIP() const { 
 	return visibleIP ; 
+}
+
+void RediffBolConn::connectionError(string error) {
+	assert(!isInvalid()) ;
+	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
+			     "Failed to connect to server");
+
 }

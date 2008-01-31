@@ -162,6 +162,8 @@ namespace rbol {
 		void loadAvatar(std::string username) ; 
 		void _loadAvatarCompleted(std::string name,
 					  std::string data) ;
+
+		void connectionError(std::string error) ;
 	};
 	
 }

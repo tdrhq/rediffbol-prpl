@@ -50,15 +50,18 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 		return ;
 	}
 
-	purple_debug(PURPLE_DEBUG_INFO, "rbol", "got connected\n") ;
+
 	if ( source < 0 ) { 
-		close() ;
 		handler->connectionError(error) ;
-		purple_debug(PURPLE_DEBUG_ERROR, "rbol", 
+		close() ;
+
+		setInvalid() ;
+		purple_debug_error( "rbol", "connection error '%s'\n", 
 			     error) ;
 		return ;
 	}
 
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", "got connected\n") ;
 	fd = source ; 
 	
 	/* so now this callback need not take care of connection issues */
@@ -155,8 +158,8 @@ PurpleAsyncConn::write(const void* data,
 		written = 0 ; 
 	else if ( written <= 0 ) { 
 		written = 0 ; 
-		close() ;
 		handler->readError() ;
+		close() ;
 		return ;
 	}
 
@@ -226,28 +229,24 @@ PurpleAsyncConn::read_cb() {
 			return ; /* safe */
 		
 		/* todo: register a connection error */
-		close();
 		handler->readError() ;
+		close();
 		cerr<<"out here\n" ;
 		return ;
 	} else if ( len == 0 ) { 
 		/* todo: server closed conenction */ 
 		
 		handler->closeCallback();
+		close() ;
+
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol",
 			     "pathetic, the server has closed the connection\n");
-		purple_input_remove(rx_handler) ;
-		purple_input_remove(tx_handler) ;
-		rx_handler = NULL ;
-		tx_handler = NULL ;
-		cerr<<"out here2\n";
 		return ;
 	}
 	
 	awaiting.push(string(buf, buf+len)) ;
 
 	handler->readCallback(awaiting);
-	cerr<< "out here\n" ;
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {
