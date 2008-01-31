@@ -135,15 +135,11 @@ void RediffBolConn::connectToGK() {
 	write_int(s, strlen(CAP_HTTP) );
 
 	s.write(CAP_HTTP, strlen(CAP_HTTP));
-	printf("%d\n", s.str().length()) ;
 	string t = s.str() ;
 
 	hex_dump(t, "Gk message") ;
-	printf("here2\n");
 
 	connection->write((const void*)s.str().data(), s.str().size()) ;
-	printf("here\n");
-
 }
 void RediffBolConn::connectToCS() { 
 

@@ -17,7 +17,6 @@ string rbol::encode(const string a, const string from, const string to) {
 	}
 	char* buf = new char [5*a.size()] ; 
 	char * obuf = buf ;
-//	char *inbuf = strdup(a.c_str()) ;
 	char *inbuf = new char[a.length()] ;
 	copy(a.begin(), a.end(), inbuf ) ;
 
@@ -29,7 +28,6 @@ string rbol::encode(const string a, const string from, const string to) {
 
 	size_t size = iconv(ic, &inbuf, &inbytesleft, &buf, &outbytesleft) ; 
 
-	printf("-----------------------------\n");
 	if ( size == (size_t) -1 ) {
 		
 		perror(a.c_str());
@@ -38,7 +36,6 @@ string rbol::encode(const string a, const string from, const string to) {
 	
 	string ret ( obuf, obuf + (oo-outbytesleft) ) ;
 
-	printf("here\n") ;
 	delete obuf ; 
 	delete oinbuf ; 
 	
@@ -46,7 +43,6 @@ string rbol::encode(const string a, const string from, const string to) {
 		perror("encode") ;
 		assert(false);
 	}
-	printf("not here\n") ;
 	return ret ;
 }
 
