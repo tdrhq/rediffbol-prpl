@@ -334,6 +334,10 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	for(int i = 0 ; i < 3; i++) 
 		names[i] = buffer.readString() ; 
 
+	this->server_userId = names[0] ; 
+	this->server_displayname = names[1] ; 
+	this->server_nickname = names[2] ;
+
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "Got names %s %s %s\n",
 		     names[0].c_str() ,
 		     names[1].c_str() ,
@@ -389,7 +393,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	
 	// session and visible IP
 	session = buffer.readString() ;
-	string visibleIP = buffer.readString() ;
+	visibleIP = buffer.readString() ;
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "Session: %s IP:%s\n", 
 		     session.c_str(), visibleIP.c_str()) ;
@@ -1245,6 +1249,10 @@ void RediffBolConn::sendDelContactRequest(string idToDel, string group) {
 void RediffBolConn::sendAddContactRequest( 
 					  std::string remoteid, 
 					  std::string group) { 
+
+	if ( this->groups.count(group) == 0 ) 
+		sendAddRemoveGroupRequest(group) ;
+
 	string localid = fixEmail(SAFE(account->username) );
 	remoteid = fixEmail(remoteid) ;
 
@@ -1424,4 +1432,24 @@ void RediffBolConn::sendAddRemoveGroupRequest(string groupname, bool Remove) {
 	
 	hex_dump(out.str(), "Group Add/Remove request") ;
 	connection->write(out.str()) ;
+}
+
+string RediffBolConn::getServerUserId()  const { 
+	return server_userId ; 
+}
+
+string RediffBolConn::getServerDisplayName() const  { 
+	return server_displayname ; 
+}
+
+string RediffBolConn::getServerNickname() const { 
+	return server_nickname ;
+}
+
+string RediffBolConn::getSessionString() const { 
+	return session ;
+}
+
+string RediffBolConn::getVisibleIP() const { 
+	return visibleIP ; 
 }

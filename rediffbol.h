@@ -71,6 +71,7 @@ namespace rbol {
 
 		std::vector<std::string> roster ; 
 		std::string session ;
+		std::string visibleIP ; 
 		int keep_alive_counter ; 
 		guint keep_alive_timer_handle ; 
 		int connection_state ; 
@@ -86,9 +87,18 @@ namespace rbol {
 		std::set<std::string> groups; 
 		std::string _parseChatMessage(MessageBuffer &buffer) ;
 		
+		/* usernames as retrieved from server */
+		std::string server_userId ; 
+		std::string server_displayname ; 
+		std::string server_nickname ;
 	public: 
 		bool isInvalid() ;
 
+		std::string getServerUserId() const ;
+		std::string getServerDisplayName() const ; 
+		std::string getServerNickname() const ;
+		std::string getSessionString() const ;
+		std::string getVisibleIP() const ;
 		PurpleAccount *account ;
 		PurpleAsyncConn *connection ; 
 		std::string userAgent ;

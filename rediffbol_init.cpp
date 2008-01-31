@@ -56,14 +56,27 @@ using namespace rbol ;
 /* 
  * UI callbacks
  */
-static void rediffbol_input_user_info(PurplePluginAction *action)
+static void rediffbol_set_avatar(PurplePluginAction *action)
 {
 	PurpleConnection *gc = (PurpleConnection *)action->context;
 	PurpleAccount *acct = purple_connection_get_account(gc);
-	purple_debug_info("rediffbol", "showing 'Set User Info' dialog for %s\n",
-			  acct->username);
 	
-	purple_account_request_change_user_info(acct);
+	if ( !gc->proto_data ) return ;
+
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ;
+
+	std::string uri = "http://avatars.rediff.com/avatars/login.asp?username="
+		+ conn->getServerUserId() + "&session_id=" 
+		+ conn->getSessionString()+ "&from=bol&display=" 
+		+ conn->getServerDisplayName() + "&user_ip=" 
+		+ conn->getVisibleIP() ;
+
+	purple_debug_info("rediffbol", "opening URI %s\n",
+			  uri.c_str());
+
+	purple_notify_uri(action->plugin, uri.c_str());
+	
+	
 }
 
 /* this is set to the actions member of the PurplePluginInfo struct at the
@@ -72,7 +85,7 @@ static void rediffbol_input_user_info(PurplePluginAction *action)
 static GList *rediffbol_actions(PurplePlugin *plugin, gpointer context)
 {
 	PurplePluginAction *action = purple_plugin_action_new(
-		"Set User Info...", rediffbol_input_user_info);
+		"Set Avatar (Buddy Icon)...", rediffbol_set_avatar);
 	return g_list_append(NULL, action);
 }
 
