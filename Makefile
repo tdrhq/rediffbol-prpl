@@ -37,11 +37,11 @@ else
 endif
 
 
-PIDGIN_CFLAGS  = $(shell pkg-config pidgin --cflags)
-GTK_CFLAGS   = $(shell pkg-config gtk+-2.0 --cflags)
-PIDGIN_LIBS    = $(shell pkg-config pidgin --libs)
-GTK_LIBS     = $(shell pkg-config gtk+-2.0 --libs)
-PIDGIN_LIBDIR  = $(shell pkg-config --variable=libdir pidgin)/pidgin
+PURPLE_CFLAGS  = $(shell pkg-config purple --cflags)
+GLIB_CFLAGS   = $(shell pkg-config glib-2.0 --cflags)
+PURPLE_LIBS    = $(shell pkg-config purple --libs)
+GLIB_LIBS     = $(shell pkg-config glib-2.0 --libs)
+PURPLE_LIBDIR  = $(shell pkg-config --variable=libdir purple)/purple-2
 
 all: librediffbol.so
 
@@ -50,7 +50,7 @@ install: all
 	cp librediffbol.so $(LIB_INSTALL_DIR)
 
 librediffbol.so: $(SRC_FILES) $(HEADERS) 
-	$(CC) --debug -shared -o librediffbol.so $(PIDGIN_CFLAGS) $(PIDGIN_LIBS) $(CFLAGS)  $(SRC_FILES) -fPIC 
+	$(CC) --debug -shared -o librediffbol.so $(PURPLE_CFLAGS) $(PURPLE_LIBS) $(CFLAGS)  $(SRC_FILES) -fPIC 
 
 clean:
 	rm -rf *.o *.c~ *.h~ *.so *.la .libs *.cpp~
