@@ -6,17 +6,53 @@ OVERVIEW
 
 Rediffbol is an IM service used by some people in India.
 
-Rediffbol-prpl is a Rediffbol protocol-plugin for pidgin.
+Rediffbol-prpl is a Rediffbol protocol-plugin for libpurple, used by
+IM-clients such as Pidgin and Adium.
  
 -----------------------
 BUILDING AND INSTALLING
 -----------------------
 
-To build just type "make" followed by "make install". Please let me know if 
-you have any compilation issues. I haven't tried compiling on Windows yet.
+First make sure you have the development files for libpurple installed.
+You could either have got this by installing from source or installing
+the respective package. E.g. in ubuntu do 
+    sudo apt-get install libpurple-dev
+
+rediffbol-prpl requires libpurple >= 2.3.0. If you get a compile error
+that says PURPLE_CONNECTION_ERROR_NETWORK_ERROR is not defined, then the
+likely cause is an old version of libpurple-dev. 
+
+To build just type "make" followed by "make install" (You don't have to
+do "sudo make install"). 
+
+Windows: I am pretty confident its possible to build this for Windows
+too, but you'll have to do some hacking to the Makefile. Since I
+don't use Windows, I can't do this myself. Send me whatever is required
+if you manage to do it :)
+
+------------
+PROJECT PAGE
+------------
+
+http://rediffbol-prpl.sourceforge.net
+
+----------
+KNOWN BUGS
+----------
+
+eh?
 
 -------
 AUTHORS
 -------
 
-Arnold "arnstein87" Noronha <arnold AT cmi DOT ac DOT in, arn_2000 AT rediffmail DOT com>
+Arnold "arnstein87" Noronha <arnold AT cmi DOT ac DOT in, arn_2000 AT
+rediffmail DOT com>
+
+----------------
+ACKNOWLEDGEMENTS
+----------------
+
+Many thanks to Binu Paul <binu_paul AT users DOT sourceforge DOT net>
+for his help, and for reverse-engineering the Rbol protocol.
+
