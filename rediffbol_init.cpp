@@ -59,7 +59,6 @@ using namespace rbol ;
 static void rediffbol_set_avatar(PurplePluginAction *action)
 {
 	PurpleConnection *gc = (PurpleConnection *)action->context;
-	PurpleAccount *acct = purple_connection_get_account(gc);
 	
 	if ( !gc->proto_data ) return ;
 
@@ -101,14 +100,9 @@ static const char *rediffbol_list_icon(PurpleAccount *acct, PurpleBuddy *buddy)
 
 static const char *rediffbol_list_emblem(PurpleBuddy *buddy)
 {
+	return NULL ;
 }
 
-static void rediffbol_tooltip_text(PurpleBuddy *buddy,
-				   PurpleNotifyUserInfo *info,
-				   gboolean full) {
-	
-	/*TODO*/
-}
 
 static GList *rediffbol_status_types(PurpleAccount *acct)
 {        GList *types = NULL;
@@ -241,10 +235,6 @@ static void rediffbol_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 				    SAFE(group->name) ) ;
 }
 
-static void rediffbol_add_buddies(PurpleConnection *gc, GList *buddies,
-				  GList *groups) {
-
-}
 
 static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 				   PurpleGroup *group)
@@ -257,17 +247,7 @@ static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 	conn->sendDelContactRequest(SAFE(buddy->name), SAFE(group->name)) ;
 }
 
-static void rediffbol_remove_buddies(PurpleConnection *gc, GList *buddies,
-                                    GList *groups) {
 
-}
-
-
-static void rediffbol_set_permit_deny(PurpleConnection *gc) {
-  /* this is for synchronizing the local black/whitelist with the server.
-   * for rediffbol, it's a noop.
-   */
-}
 
 static void rediffbol_alias_buddy(PurpleConnection *gc, const char *who,
                                  const char *alias) {
@@ -317,6 +297,7 @@ static unsigned int rediffbol_send_typing(PurpleConnection *gc,
 				  "typing notification\n") ;
 	}
 
+	return 0 ;
 }
 
 static void rediffbol_group_buddy(PurpleConnection *gc, 
@@ -350,7 +331,7 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,               /* user_splits, initialized in rediffbol_init() */
 	NULL,               /* protocol_options, initialized in rediffbol_init() */
 	{   /* icon_spec, a PurpleBuddyIconSpec */
-		"png,jpg,gif",                   /* format */
+		strdup("png,jpg,gif"),                   /* format */
 		0,                               /* min_width */
 		0,                               /* min_height */
 		128,                             /* max_width */
@@ -436,32 +417,32 @@ static void rediffbol_destroy(PurplePlugin *plugin) {
 
 static PurplePluginInfo info =
 {
-  PURPLE_PLUGIN_MAGIC,                                     /* magic */
-  PURPLE_MAJOR_VERSION,                                    /* major_version */
-  PURPLE_MINOR_VERSION,                                    /* minor_version */
-  PURPLE_PLUGIN_PROTOCOL,                                  /* type */
-  NULL,                                                    /* ui_requirement */
-  0,                                                       /* flags */
-  NULL,                                                    /* dependencies */
-  PURPLE_PRIORITY_DEFAULT,                                 /* priority */
-  REDIFFBOLPRPL_ID,                                             /* id */
-  "RediffBol",                                              /* name */
-  "0.2",                                                   /* version */
-  "RediffBol Protocol Plugin",                                  /* summary */
-  "RediffBol Protocol Plugin",                                  /* description */
-  "Arnold Noronha <arnold+rb@cmi.ac.in>",                     /* author */
-  "http://rediffbol-prpl.sourceforge.net",  /* homepage */
-  NULL,                                                    /* load */
-  NULL,                                                    /* unload */
-  rediffbol_destroy,                                        /* destroy */
-  NULL,                                                    /* ui_info */
-  &prpl_info,                                              /* extra_info */
-  NULL,                                                    /* prefs_info */
-  rediffbol_actions,                                        /* actions */
-  NULL,                                                    /* padding... */
-  NULL,
-  NULL,
-  NULL,
+	PURPLE_PLUGIN_MAGIC,                   /* magic */
+	PURPLE_MAJOR_VERSION,                  /* major_version */
+	PURPLE_MINOR_VERSION,                  /* minor_version */
+	PURPLE_PLUGIN_PROTOCOL,                /* type */
+	NULL,                                  /* ui_requirement */
+	0,                                     /* flags */
+	NULL,                                  /* dependencies */
+	PURPLE_PRIORITY_DEFAULT,               /* priority */
+	strdup(REDIFFBOLPRPL_ID),              /* id */
+	strdup("RediffBol"),                   /* name */
+	strdup("0.2"),                         /* version */
+	strdup("RediffBol Protocol Plugin"),   /* summary */
+	strdup("RediffBol Protocol Plugin"),   /* description */
+	strdup("Arnold Noronha <arnold+rb@cmi.ac.in>"),   /* author */
+	strdup("http://rediffbol-prpl.sourceforge.net"),  /* homepage */
+	NULL,                                  /* load */
+	NULL,                                  /* unload */
+	rediffbol_destroy,                     /* destroy */
+	NULL,                                  /* ui_info */
+	&prpl_info,                            /* extra_info */
+	NULL,                                  /* prefs_info */
+	rediffbol_actions,                     /* actions */
+	NULL,                                  /* padding... */
+	NULL,
+	NULL,
+	NULL,
 };
 
 extern "C" { 

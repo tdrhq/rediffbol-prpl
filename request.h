@@ -1,35 +1,36 @@
 
 #ifndef __REQUEST__H__ 
 #define __REQUEST__H__ 
+
 namespace rbol { 
-	static const char* GKRequestHeader             = "Gatekeeper2" ;
-	static const char* GKCmdGetLoginServers        = "GetLoginServers" ;
-	static const char* CSRequestHeader             = "Server1.2" ;
-	static const char* CSCmdSignIn                         = "SignIn" ;
-	static const char* CSCmdGetOfflineMsgs         = "GetOfflineMsgs" ;
-	static const char* CSCmdSetOnlineStatus        = "SetOnlineStatus" ;
-	static const char* CSCmdTextMessage            = "TextMessage" ;
-	static const char* CSPeerRequestHeader         = "ClientPeer1.2" ;
-	static const char* CSCmdGetChatRooms           = "GetChatRoomsRequest" ;
-	static const char* CSCmdJoinChatRoom           = "JoinChatRoom" ;
-	static const char* CSCmdKeepAlive                      = "KeepAlive" ;
-	static const char* CSCmdDelOfflineMsg          = "DelOfflineMsg" ;
-	static const char* CSCmdGetContactId           = "GetContactId" ;
-	static const char* CSCmdLeaveChatRoom          = "LeaveChatRoom" ;
-	static const char* CSCmdGetAddRequests         = "GetAddRequests" ;
-	static const char* CSCmdAcceptAdd                      = "AcceptAdd" ;
-	static const char* CSCmdAcceptAdd2                     = "AcceptAdd2" ;
-	static const char* CSCmdBlockUser                      = "BlockUser" ;
-	static const char* CSCmdAllowUser                      = "AllowUser" ;
-	static const char* CSCmdDelAddRequest          = "DelAddRequest" ;
-	static const char* CSCmdDelContact             = "DelContact2" ;
-	static const char* CSCmdAddGroup               = "AddGroup" ;
-	static const char* CSCmdRemoveGroup            = "RemoveGroup" ;
-	static const char* CSCmdMoveContact            = "MoveContactBetweenGroups" ;
-	static const char* CSCmdAddContact             = "AddContact2" ;
-	static const char* CSCmdCheckUserType          = "CheckUserType" ;
-	static const char* CSCmdChatRoomMessage        = "ChatRoomMessage" ;
-	static const char* CSCmdTypingNotify           = "TypingNotify" ;
+	#define GKRequestHeader               "Gatekeeper2"  
+	#define GKCmdGetLoginServers          "GetLoginServers"  
+	#define CSRequestHeader               "Server1.2"  
+	#define CSCmdSignIn                           "SignIn"  
+	#define CSCmdGetOfflineMsgs           "GetOfflineMsgs"  
+	#define CSCmdSetOnlineStatus          "SetOnlineStatus"  
+	#define CSCmdTextMessage              "TextMessage"  
+	#define CSPeerRequestHeader           "ClientPeer1.2"  
+	#define CSCmdGetChatRooms             "GetChatRoomsRequest"  
+	#define CSCmdJoinChatRoom             "JoinChatRoom"  
+	#define CSCmdKeepAlive                        "KeepAlive"  
+	#define CSCmdDelOfflineMsg            "DelOfflineMsg"  
+	#define CSCmdGetContactId             "GetContactId"  
+	#define CSCmdLeaveChatRoom            "LeaveChatRoom"  
+	#define CSCmdGetAddRequests           "GetAddRequests"  
+	#define CSCmdAcceptAdd                        "AcceptAdd"  
+	#define CSCmdAcceptAdd2                       "AcceptAdd2"  
+	#define CSCmdBlockUser                        "BlockUser"  
+	#define CSCmdAllowUser                        "AllowUser"  
+	#define CSCmdDelAddRequest            "DelAddRequest"  
+	#define CSCmdDelContact               "DelContact2"  
+	#define CSCmdAddGroup                 "AddGroup"  
+	#define CSCmdRemoveGroup              "RemoveGroup"  
+	#define CSCmdMoveContact              "MoveContactBetweenGroups"  
+	#define CSCmdAddContact               "AddContact2"  
+	#define CSCmdCheckUserType            "CheckUserType"  
+	#define CSCmdChatRoomMessage          "ChatRoomMessage"  
+	#define CSCmdTypingNotify             "TypingNotify"  
 
 }
 #endif

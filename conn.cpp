@@ -24,7 +24,6 @@ bool PurpleAsyncConn::setInvalid() {
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond);
 
 PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
-				 string ip, gint32 port,
 				 int pm ) :awaiting("") 
 { 
 	valid_PurpleAsyncConns.insert(this) ;
@@ -34,8 +33,6 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 	ref_counter = 1 ; 
 	rx_handler = NULL ;
 	tx_handler = NULL ;
-	establish_connection(ip, port) ;
-	
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
@@ -92,8 +89,7 @@ PurpleAsyncConn::establish_connection(
 			     "connection failed\n") ;
 		return false ;
 	}
-	
-
+	return true ;
 }
 
 
@@ -108,8 +104,8 @@ static void conn_got_connected(gpointer data, gint source,
 
 
 /* shutdowns the connection, waits till all packets are sent. 
- /* TODO: fix  but returns immediately */
-bool 
+ * TODO: fix  but returns immediately */
+void 
 PurpleAsyncConn::close() { 
 	setInvalid() ;
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,

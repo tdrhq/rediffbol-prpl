@@ -42,14 +42,14 @@ MessageBuffer::peekInt32() {
 
 void 
 MessageBuffer::seek(int len) { 
-	if ( this->offset + len >= this->str.length()) 
+	if ( size_t(this->offset) + len >= this->str.length()) 
 		throw MessageBufferOverflowException() ;
 	this->offset += len ;
 }
 
 char 
 MessageBuffer::readByte() {
-	if ( this->offset >= this->str.length()) { 
+	if ( size_t(this->offset) >= this->str.length()) { 
 		throw MessageBufferOverflowException() ;
 	}
 	return str[this->offset++] ;
@@ -93,7 +93,7 @@ MessageBuffer::readShort() {
 
 gboolean 
 MessageBuffer::isEnd() { 
-	return ( offset >= str.length()) ;
+	return ( size_t(offset) >= str.length()) ;
 }
 
 gboolean 
