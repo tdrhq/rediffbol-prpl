@@ -32,6 +32,7 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 	if ( ! url_text ) { 
 		purple_debug_info("rbol", "Unable to load url string\n") ;
 		delete data ; 
+		return ;
 	}
 
 	purple_debug_info("rbol", "Key String: %s\n", url_text) ;
