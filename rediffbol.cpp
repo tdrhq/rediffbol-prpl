@@ -21,11 +21,6 @@ using namespace rbol ;
 
 #define SAFE(a) (a?a:"")
 
-set<RediffBolConn*> RediffBolConn::valid_connections ; 
-
-bool RediffBolConn::isInvalid() { 
-	return valid_connections.count(this) == 0 ;
-}
 
 RediffBolConn::RediffBolConn(PurpleAccount *acct) { 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "creating a connection\n");
@@ -39,9 +34,7 @@ RediffBolConn::RediffBolConn(PurpleAccount *acct) {
 	keep_alive_timer_handle = 0 ;
 }
 
-void RediffBolConn::setInvalid() { 
-	valid_connections.erase(this) ;
-}
+
 
 static string escape_html_entities(string text) {
 	char *ret = g_markup_escape_text(text.data(), text.length()) ;
@@ -74,7 +67,6 @@ void RediffBolConn::softDestroy() {
 	
 }
 void RediffBolConn::startLogin() { 
-	valid_connections.insert(this) ;
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "starting login\n");
 

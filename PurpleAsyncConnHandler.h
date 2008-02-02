@@ -3,10 +3,11 @@
 
 #include "conn.h"
 #include <account.h>
+#include "RObject.h"
 
 namespace rbol { 
 
-	class PurpleAsyncConnHandler { 
+	class PurpleAsyncConnHandler : public RObject { 
 	private:
 		virtual void gotConnected()  = 0 ; 
 		virtual void readCallback(MessageBuffer &buffer) = 0 ; 

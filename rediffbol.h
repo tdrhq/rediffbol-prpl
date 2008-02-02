@@ -30,6 +30,8 @@
 #include <vector>
 #include "PurpleAsyncConnHandler.h"
 #include <set>
+#include "RObject.h"
+
 typedef void (*GcFunc)(PurpleConnection *from,
                        PurpleConnection *to,
                        gpointer userdata);
@@ -46,8 +48,6 @@ namespace rbol {
 
 	class RediffBolConn : public PurpleAsyncConnHandler { 
 	private:
-
-		static std::set<RediffBolConn* > valid_connections ;
 
 		/* Response Parsers */
 
@@ -76,9 +76,6 @@ namespace rbol {
 		guint keep_alive_timer_handle ; 
 		int connection_state ; 
 
-		void setInvalid() ; 
-
-
 		void softDestroy() ;
 
 		std::map<std::string, std::string> nickname; 
@@ -92,8 +89,6 @@ namespace rbol {
 		std::string server_displayname ; 
 		std::string server_nickname ;
 	public: 
-		bool isInvalid() ;
-
 		std::string getServerUserId() const ;
 		std::string getServerDisplayName() const ; 
 		std::string getServerNickname() const ;

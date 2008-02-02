@@ -8,9 +8,10 @@
 #include <string>
 #include "PurpleAsyncConnHandler.h" 
 #include <set>
+#include "RObject.h"
 
 namespace rbol {
-	class PurpleAsyncConn { 
+	class PurpleAsyncConn : public RObject { 
 	private:
 		/*
 		 * After starting a connection with purple_proxy_connect,
@@ -20,10 +21,8 @@ namespace rbol {
 		 * point it becomes invalid. After that I cannot even 
 		 * trust that this object *exists* in memory. 
 		 */
-		static std::set<PurpleAsyncConn*> valid_PurpleAsyncConns; 
+
 		PurpleProxyConnectData *connection_attempt_data ;
-		bool isInvalid() ;
-		void setInvalid() ;
 
 		/* buffers */
 		PurpleCircBuffer *txbuf ;
@@ -33,9 +32,6 @@ namespace rbol {
 		guint tx_handler; 
 		guint rx_handler; 
 		
-		/* some deprecated counter */
-		int ref_counter ;
-
 		/* the purple connection socket */
 		int fd ;
 
@@ -54,7 +50,7 @@ namespace rbol {
 			        int pm) ;
 		bool establish_connection(std::string ip, gint32 port) ;
 
-		~PurpleAsyncConn() ;
+		virtual ~PurpleAsyncConn() ;
 		
 		void write(const void* data, int len) ; 
 		void write(std::string s) ;
@@ -64,9 +60,7 @@ namespace rbol {
 
 		void close() ;
 		void got_connected_cb(int source, const gchar* ) ;
-		void unref() { 
-			ref_counter -- ;
-		}
+
 		
 	};
 }

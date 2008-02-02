@@ -11,16 +11,8 @@ using namespace std;
 
 #include <connection.h>
 
-std::set<PurpleAsyncConn*> PurpleAsyncConn::valid_PurpleAsyncConns; 
 namespace rbol { 
 	void hex_dump(const string, const string);
-}
-
-bool PurpleAsyncConn::isInvalid() {
-	return valid_PurpleAsyncConns.count(this) == 0 ;
-}
-void PurpleAsyncConn::setInvalid() {
-	valid_PurpleAsyncConns.erase(this);
 }
 
 
@@ -29,21 +21,15 @@ static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond);
 PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 				 int pm ) :awaiting("") 
 { 
-	valid_PurpleAsyncConns.insert(this) ;
 	handler = _handler ;
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm ;
-	ref_counter = 1 ; 
 	rx_handler = NULL ;
 	tx_handler = NULL ;
 	connection_attempt_data = NULL ;
 
 	purple_debug_info("rbol", "Connection object created: %x\n", this);
-	for(typeof(valid_PurpleAsyncConns.begin()) it = 
-		    valid_PurpleAsyncConns.begin() ;
-	    it!= valid_PurpleAsyncConns.end() ; it++ ){ 
-		purple_debug_info("rbol", "Valid Connection %x\n", *it) ;
-	}
+
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
@@ -246,7 +232,7 @@ static void conn_write_cb( gpointer data, gint source,
 #include <iostream>
 void
 PurpleAsyncConn::read_cb() { 
-
+	dump() ;
 	if ( isInvalid() ) { 
 		purple_debug_info("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
 		assert(false);
