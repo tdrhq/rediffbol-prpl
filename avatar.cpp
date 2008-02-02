@@ -92,7 +92,7 @@ void RediffBolConn::_loadAvatarCompleted(std::string name,
 					 std::string avatar_data) { 
 	assert(!isInvalid()) ;
 
-	char * data = new char[avatar_data.length()] ; 
+	char * data = malloc(avatar_data.length()) ;
 	memcpy(data, (void*) avatar_data.data(), avatar_data.length());
 	purple_buddy_icons_set_for_user(account,
 					name.c_str(), 
