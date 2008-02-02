@@ -23,7 +23,7 @@ namespace rbol {
 		static std::set<PurpleAsyncConn*> valid_PurpleAsyncConns; 
 
 		bool isInvalid() ;
-		bool setInvalid() ;
+		void setInvalid() ;
 
 		/* buffers */
 		PurpleCircBuffer *txbuf ;

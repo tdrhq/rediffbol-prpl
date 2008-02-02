@@ -16,8 +16,8 @@ std::set<PurpleAsyncConn*> PurpleAsyncConn::valid_PurpleAsyncConns;
 bool PurpleAsyncConn::isInvalid() {
 	return valid_PurpleAsyncConns.count(this) == 0 ;
 }
-bool PurpleAsyncConn::setInvalid() {
-	return	valid_PurpleAsyncConns.erase(this);
+void PurpleAsyncConn::setInvalid() {
+	valid_PurpleAsyncConns.erase(this);
 }
 
 
@@ -33,10 +33,16 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 	ref_counter = 1 ; 
 	rx_handler = NULL ;
 	tx_handler = NULL ;
+	purple_debug_info("rbol", "Connection object created: %x\n", this);
+	for(typeof(valid_PurpleAsyncConns.begin()) it = 
+		    valid_PurpleAsyncConns.begin() ;
+	    it!= valid_PurpleAsyncConns.end() ; it++ ){ 
+		purple_debug_info("rbol", "Valid Connection %x\n", *it) ;
+	}
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
-	close() ;
+	this->close() ;
 }
 
 void 
@@ -77,8 +83,8 @@ PurpleAsyncConn::establish_connection(
 	const string ip, 
 	const int port) {
  
-	tx_handler = NULL ; 
-	rx_handler = NULL ;	
+	assert(rx_handler == 0 and tx_handler == 0 ) ;
+
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "establishing connection\n");
 	fd = -1 ;
 	
@@ -107,6 +113,7 @@ static void conn_got_connected(gpointer data, gint source,
  * TODO: fix  but returns immediately */
 void 
 PurpleAsyncConn::close() { 
+	purple_debug_info("rbol", "Closing connection object %x\n", this);
 	setInvalid() ;
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
 		     "In here\n") ;
@@ -121,7 +128,8 @@ PurpleAsyncConn::close() {
 	if ( rx_handler ) { 
 		purple_input_remove(rx_handler) ;
 		rx_handler = NULL ;
-	}
+	} else 
+		purple_debug_warning("rbol", "Why is there no rx_handler?\n");
 	handler = NULL ;
 	
 	
@@ -219,7 +227,8 @@ void
 PurpleAsyncConn::read_cb() { 
 
 	if ( isInvalid() ) { 
-		purple_debug_warning("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
+		purple_debug_info("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
+		assert(false);
 		return ;
 	}
 
