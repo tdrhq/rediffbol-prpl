@@ -116,8 +116,8 @@ namespace rbol {
 		void sendOfflineMessagesRequest() ;
 		void deleteOfflineMessage(std::string id) ;
 
-		void readCallback(MessageBuffer &buffer) ;
-		virtual void readError() ;
+		void readCallback(MessageBuffer &buffer, PurpleAsyncConn*) ;
+		virtual void readError(PurpleAsyncConn* ) ;
 		void parseGkResponse(MessageBuffer &buffer) ;
 		void parseCSResponse(MessageBuffer &buffer) ;
 		void parseNewMailsResponse(MessageBuffer &buffer) ;
@@ -135,7 +135,7 @@ namespace rbol {
 		static std::string fixEmail(std::string a) ;
 		std::string getBuddyNickname(std::string buddyname) ; 
 		std::string getBuddyStatusMessage(std::string buddyname) ;
-		virtual void closeCallback() ;
+		virtual void closeCallback(PurpleAsyncConn*) ;
 		void sendAcceptAddRequest(std::string localid, 
 					  std::string reqId, 
 					  std::string from, std::string from2,
@@ -158,7 +158,8 @@ namespace rbol {
 		void _loadAvatarCompleted(std::string name,
 					  std::string data) ;
 
-		void connectionError(std::string error) ;
+		void connectionError(std::string error, 
+			PurpleAsyncConn* conn) ;
 	};
 	
 }

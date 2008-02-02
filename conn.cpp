@@ -24,8 +24,8 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 	handler = _handler ;
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm ;
-	rx_handler = NULL ;
-	tx_handler = NULL ;
+	rx_handler = 0 ;
+	tx_handler = 0 ;
 	connection_attempt_data = NULL ;
 
 	purple_debug_info("rbol", "Connection object created: %x\n", this);
@@ -48,7 +48,7 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 
 
 	if ( source < 0 ) { 
-		handler->connectionError(error) ;
+		handler->connectionError(error, this) ;
 		close() ;
 
 		setInvalid() ;
@@ -133,11 +133,11 @@ PurpleAsyncConn::close() {
 	}
 	if ( tx_handler ) { 
 		purple_input_remove(tx_handler) ;
-		tx_handler = NULL ;
+		tx_handler = 0 ;
 	}
 	if ( rx_handler ) { 
 		purple_input_remove(rx_handler) ;
-		rx_handler = NULL ;
+		rx_handler = 0 ;
 	} else 
 		purple_debug_warning("rbol", "Why is there no rx_handler?\n");
 
@@ -170,7 +170,7 @@ PurpleAsyncConn::write(const void* data,
 		written = 0 ; 
 	else if ( written <= 0 ) { 
 		written = 0 ; 
-		handler->readError() ;
+		handler->readError(this) ;
 		close() ;
 		return ;
 	}
@@ -188,7 +188,7 @@ PurpleAsyncConn::write(const void* data,
 
 	}
 
-	handler->writeCallback() ;
+	handler->writeCallback(this) ;
 }
 
 
@@ -211,7 +211,7 @@ PurpleAsyncConn::write_cb() {
 	else if ( ret <= 0 ) {
 		
 		purple_debug_error("rbol", "writing failed, going into bad state\n") ;
-		handler->readError() ;
+		handler->readError(this) ;
 		close() ;
 		return ; 
 	}
@@ -247,14 +247,14 @@ PurpleAsyncConn::read_cb() {
 			return ; /* safe */
 		
 		/* todo: register a connection error */
-		handler->readError() ;
+		handler->readError(this) ;
 		close();
 		cerr<<"out here\n" ;
 		return ;
 	} else if ( len == 0 ) { 
 		/* todo: server closed conenction */ 
 		
-		handler->closeCallback();
+		handler->closeCallback(this);
 		close() ;
 
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol",
@@ -266,7 +266,7 @@ PurpleAsyncConn::read_cb() {
 	purple_debug_info("rbol", "am I even here?\n");
 	awaiting.push(string(buf, buf+len)) ;
 
-	handler->readCallback(awaiting);
+	handler->readCallback(awaiting, this);
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {

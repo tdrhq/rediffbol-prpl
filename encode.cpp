@@ -36,8 +36,8 @@ string rbol::encode(const string a, const string from, const string to) {
 	
 	string ret ( obuf, obuf + (oo-outbytesleft) ) ;
 
-	delete obuf ; 
-	delete oinbuf ; 
+	delete[] obuf ; 
+	delete[] oinbuf ; 
 	
 	if ( iconv_close(ic) != 0 ) { 
 		perror("encode") ;

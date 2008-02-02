@@ -195,7 +195,11 @@ void RediffBolConn::gotConnected() {
 
 }
 
-void RediffBolConn::readCallback(MessageBuffer &buffer) try { 
+void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) try { 
+	if ( conn != connection ) { 
+		purple_debug_info("rbol", "unintended read callback\n") ;
+		return ;
+	}
 	assert(!isInvalid() );
 	while ( buffer.left() >= 4 ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
@@ -288,8 +292,8 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 				     "Failed to initiate connection to CS\n");
 
 	connection->close();
-	delete connection ;
-	connection = NULL;
+	connection->delRef() ;
+
 	connection = newconn ;
 }
 
@@ -1015,7 +1019,8 @@ void RediffBolConn::setStatus(string status, string message) {
 	
 }
 
-void RediffBolConn::closeCallback() { 
+void RediffBolConn::closeCallback(PurpleAsyncConn* conn) { 
+	if ( conn != connection ) return ;
 	/* aargh.. server has closed the connection */
 	assert(!isInvalid()) ;
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
@@ -1293,7 +1298,8 @@ void RediffBolConn::sendAddContactRequest(
 	
 }
 
-void RediffBolConn::readError() { 
+void RediffBolConn::readError(PurpleAsyncConn *conn) { 
+	if ( conn != connection ) return ;
 	assert(!isInvalid()) ; 
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 			     "Failed reading through socket");
@@ -1460,7 +1466,8 @@ string RediffBolConn::getVisibleIP() const {
 	return visibleIP ; 
 }
 
-void RediffBolConn::connectionError(string error) {
+void RediffBolConn::connectionError(string error, PurpleAsyncConn* conn) {
+	if ( conn != connection ) return;
 	assert(!isInvalid()) ;
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 			     "Failed to connect to server");
