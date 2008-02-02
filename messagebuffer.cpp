@@ -57,13 +57,11 @@ MessageBuffer::readByte() {
 
 string
 MessageBuffer::readBytes(int len) { 
-	int i ;
 	if ( this->left() < len ) { 
 		throw MessageBufferOverflowException() ;
 	}
-	string s ; 
-	for(i = 0 ; i < len; i++) 
-		s+= readByte() ;
+	string s = str.substr(this->offset, len) ;
+	this->offset += len ;
 	return s;
 }
 

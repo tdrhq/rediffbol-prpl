@@ -28,7 +28,7 @@
 CC := g++
 LIBTOOL := libtool
 SRC_FILES := rediffbol.cpp messagebuffer.cpp rediffbol_init.cpp conn.cpp encode.cpp util.cpp FontParser.cpp avatar.cpp 
-HEADERS := rediffbol.h messagebuffer.h conn.h encode.h util.h FontParser.h
+HEADERS := rediffbol.h messagebuffer.h conn.h encode.h util.h FontParser.h PurpleAsyncConnHandler.h
 
 ifeq ($(PREFIX),)
   LIB_INSTALL_DIR = $(HOME)/.purple/plugins

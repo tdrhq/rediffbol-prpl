@@ -17,16 +17,13 @@ namespace rbol {
 		}
 		
 		/* failed to connect */
-		virtual void connectionError(std::string message) { 
-		}
+		virtual void connectionError(std::string message) = 0 ;
 
 		/* there was a network error in reading data*/
-		virtual void readError()  {
-		}
+		virtual void readError() = 0 ;
 		
 		/* the server closed the connection */
-		virtual void closeCallback() {
-		}
+		virtual void closeCallback() = 0 ;
 		
 		virtual PurpleAccount* getProxyAccount() = 0 ; 
 

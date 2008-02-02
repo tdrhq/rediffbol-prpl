@@ -5,7 +5,7 @@
 #include <glib.h>
 #include <errno.h>
 #include <debug.h>
-
+#include <cassert>
 using namespace rbol ;
 using namespace std; 
 
@@ -142,6 +142,7 @@ PurpleAsyncConn::write(const void* data,
 	int datalen) { 
 	int written ; 
 
+	assert(!isInvalid()) ;
 
 	if ( !tx_handler) 
 		written = ::write(fd, data, datalen) ;
@@ -192,7 +193,11 @@ PurpleAsyncConn::write_cb() {
 	if ( ret < 0 && errno == EAGAIN ) {
 		return ; 
 	}
-	else if ( ret <= 0 ) { 
+	else if ( ret <= 0 ) {
+		
+		purple_debug_error("rbol", "writing failed, going into bad state\n") ;
+		handler->readError() ;
+		close() ;
 		return ; 
 	}
 
