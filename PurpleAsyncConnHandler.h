@@ -29,6 +29,8 @@ namespace rbol {
 
 		friend class PurpleAsyncConn ;
 
+	public:
+		virtual ~PurpleAsyncConnHandler() { } ;
 		
 	} ;
 }

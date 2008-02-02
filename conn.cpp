@@ -12,6 +12,9 @@ using namespace std;
 #include <connection.h>
 
 std::set<PurpleAsyncConn*> PurpleAsyncConn::valid_PurpleAsyncConns; 
+namespace rbol { 
+	void hex_dump(const string, const string);
+}
 
 bool PurpleAsyncConn::isInvalid() {
 	return valid_PurpleAsyncConns.count(this) == 0 ;
@@ -133,7 +136,8 @@ PurpleAsyncConn::close() {
 	handler = NULL ;
 	
 	
-	if (fd > 0 ) {
+	int _tmp ; 
+	if (fd > 0 and purple_input_get_error(fd, &_tmp) == 0 ) {
 		::close(fd) ;
 		fd = 0 ; 
 	}
@@ -225,6 +229,7 @@ static void conn_write_cb( gpointer data, gint source,
 #include <iostream>
 void
 PurpleAsyncConn::read_cb() { 
+	purple_debug_info("rbol", "how abt here?\n");
 
 	if ( isInvalid() ) { 
 		purple_debug_info("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
@@ -254,6 +259,8 @@ PurpleAsyncConn::read_cb() {
 		return ;
 	}
 	
+	hex_dump(string(buf, buf+len), "this is the last received data" );
+	purple_debug_info("rbol", "am I even here?\n");
 	awaiting.push(string(buf, buf+len)) ;
 
 	handler->readCallback(awaiting);

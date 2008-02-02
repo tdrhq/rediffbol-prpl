@@ -279,20 +279,26 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 	//string ip = res[0] ;
 
 	//connection->unref() ;
-	delete connection ;
-	connection = NULL ;
+
+
 	
 	int f = ip.find(":") ;
 	int port = atoi(ip.substr(f+1).c_str()) ;
 	ip = ip.substr(0, f) ;
 
+
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "connecting to chatserver[%s,%d]\n", ip.c_str(), port);
-	connection = new PurpleAsyncConn(this, 
+
+	PurpleAsyncConn* newconn =  new PurpleAsyncConn(this, 
 					 0) ;
-	if ( ! connection->establish_connection(ip, port)) 
+	if ( ! newconn->establish_connection(ip, port)) 
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 				     "Failed to initiate connection to CS\n");
 
+	connection->close();
+	delete connection ;
+	connection = NULL;
+	connection = newconn ;
 }
 
 gboolean keep_alive_timer(gpointer data) { 
