@@ -21,7 +21,7 @@ namespace rbol {
 		 * trust that this object *exists* in memory. 
 		 */
 		static std::set<PurpleAsyncConn*> valid_PurpleAsyncConns; 
-
+		PurpleProxyConnectData *connection_attempt_data ;
 		bool isInvalid() ;
 		void setInvalid() ;
 
