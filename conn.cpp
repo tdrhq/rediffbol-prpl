@@ -61,6 +61,7 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 	fd = source ; 
 	
 	/* so now this callback need not take care of connection issues */
+	assert(rx_handler == 0);
 	rx_handler = purple_input_add(fd, PURPLE_INPUT_READ, 
 					  conn_read_cb, this) ;
 	handler->gotConnected() ;
@@ -76,7 +77,9 @@ PurpleAsyncConn::establish_connection(
 	const string ip, 
 	const int port) {
  
-	assert(rx_handler == 0 and tx_handler == 0 ) ;
+	/* try to ensure this is called only once */
+	assert(rx_handler == 0 and tx_handler == 0
+		and connection_attempt_data == NULL ) ;
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "establishing connection\n");
 	fd = -1 ;
@@ -157,8 +160,10 @@ PurpleAsyncConn::write(const void* data,
 	int datalen) { 
 	int written ; 
 
-	assert(!isInvalid()) ;
-
+	if ( isInvalid() ) { 
+		purple_debug_info("rbol", "Writing to a invalid conn?\n") ;
+		return; 
+	}
 	if ( !tx_handler) 
 		written = ::write(fd, data, datalen) ;
 	else { 
@@ -235,7 +240,6 @@ PurpleAsyncConn::read_cb() {
 	dump() ;
 	if ( isInvalid() ) { 
 		purple_debug_info("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
-		assert(false);
 		return ;
 	}
 

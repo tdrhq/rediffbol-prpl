@@ -14,11 +14,13 @@ static void load_avatar_callback(PurpleUtilFetchUrlData* url_data,
 	data = (typeof(data)) ( user_data ) ;
 
 	if ( url_text == NULL or data ->first->isInvalid()  )  {
+		data->first->delRef() ;
 		delete data ;
 		return  ; 
 	}
 	data->first->_loadAvatarCompleted(data->second, string(url_text, 
 							       url_text+len));
+	data->first->delRef() ;
 	delete data;
 }
 
@@ -31,6 +33,7 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 
 	if ( ! url_text ) { 
 		purple_debug_info("rbol", "Unable to load url string\n") ;
+		data->first->delRef();
 		delete data ; 
 		return ;
 	}
@@ -65,6 +68,7 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 
 }
 void RediffBolConn::loadAvatar(std::string name) { 
+	addRef();
 	pair<RediffBolConn*, string> *data = new pair<RediffBolConn*, string> 
 		(this, name) ;
 
@@ -90,7 +94,10 @@ void RediffBolConn::loadAvatar(std::string name) {
 
 void RediffBolConn::_loadAvatarCompleted(std::string name, 
 					 std::string avatar_data) { 
-	assert(!isInvalid()) ;
+	if ( isInvalid()) { 
+		purple_debug_info("rbol", "Got avatar for invalid object\n") ;
+		return ;
+	}
 
 	char * data = (char*)malloc(avatar_data.length()) ;
 	memcpy(data, (void*) avatar_data.data(), avatar_data.length());

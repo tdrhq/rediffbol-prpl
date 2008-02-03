@@ -64,6 +64,8 @@ void RediffBolConn::softDestroy() {
 		keep_alive_timer_handle = 0 ; 
 	}
 	setInvalid() ;
+	connection->delRef() ;
+	connection = NULL ;
 	
 }
 void RediffBolConn::startLogin() { 
@@ -200,7 +202,10 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 		purple_debug_info("rbol", "unintended read callback\n") ;
 		return ;
 	}
-	assert(!isInvalid() );
+
+	if ( isInvalid () ) { 
+		purple_debug_info("rbol", "read callback on bad guy\n") ;
+	}
 	while ( buffer.left() >= 4 ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "got a response\n") ;

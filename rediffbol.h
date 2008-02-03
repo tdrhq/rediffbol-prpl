@@ -160,6 +160,10 @@ namespace rbol {
 
 		void connectionError(std::string error, 
 			PurpleAsyncConn* conn) ;
+		bool shutdown() { 
+			softDestroy() ;
+			return true ;
+		}
 	};
 	
 }
