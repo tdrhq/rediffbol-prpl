@@ -33,7 +33,7 @@ HEADERS := rediffbol.h messagebuffer.h conn.h encode.h util.h FontParser.h Purpl
 ifeq ($(PREFIX),)
   LIB_INSTALL_DIR = $(HOME)/.purple/plugins
 else
-  LIB_INSTALL_DIR = $(PREFIX)/lib/pidgin
+  LIB_INSTALL_DIR = $(PREFIX)/lib/purple-2/
 endif
 
 
