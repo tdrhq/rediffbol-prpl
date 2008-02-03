@@ -113,8 +113,6 @@ PurpleAsyncConn::close() {
 
 	purple_debug_info("rbol", "Closing connection object %x\n", this);
 	setInvalid() ;
-	purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
-		     "In here\n") ;
 
 	if ( connection_attempt_data ) {
 		purple_proxy_connect_cancel(connection_attempt_data ) ;
@@ -141,8 +139,7 @@ PurpleAsyncConn::close() {
 	if ( rx_handler ) { 
 		purple_input_remove(rx_handler) ;
 		rx_handler = 0 ;
-	} else 
-		purple_debug_warning("rbol", "Why is there no rx_handler?\n");
+	}
 
 	handler = NULL ;
 	
@@ -243,7 +240,7 @@ PurpleAsyncConn::read_cb(int source) {
 	char buf[1024] ;
 	int len = read(source, buf, sizeof(buf)) ;
 	if ( isInvalid() ) { 
-		purple_debug_info("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
+		purple_debug_info("rbol", "Orphaned connection callback\n") ;
 		return ;
 	}
 
@@ -266,9 +263,6 @@ PurpleAsyncConn::read_cb(int source) {
 		return ;
 	}
 	
-	hex_dump(string(buf, buf+len), "this is the last received data" );
-
-	purple_debug_info("rbol", "am I even here?\n");
 	awaiting.push(string(buf, buf+len)) ;
 
 	handler->readCallback(awaiting, this);
@@ -276,7 +270,6 @@ PurpleAsyncConn::read_cb(int source) {
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {
 
-	purple_debug_info("rbol", "source-fd = %d\n", source) ;
 	int _tmp ;
 	if ( source < 0 or purple_input_get_error(source, &_tmp) != 0 ) { 
 		purple_debug_info("rbol", "Callback called on invalid handle\n");
