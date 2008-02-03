@@ -56,7 +56,7 @@ namespace rbol {
 		void write(std::string s) ;
 		/* internal callbacks */
 		void write_cb() ;
-		void read_cb() ;
+		void read_cb(int source) ;
 
 		void close() ;
 		void got_connected_cb(int source, const gchar* ) ;

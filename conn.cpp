@@ -236,16 +236,17 @@ static void conn_write_cb( gpointer data, gint source,
 
 #include <iostream>
 void
-PurpleAsyncConn::read_cb() { 
+PurpleAsyncConn::read_cb(int source) { 
 	dump() ;
+
+	purple_debug_info("rbol", "got a read on %x with fd=%d\n", this, source);
+	char buf[1024] ;
+	int len = read(source, buf, sizeof(buf)) ;
 	if ( isInvalid() ) { 
 		purple_debug_info("rbol", "Technically, should not get a readcallback on invalid connectin\n") ;
 		return ;
 	}
 
-	purple_debug_info("rbol", "got a read on %x with fd=%d\n", this, fd);
-	char buf[1024] ;
-	int len = read(fd, buf, sizeof(buf)) ;
 	if( len < 0 ) {
 		if ( errno == EAGAIN )
 			return ; /* safe */
@@ -253,7 +254,6 @@ PurpleAsyncConn::read_cb() {
 		/* todo: register a connection error */
 		handler->readError(this) ;
 		close();
-		cerr<<"out here\n" ;
 		return ;
 	} else if ( len == 0 ) { 
 		/* todo: server closed conenction */ 
@@ -267,6 +267,7 @@ PurpleAsyncConn::read_cb() {
 	}
 	
 	hex_dump(string(buf, buf+len), "this is the last received data" );
+
 	purple_debug_info("rbol", "am I even here?\n");
 	awaiting.push(string(buf, buf+len)) ;
 
@@ -282,7 +283,7 @@ static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) 
 		return ;
 
 	}
-	((PurpleAsyncConn*)data)->read_cb() ;
+	((PurpleAsyncConn*)data)->read_cb(source) ;
 }
 
 void PurpleAsyncConn::write(string s ) { 
