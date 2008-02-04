@@ -121,6 +121,7 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
                                     purple_value_new(PURPLE_TYPE_STRING));
         types = g_list_append(types, type);
         
+
         type = purple_status_type_new(PURPLE_STATUS_AWAY, RB_STATUS_AWAY,
                                       NULL, TRUE);
         purple_status_type_add_attr(type, "message", ("Away"),
@@ -131,7 +132,24 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
                                       NULL, TRUE);
         purple_status_type_add_attr(type, "message", ("Offline"),
                                     purple_value_new(PURPLE_TYPE_STRING));
+
+	types = g_list_append(types, type) ;
+
+	
+	/* invisible */
+	type = purple_status_type_new(PURPLE_STATUS_INVISIBLE, "invisible", 
+				      NULL, TRUE); 
+	types = g_list_append(types, type) ;
+
+	/* busy */
+	type = purple_status_type_new(PURPLE_STATUS_UNAVAILABLE, "busy",
+				      NULL, TRUE);
+	purple_status_type_add_attr(type, "message", ("Busy"), 
+				    purple_value_new(PURPLE_TYPE_STRING));
         types = g_list_append(types, type);
+
+
+				    
         
         
         return types;
@@ -208,8 +226,7 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 		return ;
 	}
 
-	if ( primitive == PURPLE_STATUS_UNAVAILABLE
-		or primitive == PURPLE_STATUS_EXTENDED_AWAY) {
+	if ( primitive == PURPLE_STATUS_UNAVAILABLE) {
 		rb->setStatus("Busy", msg ) ;
 		return ;
 	}
@@ -223,6 +240,8 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 		purple_debug_info("rbol", "uh, ok, so I have to set my status to offline\n") ;
 		return;
 	}
+
+	purple_debug_info("rbol", "I haven't processed this status change!\n");
 }
 
 
