@@ -20,7 +20,7 @@ You could either have got this by installing from source or installing
 the respective package. E.g. in ubuntu do 
     sudo apt-get install libpurple-dev
 
-rediffbol-prpl requires libpurple >= 2.3.0. 
+Note that rediffbol-prpl requires libpurple >= 2.3.0. 
 
 To build just run :
 	./configure && make && sudo make install 
@@ -30,6 +30,8 @@ To uninstall just run
 It is possible to install the plugin _without_ administrative permissions.
 For this do
 	./configure && make && make install-exec-local
+And uninstall using 
+	make uninstall-local
 
 
 Windows: I am pretty confident its possible to build this for Windows
