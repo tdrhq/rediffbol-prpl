@@ -40,8 +40,8 @@ namespace rbol {
 	#define  CAP_DIR  "RBOL/1.2.5" 
         #define  CAP_HTTP_CONNECT  "RBOL/1.2.5+HTTP_CONNECT" 
         #define  CAP_HTTP  "RBOL/1.2.5+HTTP" 
-//	#define  DEFAULT_USERAGENT  "Rediff Bol8.0 build 315" 
-	#define  DEFAULT_USERAGENT  "libpurple:rediffbol-prpl" 
+	#define  DEFAULT_USERAGENT  "Rediff Bol8.0 build 315" 
+//	#define  DEFAULT_USERAGENT  "libpurple:rediffbol-prpl" 
 	extern void hex_dump (const std::string a,const std::string message) ;
 	
 	class PurpleAsyncConn ;
