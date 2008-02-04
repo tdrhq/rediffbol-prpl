@@ -9,6 +9,7 @@ PURPLE_CFLAGS  = $(shell pkg-config purple --cflags)
 GLIB_CFLAGS   = $(shell pkg-config glib-2.0 --cflags)
 PURPLE_LIBS    = $(shell pkg-config purple --libs)
 GLIB_LIBS     = $(shell pkg-config glib-2.0 --libs)
+
 pkgdir  = $(shell pkg-config --variable=libdir purple)/purple-2
 
 
@@ -32,3 +33,7 @@ librediffbol_la_LIBADD  =
 
 AM_CPPFLAGS = \
 	$(PURPLE_CFLAGS) $(GLIB_CFLAGS)
+
+
+install-exec-local: all-am
+	cp .libs/librediffbol.so ~/.purple/plugins/

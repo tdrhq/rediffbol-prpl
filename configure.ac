@@ -32,5 +32,25 @@ AC_CHECK_FUNCS([strdup])
 
 # self added
 
+PKG_CHECK_MODULES([libpurple], [purple >= 2.3.0], , [
+        AC_MSG_RESULT(no)
+	        AC_MSG_ERROR([
+
+You must have the libpurple development headers (>= 2.3.0) installed to build.
+
+If you have these installed already you may need to install pkg-config so
+I can find them.
+		])])
+
+PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.0], , [
+        AC_MSG_RESULT(no)
+	                AC_MSG_ERROR([
+
+You must have the glib development headers (>= 2.0) installed to build.
+
+If you have these installed already you may need to install pkg-config so
+I can find them.
+			                ])])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
