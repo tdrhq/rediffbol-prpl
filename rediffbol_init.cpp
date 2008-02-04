@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
  */
 
+
 #define PURPLE_PLUGINS
+#include "config.h"
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
@@ -447,8 +449,8 @@ static PurplePluginInfo info =
 	NULL,                                  /* dependencies */
 	PURPLE_PRIORITY_DEFAULT,               /* priority */
 	strdup(REDIFFBOLPRPL_ID),              /* id */
-	strdup("RediffBol"),                   /* name */
-	strdup("0.2"),                         /* version */
+	strdup(PACKAGE),                   /* name */
+	strdup(PACKAGE_VERSION),                         /* version */
 	strdup("RediffBol Protocol Plugin"),   /* summary */
 	strdup("RediffBol Protocol Plugin"),   /* description */
 	strdup("Arnold Noronha <arnold+rb@cmi.ac.in>"),   /* author */
