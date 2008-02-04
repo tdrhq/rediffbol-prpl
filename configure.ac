@@ -15,6 +15,7 @@ AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
+AC_PROG_RANLIB
 
 # Checks for header files.
 AC_HEADER_STDC

@@ -3,7 +3,7 @@
 
 #include <glib.h>
 #include <string>
-
+#include "config.h"
 namespace rbol{ 
 	class MessageBufferOverflowException { 
 	public:

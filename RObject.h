@@ -3,7 +3,7 @@
 
 #include <string>
 #include <set>
-
+#include "config.h"
 namespace rbol { 
 	/**
 	 * This object tries to mimic a *validity tester*. Any child

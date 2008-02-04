@@ -6,7 +6,7 @@
 #include <time.h>
 
 #include <glib.h>
-
+#include "config.h"
 #include "account.h"
 #include "accountopt.h"
 #include "blist.h"

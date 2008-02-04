@@ -2,6 +2,7 @@
 #define __fontparse__h__ 
 
 #include <string>
+#include "config.h"
 
 namespace rbol { 
 	class FontParser { 

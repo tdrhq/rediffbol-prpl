@@ -9,6 +9,7 @@
 #include "PurpleAsyncConnHandler.h" 
 #include <set>
 #include "RObject.h"
+#include "config.h"
 
 namespace rbol {
 	class PurpleAsyncConn : public RObject { 
