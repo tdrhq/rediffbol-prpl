@@ -13,17 +13,24 @@ IM-clients such as Pidgin and Adium.
 BUILDING AND INSTALLING
 -----------------------
 
+Rediffbol-prpl now uses the standard GNU build system. 
+
 First make sure you have the development files for libpurple installed.
 You could either have got this by installing from source or installing
 the respective package. E.g. in ubuntu do 
     sudo apt-get install libpurple-dev
 
-rediffbol-prpl requires libpurple >= 2.3.0. If you get a compile error
-that says PURPLE_CONNECTION_ERROR_NETWORK_ERROR is not defined, then the
-likely cause is an old version of libpurple-dev. 
+rediffbol-prpl requires libpurple >= 2.3.0. 
 
-To build just type "make" followed by "make install" (You don't have to
-do "sudo make install"). 
+To build just run :
+	./configure && make && sudo make install 
+To uninstall just run
+	sudo make uninstall
+
+It is possible to install the plugin _without_ administrative permissions.
+For this do
+	./configure && make && make install-exec-local
+
 
 Windows: I am pretty confident its possible to build this for Windows
 too, but you'll have to do some hacking to the Makefile. Since I
@@ -46,8 +53,8 @@ eh?
 AUTHORS
 -------
 
-Arnold "arnstein87" Noronha <arnold AT cmi DOT ac DOT in, arn_2000 AT
-rediffmail DOT com>
+Arnold "arnstein" Noronha <arnstein87@users.sourceforge.net, 
+	arn_2000@rediffmail.com>
 
 ----------------
 ACKNOWLEDGEMENTS
