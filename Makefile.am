@@ -41,5 +41,5 @@ install-exec-local: all-am
 	cp .libs/librediffbol.so ~/.purple/plugins/
 
 uninstall-local:
-	rm -f ~/.purple/plugins
+	rm -f ~/.purple/plugins/librediffbol.*
 
