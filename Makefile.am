@@ -14,7 +14,8 @@ pkgdir  = $(shell pkg-config --variable=libdir purple)/purple-2
 
 
 EXTRA_DIST = \
-		Makefile.mingw
+	README \
+	COPYING
 
 # pkgdir = $(libdir)/purple-$(PURPLE_MAJOR_VERSION)
 
