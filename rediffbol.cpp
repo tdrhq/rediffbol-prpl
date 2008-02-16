@@ -649,6 +649,11 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		} else if ( cmd == "TypingNotify" ) { 
 			parseTypingNoficiationResponse(buffer);
 			return ;
+		} else if ( cmd == "Disconnect" ) { 
+			setStateNetworkError(PURPLE_CONNECTION_ERROR_NAME_IN_USE,
+					     "It seems like you've logged in "
+					     "elsewhere :(" );
+			return ;
 		}
 	     
 		int len = buffer.readInt() ;
