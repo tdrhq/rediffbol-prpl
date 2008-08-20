@@ -73,9 +73,9 @@ void RediffBolConn::startLogin() {
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "starting login\n");
 
 	connection = new PurpleAsyncConn(this, 
-					 1) ;
+					 2) ;
 	if ( !connection->establish_connection(	"203.199.83.62",
-						1863) ) 
+						80) ) 
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 				     "Unable to initiate connection to GK\n");
 
@@ -191,8 +191,11 @@ RediffBolConn::~RediffBolConn() {
 }		
 void RediffBolConn::gotConnected() { 
 	/* what's my state? */
-	if ( connection->getParseMode() ) 
-		connectToGK() ;
+	if ( connection->getParseMode() ) { 
+		/*connectToGK() */
+		string request = "GET http://gatekeeper.rediff.com:80/direct.cgi HTTP/1.1\r\n\r\n"; 
+		connection->write(request);
+	}
 	else connectToCS() ;
 
 }
@@ -205,6 +208,20 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 
 	if ( isInvalid () ) { 
 		purple_debug_info("rbol", "read callback on bad guy\n") ;
+	}
+
+	if ( conn->getParseMode() == 2 ) {
+		string resp = buffer.getRawBuffer() ;
+		buffer = MessageBuffer("") ;
+		const char* goodreply = "HTTP/1.1 200 OK";
+		if (resp.substr(0, strlen(goodreply)) == goodreply ) {
+			connectToGK();
+		} else { 
+			purple_debug_info("rbol", resp.c_str());
+			setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
+					     "Problem with Gatekeeper HTTP\n");
+		}
+		conn->setParseMode(1); /* Gk, in normal packet mode */
 	}
 	while ( buffer.left() >= 4 ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 

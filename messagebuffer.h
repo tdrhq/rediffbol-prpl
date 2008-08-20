@@ -23,6 +23,9 @@ namespace rbol{
 		MessageBuffer() { 
 			offset = err = 0 ;
 		}
+		std::string getRawBuffer() {
+			return str; 
+		}
 		gint32 readInt32();
 		gint32 peekInt32() ;
 		gint32 readLEInt() ;

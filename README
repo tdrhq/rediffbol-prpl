@@ -29,9 +29,9 @@ To uninstall just run
 
 It is possible to install the plugin _without_ administrative permissions.
 For this do
-	./configure && make && make install-exec-local
+	./configure && make && make local-install
 And uninstall using 
-	make uninstall-local
+	make local-uninstall
 
 
 Windows: I am pretty confident its possible to build this for Windows

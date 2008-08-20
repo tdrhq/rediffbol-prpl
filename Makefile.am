@@ -36,10 +36,10 @@ AM_CPPFLAGS = \
 	$(PURPLE_CFLAGS) $(GLIB_CFLAGS)
 
 
-install-exec-local: all-am
+local-install: all-am
 	mkdir -p ~/.purple/plugins/
 	cp -vf .libs/librediffbol.so ~/.purple/plugins/
 
-uninstall-local:
+local-uninstall:
 	rm -f ~/.purple/plugins/librediffbol.*
 
