@@ -602,6 +602,8 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 			return ;
 		} else if ( subtype == 7 ) { 
 			/* chat room response */
+			parseChatRoomsResponse(buffer) ;
+			return ;
 		} else if ( subtype == 62 ) { 
 			/* join chat room response */
 		} else if ( subtype == 14 ) { 

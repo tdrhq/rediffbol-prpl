@@ -352,19 +352,6 @@ static PurpleRoomlist*
 rediffbol_roomlist_get_list(PurpleConnection* gc){
 	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ; 
 	conn->sendGetChatRoomsRequest ();
-	PurpleRoomlist* rl = purple_roomlist_new(purple_connection_get_account(gc)) ; 
-	GList* fields = NULL ; 
-	PurpleRoomlistField * f = purple_roomlist_field_new ( PURPLE_ROOMLIST_FIELD_STRING, "", "room", TRUE ) ;
-	fields = g_list_append(fields, f) ;
-	
-	f = purple_roomlist_field_new(PURPLE_ROOMLIST_FIELD_INT, "", 
-				      "id", TRUE) ;
-
-	fields = g_list_append(fields, f) ;
-	purple_roomlist_set_fields(rl, fields) ;
-
-	
-	purple_roomlist_set_in_progress(rl, TRUE) ; 
 	return NULL ; 
 }
 

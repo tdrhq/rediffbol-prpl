@@ -184,11 +184,14 @@ namespace rbol {
 			}
 		};
 
+	private: 
+		PurpleRoomlist* roomlist ; 
+	public:
 		/**
 		 * a lobby object. A lobby can have sub-rooms
 		 */
 		struct Lobby : public ChatRoom { 
-			std::list<ChatRoom> subrooms; 
+			std::vector<ChatRoom> subrooms; 
 		};
 
 
@@ -196,13 +199,13 @@ namespace rbol {
 		 * initiate a request to get the list of chat rooms. 
 		 * Important note.
 		 */
-		void sendGetChatRoomsRequest() ; 
+		PurpleRoomlist* sendGetChatRoomsRequest() ; 
 
 		/**
 		 * callback for chatroomreqesponse. Will also notify libpurple
 		 * if necessary. 
 		 */
-		void parseChatRoomsResponse() ; 
+		void parseChatRoomsResponse(MessageBuffer &buffer) ; 
 		
 	};
 	
