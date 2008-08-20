@@ -24,7 +24,6 @@
 #include <ctype.h>
 #include <connection.h>
 #include <map>
-
 #include "request.h"
 #include "conn.h"
 #include <vector>
@@ -164,6 +163,47 @@ namespace rbol {
 			softDestroy() ;
 			return true ;
 		}
+
+
+
+		/**
+		 * The following code is meant for chat room purposes
+		 * only.
+		 */
+
+		/**
+		 * a simple structure indicating a chatroom object
+		 */
+		struct ChatRoom { 
+			int number ; 
+			int occupants; 
+			std::string  name ; 
+			ChatRoom(){
+				occupants = 0 ; 
+				number = 0 ; 
+			}
+		};
+
+		/**
+		 * a lobby object. A lobby can have sub-rooms
+		 */
+		struct Lobby : public ChatRoom { 
+			std::list<ChatRoom> subrooms; 
+		};
+
+
+		/**
+		 * initiate a request to get the list of chat rooms. 
+		 * Important note.
+		 */
+		void sendGetChatRoomsRequest() ; 
+
+		/**
+		 * callback for chatroomreqesponse. Will also notify libpurple
+		 * if necessary. 
+		 */
+		void parseChatRoomsResponse() ; 
+		
 	};
 	
 }

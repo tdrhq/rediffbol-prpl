@@ -2,7 +2,7 @@
 purpleplugindir = $(HOME)/.purple/plugins
 
  
-allsrc = avatar.cpp  conn.cpp  encode.cpp  FontParser.cpp  messagebuffer.cpp  rediffbol.cpp  rediffbol_init.cpp  util.cpp conn.h  encode.h  FontParser.h  messagebuffer.h  PurpleAsyncConnHandler.h  rediffbol.h  request.h  response.h  util.h RObject.h RObject.cpp
+allsrc = avatar.cpp  conn.cpp  encode.cpp  FontParser.cpp  messagebuffer.cpp  rediffbol.cpp  rediffbol_init.cpp  util.cpp conn.h  encode.h  FontParser.h  messagebuffer.h  PurpleAsyncConnHandler.h  rediffbol.h  request.h  response.h  util.h RObject.h RObject.cpp rediffbol_chatroom.cpp 
 
 
 PURPLE_CFLAGS  = $(shell pkg-config purple --cflags)

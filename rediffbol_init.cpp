@@ -344,6 +344,57 @@ static gboolean rediffbol_offline_message(const PurpleBuddy * buddy) {
 	return true ;
 }
 
+static void 
+rediffbol_join_chat(PurpleConnection* gc, GHashTable*gh) { 
+
+}
+static PurpleRoomlist* 
+rediffbol_roomlist_get_list(PurpleConnection* gc){
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ; 
+	conn->sendGetChatRoomsRequest ();
+	PurpleRoomlist* rl = purple_roomlist_new(purple_connection_get_account(gc)) ; 
+	GList* fields = NULL ; 
+	PurpleRoomlistField * f = purple_roomlist_field_new ( PURPLE_ROOMLIST_FIELD_STRING, "", "room", TRUE ) ;
+	fields = g_list_append(fields, f) ;
+	
+	f = purple_roomlist_field_new(PURPLE_ROOMLIST_FIELD_INT, "", 
+				      "id", TRUE) ;
+
+	fields = g_list_append(fields, f) ;
+	purple_roomlist_set_fields(rl, fields) ;
+
+	
+	purple_roomlist_set_in_progress(rl, TRUE) ; 
+	return NULL ; 
+}
+
+
+static GList *rediffbol_chat_info(PurpleConnection *gc) {
+  struct proto_chat_entry *pce; /* defined in prpl.h */
+
+  purple_debug_info("nullprpl", "returning chat setting 'room'\n");
+
+  pce = g_new0(struct proto_chat_entry, 1);
+  pce->label = (("Chat _room"));
+  pce->identifier = "room";
+  pce->required = TRUE;
+
+  return g_list_append(NULL, pce);
+}
+
+static GHashTable *rediffbol_chat_info_defaults(PurpleConnection *gc,
+                                               const char *room) {
+  GHashTable *defaults;
+
+  purple_debug_info("nullprpl", "returning chat default setting "
+                    "'room' = 'default'\n");
+
+  defaults = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
+  g_hash_table_insert(defaults, g_strdup("room"), g_strdup("default"));
+  return defaults;
+}  
+
+
 /*
  * prpl stuff. see prpl.h for more information.
  */
@@ -368,8 +419,8 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,               /* tooltip_text */
 	rediffbol_status_types,               /* status_types */
 	NULL,            /* blist_node_menu */
-	NULL,                  /* chat_info */
-	NULL,         /* chat_info_defaults */
+	rediffbol_chat_info,                  /* chat_info */
+	rediffbol_chat_info_defaults,         /* chat_info_defaults */
 	rediffbol_login,                      /* login */
 	rediffbol_close,                      /* close */
 	rediffbol_send_im,                    /* send_im */
@@ -388,7 +439,7 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,                 /* rem_permit */
 	NULL,                   /* rem_deny */
 	NULL,            /* set_permit_deny */
-	NULL,                  /* join_chat */
+	rediffbol_join_chat,                  /* join_chat */
 	NULL,                /* reject_chat */
 	NULL,              /* get_chat_name */
 	NULL,                /* chat_invite */
@@ -410,7 +461,7 @@ static PurplePluginProtocolInfo prpl_info =
 	NULL,                                /* get_cb_real_name */
 	NULL,             /* set_chat_topic */
 	NULL,                                /* find_blist_chat */
-	NULL,          /* roomlist_get_list */
+	rediffbol_roomlist_get_list,          /* roomlist_get_list */
 	NULL,            /* roomlist_cancel */
 	NULL,   /* roomlist_expand_category */
 	NULL,           /* can_receive_file */
