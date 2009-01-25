@@ -15,7 +15,8 @@ pkgdir  = $(shell pkg-config --variable=libdir purple)/purple-2
 
 EXTRA_DIST = \
 	README \
-	COPYING
+	COPYING \
+	CHANGELOG
 
 # pkgdir = $(libdir)/purple-$(PURPLE_MAJOR_VERSION)
 
