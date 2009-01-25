@@ -392,7 +392,12 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 
 	}
 
-	buffer.readInt() ; 
+	int telnums = buffer.readInt() ; 
+	for(int i = 0 ; i < telnums; i++ ){ 
+		buffer.readString() ; /* telephone number */
+		buffer.readString() ; /* contact name */ 
+		/* discard! */
+	}
 
 	//read blocked entries 
 	set<string> blocked ; 
