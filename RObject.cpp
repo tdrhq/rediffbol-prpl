@@ -8,6 +8,8 @@
 #include <eventloop.h>
 #include <sstream>
 #include <debug.h>
+#include <cstdlib>
+#include <cstring>
 
 using namespace rbol ;
 using namespace std; 
