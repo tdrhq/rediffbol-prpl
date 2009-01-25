@@ -18,7 +18,6 @@
 #include "status.h"
 #include "util.h"
 #include "version.h"
-#include <curl/curl.h>
 #include <assert.h>
 #include "xmlnode.h"
 #include <ctype.h>
