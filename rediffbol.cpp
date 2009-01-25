@@ -51,7 +51,7 @@ void rbol::hex_dump (const string a,const string message) {
 	
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 		     "Hex Dump[%s,%d]: %s\n",
-		     message.c_str(), a.length(),
+		     message.c_str(), (int) a.length(),
 		     hex_dump) ;
 	g_free(hex_dump) ; 
 }
@@ -178,7 +178,7 @@ void RediffBolConn::connectToCS() {
 	write_int(out, 9);
 	out.write("Winver:48", 9) ;
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "CS packet size: %d\n",
-		     out.str().length()) ;
+		     (int) out.str().length()) ;
 
 	hex_dump(out.str(), string("Sending CS acket")) ;
 	connection->write(out.str().data(), out.str().length()) ;
@@ -217,7 +217,7 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 		if (resp.substr(0, strlen(goodreply)) == goodreply ) {
 			connectToGK();
 		} else { 
-			purple_debug_info("rbol", resp.c_str());
+			purple_debug_info("rbol", "%s\n", resp.c_str());
 			setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 					     "Problem with Gatekeeper HTTP\n");
 		}
@@ -710,7 +710,7 @@ void RediffBolConn::setStateNetworkError(int  reason,
 					 string msg) {
 	/* can't do anything now */
 	assert(!isInvalid()) ;
-	purple_debug(PURPLE_DEBUG_INFO, "rbol" , msg.c_str()) ;
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", "%s\n", msg.c_str()) ;
 	softDestroy() ;
 	purple_connection_error_reason(account->gc, 
 	      (PurpleConnectionError)reason, (msg+"\n").c_str()) ;

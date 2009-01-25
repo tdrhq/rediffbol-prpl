@@ -28,7 +28,7 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 	tx_handler = 0 ;
 	connection_attempt_data = NULL ;
 
-	purple_debug_info("rbol", "Connection object created: %x\n", this);
+	purple_debug_info("rbol", "Connection object created: %p\n", this);
 
 }
 
@@ -111,7 +111,7 @@ static void conn_got_connected(gpointer data, gint source,
 void 
 PurpleAsyncConn::close() { 
 
-	purple_debug_info("rbol", "Closing connection object %x\n", this);
+	purple_debug_info("rbol", "Closing connection object %p\n", this);
 	setInvalid() ;
 
 	if ( connection_attempt_data ) {
@@ -236,7 +236,7 @@ void
 PurpleAsyncConn::read_cb(int source) { 
 	dump() ;
 
-	purple_debug_info("rbol", "got a read on %x with fd=%d\n", this, source);
+	purple_debug_info("rbol", "got a read on %p with fd=%d\n", this, source);
 	char buf[1024] ;
 	int len = read(source, buf, sizeof(buf)) ;
 	if ( isInvalid() ) { 

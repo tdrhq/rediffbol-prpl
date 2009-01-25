@@ -273,7 +273,7 @@ static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 
 static void rediffbol_alias_buddy(PurpleConnection *gc, const char *who,
                                  const char *alias) {
-	purple_debug_info("rediffbol", "%s sets %'s alias to %s\n",
+	purple_debug_info("rediffbol", "%s sets %s alias to %s\n",
 			  gc->account->username, who, alias);
 }
 

@@ -58,7 +58,7 @@ void RObject::addRef() {
 
 static gboolean 
 del_robject(gpointer data) {
-	purple_debug_info("rbol", "Deleting object %x\n", data) ;
+	purple_debug_info("rbol", "Deleting object %p\n", data) ;
 	RObject* d = (RObject*) data ; 
 	delete d ; 
 	return FALSE ; /* should not run again */
@@ -86,6 +86,6 @@ void RObject::dump() const {
 		s << " " ;
 	}
 
-	purple_debug_info("rbol", "[%x] Valid objects: %s\n", this, 
+	purple_debug_info("rbol", "[%p] Valid objects: %s\n", this, 
 			  s.str().c_str()) ;
 }
