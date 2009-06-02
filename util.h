@@ -1,6 +1,7 @@
 #ifndef __UTIL__H__
 #define __UTIL__H__ 
 
+#include <stdlib.h>
 #include <string> 
 
 namespace rbol { 
