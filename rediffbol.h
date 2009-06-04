@@ -130,6 +130,7 @@ namespace rbol {
 
 		void setStatus(std::string status, std::string message) ;
 		void startLogin() ;
+		void startLoginOver80 ();
 		static std::string fixEmail(std::string a) ;
 		std::string getBuddyNickname(std::string buddyname) ; 
 		std::string getBuddyStatusMessage(std::string buddyname) ;

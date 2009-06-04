@@ -73,11 +73,26 @@ void RediffBolConn::startLogin() {
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "starting login\n");
 
 	connection = new PurpleAsyncConn(this, 
-					 2) ;
-	if ( !connection->establish_connection(	"203.199.83.62",
-						80) ) 
+					 1) ;
+	if ( !connection->establish_connection(	"gatekeeper.rediff.com",
+						1863) ) {
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 				     "Unable to initiate connection to GK\n");
+		connection = NULL;
+	}
+	
+
+}
+
+void RediffBolConn::startLoginOver80() 
+{
+	purple_debug(PURPLE_DEBUG_INFO, "rbol", "trying login over port 80\n");
+	connection = new PurpleAsyncConn (this, 2);
+	if (!connection->establish_connection ("gatekeeper.rediff.com", 80)) {
+		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
+				     "Unable to initiate port 80 connection to GK\n");
+		connection = NULL;
+	}
 
 }
 
@@ -191,8 +206,11 @@ RediffBolConn::~RediffBolConn() {
 }		
 void RediffBolConn::gotConnected() { 
 	/* what's my state? */
-	if ( connection->getParseMode() ) { 
-		/*connectToGK() */
+	if (connection->getParseMode () == 1) {
+		connectToGK();
+	}
+	else if (connection->getParseMode () == 2) { 
+		/* HTTP GK */
 		string request = "GET http://gatekeeper.rediff.com:80/direct.cgi HTTP/1.1\r\n\r\n"; 
 		connection->write(request);
 	}
@@ -221,7 +239,7 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 			setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 					     "Problem with Gatekeeper HTTP\n");
 		}
-		conn->setParseMode(1); /* Gk, in normal packet mode */
+		conn->setParseMode(1); /* from now onwards looks like normal GK */
 	}
 	while ( buffer.left() >= 4 ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
@@ -1056,6 +1074,12 @@ void RediffBolConn::setStatus(string status, string message) {
 void RediffBolConn::closeCallback(PurpleAsyncConn* conn) { 
 	if ( conn != connection ) return ;
 	/* aargh.. server has closed the connection */
+
+	if (conn->getParseMode () == 1) {
+		/* hmm, let's go into HTTP GK mode */
+		startLoginOver80 ();
+	}
+	
 	assert(!isInvalid()) ;
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
 			     "Pathetic, the server has closed the connection");
