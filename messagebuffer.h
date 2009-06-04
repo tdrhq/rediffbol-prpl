@@ -12,58 +12,58 @@ namespace rbol{
 	class MessageBuffer { 
 		
 	private:
-		int offset; 
-		int err; 
-		std::string str; 
+		int offset;
+		int err;
+		std::string str;
 		
 	public:
-		MessageBuffer (std::string s) ;
-		~MessageBuffer() ;
+		MessageBuffer (std::string s);
+		~MessageBuffer();
 		
 		MessageBuffer() { 
-			offset = err = 0 ;
+			offset = err = 0;
 		}
 		std::string getRawBuffer() {
-			return str; 
+			return str;
 		}
 		gint32 readInt32();
-		gint32 peekInt32() ;
-		gint32 readLEInt() ;
+		gint32 peekInt32();
+		gint32 readLEInt();
 
 		gint32 readInt() {
-			return readInt32 () ;
+			return readInt32 ();
 		}
 		int left();
-		void seek(int len) ;
+		void seek(int len);
 		
-		char readByte() ;
+		char readByte();
 		
-		std::string readBytes( int len) ;
+		std::string readBytes( int len);
 		
 		MessageBuffer
 			readMessageBuffer( int len);
 		
-		std::string readString() ;
+		std::string readString();
 		
-		std::string readStringn(int len) ;
+		std::string readStringn(int len);
 		
-		gint16 readShort() ;
+		gint16 readShort();
 		
-		gboolean isEnd() ;
+		gboolean isEnd();
 		
-		int getLength() ; 
+		int getLength();
 		
-		void reset() ;
+		void reset();
 		
-		void push(std::string s) ;
+		void push(std::string s);
 
 		MessageBuffer tail() { 
-			return MessageBuffer(str.substr(offset)) ;
+			return MessageBuffer(str.substr(offset));
 		}
 		std::string peek() { 
-			return str.substr(offset)  ;
+			return str.substr(offset);
 		}
-	} ;
+	};
 }
 
 #endif

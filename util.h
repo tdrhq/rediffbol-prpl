@@ -7,7 +7,7 @@
 namespace rbol { 
 	std::string intToDWord(int a);
 	std::string intToSWord(int a);
-	std::string intToDWordLE(int a); 
+	std::string intToDWordLE(int a);
 	std::string bytes2Int(std::string a);
 	
 	std::string bytes2Int(char byte0, char byte1, char byte2, 

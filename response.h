@@ -28,25 +28,25 @@
 #include "rediffbol.h"
 
 namespace rbol { 
-	class RediffBolConn ;
+	class RediffBolConn;
 	
 	class Response { 
-		int responseId; 
+		int responseId;
 	public:
 		virtual int getResponseId()  {
-			return responseId ; 
+			return responseId;
 		}
 		
 		/* this is the actual processing call. This _will_ interact
 		 *  with libpurple and make changes. */
-		virtual void libpurpleProcess(RediffBolConn* rb) = 0 ; 
+		virtual void libpurpleProcess(RediffBolConn* rb) = 0;
 		
 		virtual bool parsePacket(MessageBuffer &m) = 0;
-		virtual ~Response() {} ;
-	} ;
+		virtual ~Response() {};
+	};
 }
 
-extern void response_free(struct Response *r) ;
+extern void response_free(struct Response *r);
 
 
 #endif

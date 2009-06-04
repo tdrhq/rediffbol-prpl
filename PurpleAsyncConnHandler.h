@@ -7,12 +7,12 @@
 
 namespace rbol { 
 
-	class PurpleAsyncConn; 
+	class PurpleAsyncConn;
 	class PurpleAsyncConnHandler : public RObject { 
 	private:
-		virtual void gotConnected()  = 0 ; 
+		virtual void gotConnected()  = 0;
 		virtual void readCallback(MessageBuffer &buffer, 
-			PurpleAsyncConn*) = 0 ; 
+			PurpleAsyncConn*) = 0;
 		
 
 		/* this is called before the actual buffer */
@@ -21,22 +21,22 @@ namespace rbol {
 		
 		/* failed to connect */
 		virtual void connectionError(std::string message, 
-			PurpleAsyncConn*) = 0 ;
+			PurpleAsyncConn*) = 0;
 
 		/* there was a network error in reading data*/
-		virtual void readError(PurpleAsyncConn*) = 0 ;
+		virtual void readError(PurpleAsyncConn*) = 0;
 		
 		/* the server closed the connection */
-		virtual void closeCallback(PurpleAsyncConn*) = 0 ;
+		virtual void closeCallback(PurpleAsyncConn*) = 0;
 		
-		virtual PurpleAccount* getProxyAccount() = 0 ; 
+		virtual PurpleAccount* getProxyAccount() = 0;
 
-		friend class PurpleAsyncConn ;
+		friend class PurpleAsyncConn;
 
 	public:
-		virtual ~PurpleAsyncConnHandler() { } ;
+		virtual ~PurpleAsyncConnHandler() { };
 		
-	} ;
+	};
 }
 
 #endif

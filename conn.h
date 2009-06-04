@@ -27,24 +27,24 @@ namespace rbol {
 
 		/* buffers */
 		PurpleCircBuffer *txbuf;
-		MessageBuffer awaiting; 
+		MessageBuffer awaiting;
 
 		/* handlers */
-		guint tx_handler; 
-		guint rx_handler; 
+		guint tx_handler;
+		guint rx_handler;
 		
 		/* the purple connection socket */
 		int fd;
 
 		/* store some information for the parent */
-		int parse_mode; 
+		int parse_mode;
 
 		/* super handler */
 		PurpleAsyncConnHandler *handler;
 
 	public:
 		int getParseMode() { 
-			return parse_mode; 
+			return parse_mode;
 		}
 		void setParseMode(int a) {
 			parse_mode = a;
@@ -55,7 +55,7 @@ namespace rbol {
 
 		virtual ~PurpleAsyncConn();
 		
-		void write(const void* data, int len); 
+		void write(const void* data, int len);
 		void write(std::string s);
 		/* internal callbacks */
 		void write_cb();

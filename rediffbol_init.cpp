@@ -2,18 +2,18 @@
  * rediffbol.c
  * (c) Copyright 2007, Arnold Noronha
  * 
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software;you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation;either version 2 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY;without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with this program;if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
  */
 
@@ -49,7 +49,7 @@
 //#include <libxml/xmlreader.h>
 #include "rediffbol.h"
 
-using namespace rbol ;
+using namespace rbol;
 #define REDIFFBOLPRPL_ID "prpl-rediffbol"
 
 
@@ -61,15 +61,15 @@ static void rediffbol_set_avatar(PurplePluginAction *action)
 {
 	PurpleConnection *gc = (PurpleConnection *)action->context;
 	
-	if ( !gc->proto_data ) return ;
+	if ( !gc->proto_data ) return;
 
-	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ;
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
 
 	std::string uri = "http://avatars.rediff.com/avatars/login.asp?username="
 		+ conn->getServerUserId() + "&session_id=" 
 		+ conn->getSessionString()+ "&from=bol&display=" 
 		+ conn->getServerDisplayName() + "&user_ip=" 
-		+ conn->getVisibleIP() ;
+		+ conn->getVisibleIP();
 
 	purple_debug_info("rediffbol", "opening URI %s\n",
 			  uri.c_str());
@@ -101,7 +101,7 @@ static const char *rediffbol_list_icon(PurpleAccount *acct, PurpleBuddy *buddy)
 
 static const char *rediffbol_list_emblem(PurpleBuddy *buddy)
 {
-	return NULL ;
+	return NULL;
 }
 
 
@@ -134,13 +134,13 @@ static GList *rediffbol_status_types(PurpleAccount *acct)
         purple_status_type_add_attr(type, "message", ("Offline"),
                                     purple_value_new(PURPLE_TYPE_STRING));
 
-	types = g_list_append(types, type) ;
+	types = g_list_append(types, type);
 
 	
 	/* invisible */
 	type = purple_status_type_new(PURPLE_STATUS_INVISIBLE, "invisible", 
-				      NULL, TRUE); 
-	types = g_list_append(types, type) ;
+				      NULL, TRUE);
+	types = g_list_append(types, type);
 
 	/* busy */
 	type = purple_status_type_new(PURPLE_STATUS_UNAVAILABLE, "busy",
@@ -162,83 +162,83 @@ static void rediffbol_login(PurpleAccount *acct)
 
 	purple_connection_update_progress(acct->gc, ("Connecting"),
 					  0,   /* which connection step this is */
-					  2);  /* total number of steps */
+					  2);/* total number of steps */
 	
 
 	if ( acct->gc->proto_data ) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "Closing an exisiting connection before "
-			     "reconnecting.\n") ;
+			     "reconnecting.\n");
 	}
 
 //	acct->gc->flags = PurpleConnectionFlags((int) acct->gc->flags | PURPLE_CONNECTION_HTML | PURPLE_CONNECTION_NO_URLDESC);
 
-	RediffBolConn* conn = new RediffBolConn (acct) ;
-	conn->startLogin() ;
+	RediffBolConn* conn = new RediffBolConn (acct);
+	conn->startLogin();
 }
 
 static void rediffbol_close(PurpleConnection *gc)
 {
-	RediffBolConn *conn = (RediffBolConn*) gc->proto_data ; 
+	RediffBolConn *conn = (RediffBolConn*) gc->proto_data;
 	if ( conn) { 
-		/*delete conn ;*/
+		/*delete conn;*/
 		conn->shutdown();
-		conn->delRef() ;
-		gc->proto_data = NULL ;
+		conn->delRef();
+		gc->proto_data = NULL;
 	}
 	else purple_debug_error("rbol", 
-			  "oh! how did this get destroyed already?") ;
+			  "oh! how did this get destroyed already?");
 }
 
 static int rediffbol_send_im(PurpleConnection *gc, const char *who,
 			     const char *message, PurpleMessageFlags flags)
 {
-	RediffBolConn *rb = (RediffBolConn*) gc->proto_data ; 
-	rb->sendMessage(who, message) ;
+	RediffBolConn *rb = (RediffBolConn*) gc->proto_data;
+	rb->sendMessage(who, message);
 	return 1;
 }
 
 
 static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 	const char *_msg = purple_status_get_attr_string(status, "message");
-	std::string msg = (_msg?_msg:"") ;
+	std::string msg = (_msg?_msg:"");
 
 	purple_debug_info("rediffbol", "setting %s's status to %s: %s\n",
 			  acct->username, purple_status_get_name(status), 
 			  msg.c_str());
 	
 
-	PurpleStatusType *stype = purple_status_get_type (status) ;
-	assert(stype) ;
+	PurpleStatusType *stype = purple_status_get_type (status);
+	assert(stype);
 	PurpleStatusPrimitive primitive = purple_status_type_get_primitive(
-		stype) ;
+		stype);
 	
-	RediffBolConn* rb = (RediffBolConn*) acct->gc->proto_data ;
-	if ( ! rb ) return ;
+	RediffBolConn* rb = (RediffBolConn*) acct->gc->proto_data;
+	if ( ! rb ) return;
 
 	if ( primitive == PURPLE_STATUS_AVAILABLE or
 	     primitive == PURPLE_STATUS_MOBILE ) { 
-		rb->setStatus("Online", msg) ;
-		return ;
+		rb->setStatus("Online", msg);
+		return;
 	}
 
 	if ( primitive == PURPLE_STATUS_AWAY  ) { 
-		rb->setStatus("Away", msg) ;
-		return ;
+		rb->setStatus("Away", msg);
+		return;
 	}
 
 	if ( primitive == PURPLE_STATUS_UNAVAILABLE) {
-		rb->setStatus("Busy", msg ) ;
-		return ;
+		rb->setStatus("Busy", msg );
+		return;
 	}
 
 	if ( primitive == PURPLE_STATUS_INVISIBLE ) { 
-		rb->setStatus("Invisible", msg) ;
-		return ;
+		rb->setStatus("Invisible", msg);
+		return;
 	}
 
 	if ( primitive == PURPLE_STATUS_OFFLINE ) { 
-		purple_debug_info("rbol", "uh, ok, so I have to set my status to offline\n") ;
+		purple_debug_info("rbol", "uh, ok, so I have to set my status to offline\n");
 		return;
 	}
 
@@ -250,11 +250,11 @@ static void rediffbol_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 				PurpleGroup *group)
 {
 
-	RediffBolConn *conn = (RediffBolConn*) gc->proto_data ; 
+	RediffBolConn *conn = (RediffBolConn*) gc->proto_data;
 
-	if ( !conn ) return ; 
+	if ( !conn ) return;
 	conn->sendAddContactRequest( SAFE(buddy->name), 
-				    SAFE(group->name) ) ;
+				    SAFE(group->name) );
 }
 
 
@@ -263,10 +263,10 @@ static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 {
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 		     "Deleteing %s under %s\n", buddy->name,
-		     group->name) ;
-	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ; 
-	if ( !conn) return  ;
-	conn->sendDelContactRequest(SAFE(buddy->name), SAFE(group->name)) ;
+		     group->name);
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
+	if ( !conn) return;
+	conn->sendDelContactRequest(SAFE(buddy->name), SAFE(group->name));
 }
 
 
@@ -283,8 +283,8 @@ static void rediffbol_alias_buddy(PurpleConnection *gc, const char *who,
  */
 const char *rediffbol_normalize(const PurpleAccount *acct,
                                       const char *input) {
-	std::string ret = RediffBolConn::fixEmail(SAFE(input)) ;
-	return strdup(ret.c_str()) ;
+	std::string ret = RediffBolConn::fixEmail(SAFE(input));
+	return strdup(ret.c_str());
 }
 
 static void rediffbol_set_buddy_icon(PurpleConnection *gc,
@@ -294,12 +294,12 @@ static void rediffbol_set_buddy_icon(PurpleConnection *gc,
 }
 
 static char *rediffbol_status_text(PurpleBuddy *b) { 
-	RediffBolConn *rb = (RediffBolConn*) b->account->gc->proto_data ;
-	if ( ! rb) return NULL ;
+	RediffBolConn *rb = (RediffBolConn*) b->account->gc->proto_data;
+	if ( ! rb) return NULL;
 
-	std::string message = rb->getBuddyStatusMessage(b->name)  ;
-	if ( message != "" ) return g_strdup(message.c_str() ) ;
-	else return NULL ;
+	std::string message = rb->getBuddyStatusMessage(b->name);
+	if ( message != "" ) return g_strdup(message.c_str() );
+	else return NULL;
 }
 
 static unsigned int rediffbol_send_typing(PurpleConnection *gc, 
@@ -310,37 +310,37 @@ static unsigned int rediffbol_send_typing(PurpleConnection *gc,
 	purple_debug_info("rbol", "%s %d\n", gc->account->username,
                     int(typing));
 
-	RediffBolConn * conn = (RediffBolConn*) gc->proto_data ; 
+	RediffBolConn * conn = (RediffBolConn*) gc->proto_data;
 
 	if ( typing == PURPLE_TYPING or typing == PURPLE_TYPED ) {
-		conn->sendTypingNotification(SAFE(name)); 
+		conn->sendTypingNotification(SAFE(name));
 	} else { 
 		purple_debug_info("rbol", "I can't handle this "
-				  "typing notification\n") ;
+				  "typing notification\n");
 	}
 
-	return 0 ;
+	return 0;
 }
 
 static void rediffbol_group_buddy(PurpleConnection *gc, 
 				  const char* who, 
 				  const char* old_group, 
 				  const char* new_group ) { 
-	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ;
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
 	conn->sendChangeBuddyGroupRequest(SAFE(who), 
 					  SAFE(old_group),
-					  SAFE(new_group)) ;
+					  SAFE(new_group));
 }
 
 static void rediffbol_remove_group(PurpleConnection *gc, 
 				   PurpleGroup* group) { 
-	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ;
-	conn->sendAddRemoveGroupRequest(SAFE(group->name), true) ;
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
+	conn->sendAddRemoveGroupRequest(SAFE(group->name), true);
 }
 
 static gboolean rediffbol_offline_message(const PurpleBuddy * buddy) { 
 	/* all buddies support offline messages */
-	return true ;
+	return true;
 }
 
 static void 
@@ -349,14 +349,14 @@ rediffbol_join_chat(PurpleConnection* gc, GHashTable*gh) {
 }
 static PurpleRoomlist* 
 rediffbol_roomlist_get_list(PurpleConnection* gc){
-	RediffBolConn* conn = (RediffBolConn*) gc->proto_data ; 
+	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
 	conn->sendGetChatRoomsRequest ();
-	return NULL ; 
+	return NULL;
 }
 
 
 static GList *rediffbol_chat_info(PurpleConnection *gc) {
-  struct proto_chat_entry *pce; /* defined in prpl.h */
+  struct proto_chat_entry *pce;/* defined in prpl.h */
 
   purple_debug_info("nullprpl", "returning chat setting 'room'\n");
 

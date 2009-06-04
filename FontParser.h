@@ -6,18 +6,18 @@
 
 namespace rbol { 
 	class FontParser { 
-		std::string name ;
-		std::string data ; 
+		std::string name;
+		std::string data;
 		
 	public:
-		FontParser(std::string fontname,std::string fontdata ) ;
+		FontParser(std::string fontname,std::string fontdata );
 
-		int getSize() ; 
-		std::string getColor() ;
-		bool isItalic() ;
-		bool isBold() ;
-		bool isStrikedOut() ;
-		bool isUnderlined() ;
+		int getSize();
+		std::string getColor();
+		bool isItalic();
+		bool isBold();
+		bool isStrikedOut();
+		bool isUnderlined();
 	};
 }
 #endif

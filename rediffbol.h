@@ -67,42 +67,42 @@ namespace rbol {
 		void setStateNetworkError (int  reason, 
 					  std::string msg);
 
-		std::vector<std::string> roster; 
+		std::vector<std::string> roster;
 		std::string session;
-		std::string visibleIP; 
-		int keep_alive_counter; 
-		guint keep_alive_timer_handle; 
-		int connection_state; 
+		std::string visibleIP;
+		int keep_alive_counter;
+		guint keep_alive_timer_handle;
+		int connection_state;
 
 		void softDestroy ();
 
-		std::map<std::string, std::string> nickname; 
+		std::map<std::string, std::string> nickname;
 		std::map<std::string, std::string> status_text;
-		std::map<std::string, std::string> group; 
-		std::set<std::string> groups; 
+		std::map<std::string, std::string> group;
+		std::set<std::string> groups;
 		std::string _parseChatMessage(MessageBuffer &buffer);
 		
 		/* usernames as retrieved from server */
-		std::string server_userId; 
-		std::string server_displayname; 
+		std::string server_userId;
+		std::string server_displayname;
 		std::string server_nickname;
 	public: 
 		std::string getServerUserId() const;
-		std::string getServerDisplayName() const; 
+		std::string getServerDisplayName() const;
 		std::string getServerNickname() const;
 		std::string getSessionString() const;
 		std::string getVisibleIP() const;
 		PurpleAccount *account;
-		PurpleAsyncConn *connection; 
+		PurpleAsyncConn *connection;
 		std::string userAgent;
 
-		RediffBolConn (PurpleAccount *acct); 
+		RediffBolConn (PurpleAccount *acct);
 
-		~RediffBolConn(); 
-		std::list<std::string> iplist; 
+		~RediffBolConn();
+		std::list<std::string> iplist;
 
 
-		PurpleAsyncConn* getAsyncConnection(); 
+		PurpleAsyncConn* getAsyncConnection();
 
 		void connectToGK();
 		void connectToCS();
@@ -129,9 +129,9 @@ namespace rbol {
 		void startLogin();
 		void startLoginOver80 ();
 		static std::string fixEmail(std::string a);
-		std::string getBuddyNickname(std::string buddyname); 
+		std::string getBuddyNickname(std::string buddyname);
 		std::string getBuddyStatusMessage(std::string buddyname);
-		virtual void closeCallback(PurpleAsyncConn*) ;
+		virtual void closeCallback(PurpleAsyncConn*);
 		void sendAcceptAddRequest(std::string localid, 
 					  std::string reqId, 
 					  std::string from, std::string from2,
@@ -147,15 +147,15 @@ namespace rbol {
 		
 		void sendTypingNotification(std::string user);
 		void parseTypingNoficiationResponse(MessageBuffer &buffer);
-		void sendAddRemoveGroupRequest(std::string groupname, bool Remove = false) ;
+		void sendAddRemoveGroupRequest(std::string groupname, bool Remove = false);
 
-		void loadAvatar(std::string username); 
+		void loadAvatar(std::string username);
 		void _loadAvatarCompleted(std::string name, std::string data);
 
 		void connectionError(std::string error, PurpleAsyncConn* conn);
 		bool shutdown() { 
-			softDestroy() ;
-			return true ;
+			softDestroy();
+			return true;
 		}
 
 
@@ -169,23 +169,23 @@ namespace rbol {
 		 * a simple structure indicating a chatroom object
 		 */
 		struct ChatRoom { 
-			int number; 
-			int occupants; 
-			std::string  name; 
+			int number;
+			int occupants;
+			std::string  name;
 			ChatRoom(){
-				occupants = 0; 
-				number = 0; 
+				occupants = 0;
+				number = 0;
 			}
 		};
 
 	private: 
-		PurpleRoomlist* roomlist ; 
+		PurpleRoomlist* roomlist;
 	public:
 		/**
 		 * a lobby object. A lobby can have sub-rooms
 		 */
 		struct Lobby : public ChatRoom { 
-			std::vector<ChatRoom> subrooms; 
+			std::vector<ChatRoom> subrooms;
 		};
 
 
@@ -193,13 +193,13 @@ namespace rbol {
 		 * initiate a request to get the list of chat rooms. 
 		 * Important note.
 		 */
-		PurpleRoomlist* sendGetChatRoomsRequest(); 
+		PurpleRoomlist* sendGetChatRoomsRequest();
 
 		/**
 		 * callback for chatroomreqesponse. Will also notify libpurple
 		 * if necessary. 
 		 */
-		void parseChatRoomsResponse(MessageBuffer &buffer); 
+		void parseChatRoomsResponse(MessageBuffer &buffer);
 		
 	};
 	
