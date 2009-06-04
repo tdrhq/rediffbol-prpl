@@ -23,10 +23,10 @@ namespace rbol {
 		 * trust that this object *exists* in memory. 
 		 */
 
-		PurpleProxyConnectData *connection_attempt_data ;
+		PurpleProxyConnectData *connection_attempt_data;
 
 		/* buffers */
-		PurpleCircBuffer *txbuf ;
+		PurpleCircBuffer *txbuf;
 		MessageBuffer awaiting; 
 
 		/* handlers */
@@ -34,37 +34,35 @@ namespace rbol {
 		guint rx_handler; 
 		
 		/* the purple connection socket */
-		int fd ;
+		int fd;
 
 		/* store some information for the parent */
-		int parse_mode ; 
+		int parse_mode; 
 
 		/* super handler */
-		PurpleAsyncConnHandler *handler ;
+		PurpleAsyncConnHandler *handler;
 
 	public:
 		int getParseMode() { 
-			return parse_mode ; 
+			return parse_mode; 
 		}
 		void setParseMode(int a) {
 			parse_mode = a;
 		}
 		PurpleAsyncConn(PurpleAsyncConnHandler* conn, 
-			        int pm) ;
-		bool establish_connection(std::string ip, gint32 port) ;
+			        int pm);
+		bool establish_connection(std::string ip, gint32 port);
 
-		virtual ~PurpleAsyncConn() ;
+		virtual ~PurpleAsyncConn();
 		
-		void write(const void* data, int len) ; 
-		void write(std::string s) ;
+		void write(const void* data, int len); 
+		void write(std::string s);
 		/* internal callbacks */
-		void write_cb() ;
-		void read_cb(int source) ;
+		void write_cb();
+		void read_cb(int source);
 
-		void close() ;
-		void got_connected_cb(int source, const gchar* ) ;
-
-		
+		void close();
+		void got_connected_cb(int source, const gchar*);
 	};
 }
 

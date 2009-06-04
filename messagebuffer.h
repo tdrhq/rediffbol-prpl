@@ -12,9 +12,9 @@ namespace rbol{
 	class MessageBuffer { 
 		
 	private:
-		int offset ; 
-		int err ; 
-		std::string str ; 
+		int offset; 
+		int err; 
+		std::string str; 
 		
 	public:
 		MessageBuffer (std::string s) ;
