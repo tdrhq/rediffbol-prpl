@@ -14,9 +14,9 @@ PurpleRoomlist* RediffBolConn::sendGetChatRoomsRequest(){
 	out<<intToDWord(0);
 	out<<intToDWord(7);
 	
-	out<<intToDWord(strlen(CSRequestHeader) );
+	out<<intToDWord(strlen(CSRequestHeader));
 	out<<CSRequestHeader;
-	out<<intToDWord(strlen(CSCmdGetChatRooms) );
+	out<<intToDWord(strlen(CSCmdGetChatRooms));
 	out<<CSCmdGetChatRooms;
 	out<<intToDWord(0);
 	
@@ -24,14 +24,14 @@ PurpleRoomlist* RediffBolConn::sendGetChatRoomsRequest(){
 	connection->write(out.str());
 
 
-	if ( roomlist ) { 
+	if (roomlist) { 
 		purple_roomlist_unref(roomlist);
 		roomlist = NULL;
 	}
 
 	PurpleRoomlist* rl = purple_roomlist_new(account);
 	GList* fields = NULL;
-	PurpleRoomlistField * f = purple_roomlist_field_new ( PURPLE_ROOMLIST_FIELD_STRING, "", "room", FALSE );
+	PurpleRoomlistField * f = purple_roomlist_field_new (PURPLE_ROOMLIST_FIELD_STRING, "", "room", FALSE);
 	fields = g_list_append(fields, f);
 	
 	f = purple_roomlist_field_new(PURPLE_ROOMLIST_FIELD_STRING, "", 
@@ -55,7 +55,7 @@ void RediffBolConn::parseChatRoomsResponse(MessageBuffer &buffer) {
 	vector<Lobby> lobbylist;
 	int totalusers = 0;
 	
-	for(int i = 0;i < numlobbies ; i++ ){
+	for(int i = 0;i < numlobbies ; i++){
 		string lobbyname = buffer.readString();
 		Lobby lobby;
 		lobby.occupants = 0;
@@ -75,7 +75,7 @@ void RediffBolConn::parseChatRoomsResponse(MessageBuffer &buffer) {
 
 		purple_roomlist_room_add(roomlist, r);
 
-		for(int i = 0;i < numrooms; i++ ) {
+		for(int i = 0;i < numrooms; i++) {
 			ChatRoom room;
 			room.number = buffer.readInt();
 			room.occupants = buffer.readInt();

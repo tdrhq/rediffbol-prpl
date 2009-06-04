@@ -11,9 +11,9 @@ static void load_avatar_callback(PurpleUtilFetchUrlData* url_data,
 				  gsize len ,const gchar* error_message) {
 	purple_debug_info ("rbol", "avatar callback\n");
 	pair<RediffBolConn*, string> *data = NULL;
-	data = (typeof(data)) ( user_data );
+	data = (typeof(data)) (user_data);
 
-	if ( url_text == NULL or data ->first->isInvalid()  )  {
+	if (url_text == NULL or data ->first->isInvalid())  {
 		data->first->delRef();
 		delete data;
 		return;
@@ -29,9 +29,9 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 				  gpointer user_data, const gchar * url_text, 
 				  gsize len ,const gchar* error_message) {
 	pair<RediffBolConn*, string> *data = NULL;
-	data = (typeof(data)) ( user_data );
+	data = (typeof(data)) (user_data);
 
-	if ( ! url_text ) { 
+	if (! url_text) { 
 		purple_debug_info("rbol", "Unable to load url string\n");
 		data->first->delRef();
 		delete data;
@@ -47,7 +47,7 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 	r_key = r_key.substr(5);
 
 	for(size_t l = 0;l < r_key.size(); l++) 
-		if ( r_key[l] == '<' ) { 
+		if (r_key[l] == '<') { 
 			r_key = r_key.substr(0, l);
 			break;
 		}
@@ -64,7 +64,7 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 				      NULL, /* request */
 				      false, /* don't include headers */
 				      load_avatar_callback, 
-				      (void*) data );
+				      (void*) data);
 
 }
 void RediffBolConn::loadAvatar(std::string name) { 
@@ -86,7 +86,7 @@ void RediffBolConn::loadAvatar(std::string name) {
 				      NULL, /* request */
 				      false, /* don't include headers */
 				      load_avatar_key_callback, 
-				      (void*) data );
+				      (void*) data);
 	
 
 
@@ -94,7 +94,7 @@ void RediffBolConn::loadAvatar(std::string name) {
 
 void RediffBolConn::_loadAvatarCompleted(std::string name, 
 					 std::string avatar_data) { 
-	if ( isInvalid()) { 
+	if (isInvalid()) { 
 		purple_debug_info("rbol", "Got avatar for invalid object\n");
 		return;
 	}

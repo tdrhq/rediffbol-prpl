@@ -22,7 +22,7 @@ MessageBuffer::~MessageBuffer() {
 
 gint32 
 MessageBuffer::readInt32() {
-	if ( this->left() < 4 ) { 
+	if (this->left() < 4) { 
 		throw MessageBufferOverflowException();
 	}
 	int i = *((gint32*) (this->str.c_str()+this->offset));
@@ -32,7 +32,7 @@ MessageBuffer::readInt32() {
 
 gint32 
 MessageBuffer::peekInt32() {
-	if ( this->left() < 4 ) { 
+	if (this->left() < 4) { 
 		throw MessageBufferOverflowException();
 	}
 	int i = *((gint32*) (this->str.c_str()+this->offset));
@@ -42,14 +42,14 @@ MessageBuffer::peekInt32() {
 
 void 
 MessageBuffer::seek(int len) { 
-	if ( size_t(this->offset) + len >= this->str.length()) 
+	if (size_t(this->offset) + len >= this->str.length()) 
 		throw MessageBufferOverflowException();
 	this->offset += len;
 }
 
 char 
 MessageBuffer::readByte() {
-	if ( size_t(this->offset) >= this->str.length()) { 
+	if (size_t(this->offset) >= this->str.length()) { 
 		throw MessageBufferOverflowException();
 	}
 	return str[this->offset++];
@@ -57,7 +57,7 @@ MessageBuffer::readByte() {
 
 string
 MessageBuffer::readBytes(int len) { 
-	if ( this->left() < len ) { 
+	if (this->left() < len) { 
 		throw MessageBufferOverflowException();
 	}
 	string s = str.substr(this->offset, len);
@@ -78,20 +78,20 @@ MessageBuffer::readString() {
 
 string
 MessageBuffer::readStringn(int len) { 
-	if ( len == 0 ) return "";
+	if (len == 0) return "";
 	return readBytes(len);
 }
 
 gint16 
 MessageBuffer::readShort() { 
 	gint16 ret = readByte();
-	ret = (((gint16)readByte()) << 8 ) | ret;
+	ret = (((gint16)readByte()) << 8) | ret;
 	return ret;
 }
 
 gboolean 
 MessageBuffer::isEnd() { 
-	return ( size_t(offset) >= str.length());
+	return (size_t(offset) >= str.length());
 }
 
 gboolean 

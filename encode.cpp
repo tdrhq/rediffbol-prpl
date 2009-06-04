@@ -9,16 +9,16 @@ using namespace std;
 using namespace rbol;
 
 string rbol::encode(const string a, const string from, const string to) { 
-	iconv_t ic = iconv_open( to.c_str(), from.c_str());
+	iconv_t ic = iconv_open(to.c_str(), from.c_str());
 
-	if ( ic == (iconv_t) -1) { 
+	if (ic == (iconv_t) -1) { 
 		perror("iconv_open failed");
-		assert(false );
+		assert(false);
 	}
 	char* buf = new char [5*a.size()];
 	char * obuf = buf;
 	char *inbuf = new char[a.length()];
-	copy(a.begin(), a.end(), inbuf );
+	copy(a.begin(), a.end(), inbuf);
 
 	char* oinbuf = inbuf;
 	
@@ -28,18 +28,18 @@ string rbol::encode(const string a, const string from, const string to) {
 
 	size_t size = iconv(ic, &inbuf, &inbytesleft, &buf, &outbytesleft);
 
-	if ( size == (size_t) -1 ) {
+	if (size == (size_t) -1) {
 		
 		perror(a.c_str());
-		assert(false );
+		assert(false);
 	}
 	
-	string ret ( obuf, obuf + (oo-outbytesleft) );
+	string ret (obuf, obuf + (oo-outbytesleft));
 
 	delete[] obuf;
 	delete[] oinbuf;
 	
-	if ( iconv_close(ic) != 0 ) { 
+	if (iconv_close(ic) != 0) { 
 		perror("encode");
 		assert(false);
 	}

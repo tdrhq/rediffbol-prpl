@@ -44,7 +44,7 @@ static string escape_html_entities(string text) {
 }
 
 void rbol::hex_dump (const string a,const string message) { 
-	if ( a.size() == 0 ) return;
+	if (a.size() == 0) return;
 	gchar* hex_dump = purple_str_binary_to_ascii
 		((const unsigned char*) a.data(), 
 		 a.length());
@@ -57,9 +57,9 @@ void rbol::hex_dump (const string a,const string message) {
 }
 
 void RediffBolConn::softDestroy() { 
-	if ( isInvalid() ) return;
+	if (isInvalid()) return;
 
-	if ( keep_alive_timer_handle ) {
+	if (keep_alive_timer_handle) {
 		purple_timeout_remove(keep_alive_timer_handle);
 		keep_alive_timer_handle = 0;
 	}
@@ -74,8 +74,8 @@ void RediffBolConn::startLogin() {
 
 	connection = new PurpleAsyncConn(this, 
 					 1);
-	if ( !connection->establish_connection(	"gatekeeper.rediff.com",
-						1863) ) {
+	if (!connection->establish_connection(	"gatekeeper.rediff.com",
+						1863)) {
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 				     "Unable to initiate connection to GK\n");
 		connection = NULL;
@@ -97,7 +97,7 @@ void RediffBolConn::startLoginOver80()
 }
 
 #define write_int(s, a) { int t = (a);s.write((char*) &t, sizeof(t)) ; }
-#define write_short(s,a ) { short t = (a);s.write((char*) &t, sizeof(t)) ; }
+#define write_short(s,a) { short t = (a);s.write((char*) &t, sizeof(t)) ; }
 void RediffBolConn::connectToGK() { 
 	/* construct a request */
 	ostringstream s;
@@ -138,11 +138,11 @@ void RediffBolConn::connectToGK() {
 	write_int(s, size);
 	s.write(CAP_DIR, size);
 
-	write_int(s, strlen(CAP_HTTP_CONNECT) );
+	write_int(s, strlen(CAP_HTTP_CONNECT));
 
 	s.write(CAP_HTTP_CONNECT, strlen(CAP_HTTP_CONNECT));
 
-	write_int(s, strlen(CAP_HTTP) );
+	write_int(s, strlen(CAP_HTTP));
 
 	s.write(CAP_HTTP, strlen(CAP_HTTP));
 	string t = s.str();
@@ -202,7 +202,7 @@ void RediffBolConn::connectToCS() {
 RediffBolConn::~RediffBolConn() { 
 	softDestroy();
 
-	if ( connection ) delete connection;
+	if (connection) delete connection;
 }		
 void RediffBolConn::gotConnected() { 
 	/* what's my state? */
@@ -219,20 +219,20 @@ void RediffBolConn::gotConnected() {
 }
 
 void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) try { 
-	if ( conn != connection ) { 
+	if (conn != connection) { 
 		purple_debug_info("rbol", "unintended read callback\n");
 		return;
 	}
 
-	if ( isInvalid () ) { 
+	if (isInvalid ()) { 
 		purple_debug_info("rbol", "read callback on bad guy\n");
 	}
 
-	if ( conn->getParseMode() == 2 ) {
+	if (conn->getParseMode() == 2) {
 		string resp = buffer.getRawBuffer();
 		buffer = MessageBuffer("");
 		const char* goodreply = "HTTP/1.1 200 OK";
-		if (resp.substr(0, strlen(goodreply)) == goodreply ) {
+		if (resp.substr(0, strlen(goodreply)) == goodreply) {
 			connectToGK();
 		} else { 
 			purple_debug_info("rbol", "%s\n", resp.c_str());
@@ -241,12 +241,12 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 		}
 		conn->setParseMode(1);/* from now onwards looks like normal GK */
 	}
-	while ( buffer.left() >= 4 ) { 
+	while (buffer.left() >= 4) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "got a response\n");
 		
 		
-		if ( buffer.peekInt32() + 4 > buffer.left()) return;
+		if (buffer.peekInt32() + 4 > buffer.left()) return;
 		
 		int size = buffer.readInt32();
 		MessageBuffer buf = buffer.readMessageBuffer(size);
@@ -254,7 +254,7 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 		buffer = buffer.tail ();
 		
 		/* try and parse to see what we've got */
-		if ( connection->getParseMode()) 
+		if (connection->getParseMode()) 
 			parseGkResponse(buf);
 		else 
 			parseCSResponse(buf);
@@ -263,9 +263,9 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 	
 }
 
-catch (MessageBufferOverflowException e ) { 
+catch (MessageBufferOverflowException e) { 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "overflow exception %d\n", 
-		     buffer.getLength() );
+		     buffer.getLength());
 	buffer.reset();
 	return;
   }
@@ -288,7 +288,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 
         for(int i = 0;i < numentries ; i++) { 
                 int subentries = buffer.readInt32();
-                for(int j = 0;j < subentries; j++ ){ 
+                for(int j = 0;j < subentries; j++){ 
                         string cp = buffer.readString();
                         string val = buffer.readString();
 			purple_debug(PURPLE_DEBUG_INFO, "rbol", 
@@ -299,14 +299,14 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
         }
 
 	string list = cap[CAP_DIR];
-        for(size_t i = 0;i < list.size() ; i++ )
-                if ( list[i] == ',' ) list[i] = ' ';
+        for(size_t i = 0;i < list.size() ; i++)
+                if (list[i] == ',') list[i] = ' ';
 
         istringstream iss(list);
         
         vector<string> res;
         string s;
-        while( iss >> s ) { 
+        while(iss >> s) { 
                 res.push_back(s);
         } 
 
@@ -327,7 +327,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 
 	PurpleAsyncConn* newconn =  new PurpleAsyncConn(this, 
 					 0);
-	if ( ! newconn->establish_connection(ip, port)) 
+	if (! newconn->establish_connection(ip, port)) 
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 				     "Failed to initiate connection to CS\n");
 
@@ -344,7 +344,7 @@ gboolean keep_alive_timer(gpointer data) {
 }
 
 void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) { 
-	if ( connection_state >= 2 ) { 
+	if (connection_state >= 2) { 
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol", 
 			     "Uh? Why am I getting a connection packet" 
 			     " when I'm connected!?\n");
@@ -354,14 +354,14 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	vector<string> roster;
 	map<string, vector<string> > groups;
 	int payloadsize = buffer.readInt();
-	assert(buffer.left() == payloadsize );
+	assert(buffer.left() == payloadsize);
 	
 	int errorcode = buffer.readInt();
 
-	if ( errorcode != 0 ) { 
+	if (errorcode != 0) { 
 		char err[100];
 
-		if ( errorcode == 1 ) { 
+		if (errorcode == 1) { 
 			setStateNetworkError(PURPLE_CONNECTION_ERROR_AUTHENTICATION_FAILED, "Authentication failed");
 			return;
 		}
@@ -411,7 +411,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	}
 
 	int telnums = buffer.readInt();
-	for(int i = 0;i < telnums; i++ ){ 
+	for(int i = 0;i < telnums; i++){ 
 		buffer.readString();/* telephone number */
 		buffer.readString();/* contact name */ 
 		/* discard! */
@@ -482,13 +482,13 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 			/* add this buddy if required */
 			PurpleBuddy *buddy = purple_find_buddy(account, 
 						  membername.c_str());
-			if ( !buddy ) { 
+			if (!buddy) { 
 				buddy = purple_buddy_new(account, 
 							 membername.c_str(),
 							 membername.c_str());
 				PurpleGroup *group = purple_find_group(
 					groupname2.c_str());
-				if ( ! group ) 
+				if (! group) 
 					group = purple_group_new(groupname2.c_str());
 				purple_blist_add_buddy(buddy, 
 				      purple_buddy_get_contact(buddy),
@@ -518,11 +518,11 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	keep_alive_timer_handle = purple_timeout_add_seconds(30, keep_alive_timer, this);
 }
 string getStatusFromID(int status) { 
-	if ( status == 2 ) { 
+	if (status == 2) { 
 		return "away";
-	} else if ( status == 3 ) 
+	} else if (status == 3) 
 		return "busy";
-	else if ( status == 1 ) 
+	else if (status == 1) 
 		return  "online";
 	else
 		return "offline";
@@ -603,7 +603,7 @@ void RediffBolConn::parseContactStatusChange(MessageBuffer &buffer) {
 	/* attempt to ask libpurple to update status message too */
 
 	PurpleBuddy *b = purple_find_buddy(account, name1.c_str());
-	if ( b == NULL ) return;
+	if (b == NULL) return;
 	PurplePresence *pres = purple_buddy_get_presence(b);
 	PurpleStatus * pstatus = purple_presence_get_active_status(pres);
 
@@ -623,30 +623,30 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 	string cmd = "";
 
 
-	if ( type == 1 ) { 
-		if ( buffer.getLength() == 12 ) {
+	if (type == 1) { 
+		if (buffer.getLength() == 12) {
 			hex_dump(buffer.peek(), "keep alive string");
 			return;
 		}
 
 		int subtype = buffer.readInt();
 
-		if ( subtype == 0 and connection_state < 2 ) { 
+		if (subtype == 0 and connection_state < 2) { 
 			parseCSLoginResponse(buffer);
 			return;
 		} else if (subtype == 1 or subtype == 0) { 
 			parseOfflineMessages(buffer);
 			return;
-		} else if ( subtype == 2 ) {
+		} else if (subtype == 2) {
 			parseOfflineAddContactResponse(buffer);
 			return;
-		} else if ( subtype == 7 ) { 
+		} else if (subtype == 7) { 
 			/* chat room response */
 			parseChatRoomsResponse(buffer);
 			return;
-		} else if ( subtype == 62 ) { 
+		} else if (subtype == 62) { 
 			/* join chat room response */
-		} else if ( subtype == 14 ) { 
+		} else if (subtype == 14) { 
 			parseGetContactIdResponse(buffer);
 			return;
 		}
@@ -660,7 +660,7 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		hex_dump(packet, "Unknown Type 1 response from server");
 		
 		return;
-	} else if ( type == 3 ) { 
+	} else if (type == 3) { 
 		header = buffer.readString();
 		cmd = buffer.readString();
 
@@ -668,33 +668,33 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 			     "cmd is %s\n", cmd.c_str());
 
 
-		if ( cmd ==  "Contacts") { 
+		if (cmd ==  "Contacts") { 
 			parseCSContacts(buffer);
 			return;
-		} else if ( cmd ==  "NewMailCount") { 
+		} else if (cmd ==  "NewMailCount") { 
 			parseNewMailsResponse(buffer);
 			return;
-		} else if ( cmd == "ContactStatusChange" ) { 
+		} else if (cmd == "ContactStatusChange") { 
 			/* ignore? */
-		} else if (cmd == "ContactStatusChange2" ) { 
+		} else if (cmd == "ContactStatusChange2") { 
 			parseContactStatusChange(buffer);
 			return;
-		} else if ( cmd == "ContactAddRequest" ){ 
+		} else if (cmd == "ContactAddRequest"){ 
 			parseContactAddRequest(buffer);
 			return;
-		}else if ( cmd == "TextMessage" ) { 
+		}else if (cmd == "TextMessage") { 
 			parseTextMessage(buffer);
 			return;
-		} else if ( cmd == "MessageFromMobileUser" ) {
+		} else if (cmd == "MessageFromMobileUser") {
 			parseMessageFromMobileUser(buffer);
 			return;
-		} else if ( cmd == "TypingNotify" ) { 
+		} else if (cmd == "TypingNotify") { 
 			parseTypingNoficiationResponse(buffer);
 			return;
-		} else if ( cmd == "Disconnect" ) { 
+		} else if (cmd == "Disconnect") { 
 			setStateNetworkError(PURPLE_CONNECTION_ERROR_NAME_IN_USE,
 					     "It seems like you've logged in "
-					     "elsewhere :(" );
+					     "elsewhere :(");
 			return;
 		}
 	     
@@ -703,7 +703,7 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		
 		hex_dump(dump, "Unknown type 3 response");
 		return;
-	} else if ( type == 2 ) { 
+	} else if (type == 2) { 
 		/* server message */
 		int code = buffer.readInt32();
 		buffer.readInt32();/* size */
@@ -715,7 +715,7 @@ void RediffBolConn::parseCSResponse(MessageBuffer &buffer) {
 		purple_debug(PURPLE_DEBUG_INFO, "rbol",
 			     "SERVER MESSAGE: code=%d code2="
 			     "%d MESSAGE=%s | REASON=%s\n",
-			     code, code2, message.c_str() , reason.c_str() );
+			     code, code2, message.c_str() , reason.c_str());
 
 		return;
 	}
@@ -743,7 +743,7 @@ void RediffBolConn::setStateNetworkError(int  reason,
 
 void RediffBolConn::sendMessage(string to, string message) { 
 	assert(!isInvalid());
-	string fonttype = "Dialog";/* confused :( */
+	string fonttype = "Dialog";/* confused :(*/
 
 	char *tmp = purple_unescape_html(message.c_str());
 	message = tmp;
@@ -767,14 +767,14 @@ void RediffBolConn::sendMessage(string to, string message) {
 	ostringstream out;
 	write_int(out, size-4);
 	write_int(out, 3);
-	write_int(out, strlen(CSPeerRequestHeader) );
+	write_int(out, strlen(CSPeerRequestHeader));
 	out.write(CSPeerRequestHeader, strlen(CSPeerRequestHeader));; 
 
 	write_int(out, strlen(CSCmdTextMessage));
 	out.write(CSCmdTextMessage, strlen(CSCmdTextMessage));
 	
 	write_int(out, 37+ sendersize + recipientsize + msgsize + 
-		  fontstrsize );
+		  fontstrsize);
 
 	write_int(out, sender.length());
 	out.write(sender.data() , sender.length());
@@ -833,7 +833,7 @@ void RediffBolConn::sendKeepAlive(){
 
 void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) { 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , 
-		     "parsing offline messages\n" );
+		     "parsing offline messages\n");
 	int payloadsize = buffer.readInt();
 	buffer = buffer.readMessageBuffer(payloadsize);
 	int numentries = buffer.readInt();
@@ -851,7 +851,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 		purple_debug_info("rbol", "Got offline message time as %d",
 				  timestamp);
 		
-		if ( msgtype == 0 ) { 
+		if (msgtype == 0) { 
 			string msg = msgbuf.readStringn(msgbuf.getLength());
 
 			serv_got_im(purple_account_get_connection(account),
@@ -861,7 +861,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 			string final_message = _parseChatMessage(msgbuf);
 			serv_got_im(purple_account_get_connection(account),
 				    sender.c_str(), final_message.c_str() ,
-				    PurpleMessageFlags(0), timestamp );
+				    PurpleMessageFlags(0), timestamp);
 				  
 		} /* else */ 
 
@@ -880,7 +880,7 @@ void RediffBolConn::sendOfflineMessagesRequest() {
 	out<<intToDWord(totalsize-4);
 	out<<intToDWord(0);
 	out<<intToDWord(1);
-	out<<intToDWord(strlen(CSRequestHeader) );
+	out<<intToDWord(strlen(CSRequestHeader));
 	out<<CSRequestHeader;
 	out<<intToDWord(strlen(CSCmdGetOfflineMsgs));
 	out<<CSCmdGetOfflineMsgs;
@@ -899,17 +899,17 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 	string final_message;
 
 
-	while ( !buffer.isEnd() ) { 
+	while (!buffer.isEnd()) { 
 		int len = buffer.readLEInt();
 
-		if ( len == 0 ) { 
+		if (len == 0) { 
 			int fontstrlen = buffer.readLEInt();
 			string  font = buffer.readStringn(fontstrlen);
 			string fontinfo = buffer.readStringn(13);
 			
 			int messagelen = buffer.readLEInt();
 			//string message = escape_html_entities(
-			//	buffer.readStringn(messagelen) );
+			//	buffer.readStringn(messagelen));
 			
 			string message = buffer.readStringn(messagelen);
 
@@ -917,7 +917,7 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 
 			
 			hex_dump(message, "message before ASCII encoding\n");
-			message = encode( message, "UTF-16BE", "UTF-8");
+			message = encode(message, "UTF-16BE", "UTF-8");
 			font = encode(font, "UTF-16BE", "UTF-8");
 			message = escape_html_entities (message);
 
@@ -938,19 +938,19 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 			final_message += "' >";
 #endif
 
-			if ( fp.isItalic()) final_message += "<em>";
-			if ( fp.isBold()) final_message += "<b>";
+			if (fp.isItalic()) final_message += "<em>";
+			if (fp.isBold()) final_message += "<b>";
 
 			final_message += message;
 
-			if ( fp.isBold()) final_message += "</b>";
-			if ( fp.isItalic()) final_message += "</em>";
+			if (fp.isBold()) final_message += "</b>";
+			if (fp.isItalic()) final_message += "</em>";
 
 #ifdef REDIFFBOL_ENABLE_INCOMING_FONT_SUPPORT 
 			final_message += "</font>";
 #endif
 
-		} else if ( len == 1 ) { 
+		} else if (len == 1) { 
 			int smileycode = buffer.readLEInt();
 			int smileylen = buffer.readLEInt();
 			string smiley = buffer.readStringn(smileylen);
@@ -964,7 +964,7 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 				":-z", ":-)", ":-O", "\\:)" , ":p",
 				";-)"} ;
 			
-			if ( smileycode < int(sizeof(codes)/sizeof(codes[0]))) 
+			if (smileycode < int(sizeof(codes)/sizeof(codes[0]))) 
 				final_message += codes[smileycode];
 		} else { 
 			purple_debug(PURPLE_DEBUG_INFO, "rbol" ,
@@ -976,7 +976,7 @@ string RediffBolConn::_parseChatMessage(MessageBuffer &buffer) {
 	return final_message;
 	
 }
-void RediffBolConn::parseTextMessage( MessageBuffer &buffer) { 
+void RediffBolConn::parseTextMessage(MessageBuffer &buffer) { 
 	int payloadsize = buffer.readInt();
 	buffer = buffer.readMessageBuffer(payloadsize);
 	
@@ -993,7 +993,7 @@ void RediffBolConn::parseTextMessage( MessageBuffer &buffer) {
 		     "got message %s\n", final_message.c_str());
 	serv_got_im(purple_account_get_connection(account) ,
 		    senderstr.c_str() ,final_message.c_str(), 
-		    (PurpleMessageFlags) 0, time(NULL) );
+		    (PurpleMessageFlags) 0, time(NULL));
 
 	
 
@@ -1029,22 +1029,22 @@ void RediffBolConn::setStatus(string status, string message) {
 
 
 	string t = status;
-	transform(t.begin(), t.end(), t.begin(), ::tolower );
+	transform(t.begin(), t.end(), t.begin(), ::tolower);
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 		     "Setting status [%s] [%s] [%s]\n", status.c_str(), 
 		     message.c_str(), t.c_str());
 
-	if ( message == "" ) message = status;
+	if (message == "") message = status;
 
 	int code;
-	if ( t == "online" or t == "available" ) 
+	if (t == "online" or t == "available") 
 		code = 1;
-	else if ( t == "away" ) 
+	else if (t == "away") 
 		code = 2;
-	else if ( t == "busy" ) 
+	else if (t == "busy") 
 		code = 3;
-	else if ( t == "invisible" )
+	else if (t == "invisible")
 		code = 4;
 	else return;
 
@@ -1072,7 +1072,7 @@ void RediffBolConn::setStatus(string status, string message) {
 }
 
 void RediffBolConn::closeCallback(PurpleAsyncConn* conn) { 
-	if ( conn != connection ) return;
+	if (conn != connection) return;
 	/* aargh.. server has closed the connection */
 
 	if (conn->getParseMode () == 1) {
@@ -1127,7 +1127,7 @@ void RediffBolConn::parseNewMailsResponse(MessageBuffer &buffer) {
 }
 
 string RediffBolConn::fixEmail(string original) { 
-	if ( find(original.begin(), original.end(), '@') == original.end() ) 
+	if (find(original.begin(), original.end(), '@') == original.end()) 
 		return original + "@rediffmail.com";
 	else return original;
 }
@@ -1262,7 +1262,7 @@ void RediffBolConn::parseOfflineAddContactResponse(MessageBuffer &buffer) {
 	buffer = buffer.readMessageBuffer(buffer.readInt());
 
 	int numentries = buffer.readInt();
-	if ( numentries == 0 ) return;
+	if (numentries == 0) return;
 
 	for(int i = 0;i < numentries; i ++) { 
 		string reqId = buffer.readString();
@@ -1315,14 +1315,14 @@ void RediffBolConn::sendDelContactRequest(string idToDel, string group) {
 	connection->write(out.str());
 }
 
-void RediffBolConn::sendAddContactRequest( 
+void RediffBolConn::sendAddContactRequest(
 					  std::string remoteid, 
 					  std::string group) { 
 
-	if ( this->groups.count(group) == 0 ) 
+	if (this->groups.count(group) == 0) 
 		sendAddRemoveGroupRequest(group);
 
-	string localid = fixEmail(SAFE(account->username) );
+	string localid = fixEmail(SAFE(account->username));
 	remoteid = fixEmail(remoteid);
 
 	int size = 36 + strlen(CSRequestHeader) + strlen(CSCmdAddContact)
@@ -1357,7 +1357,7 @@ void RediffBolConn::sendAddContactRequest(
 }
 
 void RediffBolConn::readError(PurpleAsyncConn *conn) { 
-	if ( conn != connection ) return;
+	if (conn != connection) return;
 	assert(!isInvalid());
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 			     "Failed reading through socket");
@@ -1382,7 +1382,7 @@ void RediffBolConn::parseMessageFromMobileUser(MessageBuffer &buffer) {
 
 	serv_got_im(purple_account_get_connection(account) ,
 		    from.c_str() ,message.c_str(), 
-		    (PurpleMessageFlags) 0, time(NULL) );
+		    (PurpleMessageFlags) 0, time(NULL));
 	
 }
 
@@ -1408,7 +1408,7 @@ void RediffBolConn::sendTypingNotification(string to) {
 	out<<intToDWord(to.length());
 	out<<to;
 
-	assert(out.str().length() == size_t(size) );
+	assert(out.str().length() == size_t(size));
 	hex_dump(out.str(), "typing notification request");
 
 	connection->write(out.str());
@@ -1430,7 +1430,7 @@ void RediffBolConn::sendChangeBuddyGroupRequest(std::string buddy,
 				 std::string from_group, 
 						std::string to_group) {
 
-	if ( groups.count(to_group) == 0 ) { 
+	if (groups.count(to_group) == 0) { 
 		sendAddRemoveGroupRequest(to_group);
 	}
 
@@ -1474,7 +1474,7 @@ void RediffBolConn::sendChangeBuddyGroupRequest(std::string buddy,
 
 void RediffBolConn::sendAddRemoveGroupRequest(string groupname, bool Remove) { 
 	string cmd = CSCmdAddGroup;
-	if ( Remove ) cmd = CSCmdRemoveGroup;
+	if (Remove) cmd = CSCmdRemoveGroup;
 
 	string username = fixEmail(SAFE(account->username));
 
@@ -1525,7 +1525,7 @@ string RediffBolConn::getVisibleIP() const {
 }
 
 void RediffBolConn::connectionError(string error, PurpleAsyncConn* conn) {
-	if ( conn != connection ) return;
+	if (conn != connection) return;
 	assert(!isInvalid());
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 			     "Failed to connect to server");

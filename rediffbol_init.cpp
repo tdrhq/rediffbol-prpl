@@ -61,7 +61,7 @@ static void rediffbol_set_avatar(PurplePluginAction *action)
 {
 	PurpleConnection *gc = (PurpleConnection *)action->context;
 	
-	if ( !gc->proto_data ) return;
+	if (!gc->proto_data) return;
 
 	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
 
@@ -165,7 +165,7 @@ static void rediffbol_login(PurpleAccount *acct)
 					  2);/* total number of steps */
 	
 
-	if ( acct->gc->proto_data ) { 
+	if (acct->gc->proto_data) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "Closing an exisiting connection before "
 			     "reconnecting.\n");
@@ -180,7 +180,7 @@ static void rediffbol_login(PurpleAccount *acct)
 static void rediffbol_close(PurpleConnection *gc)
 {
 	RediffBolConn *conn = (RediffBolConn*) gc->proto_data;
-	if ( conn) { 
+	if (conn) { 
 		/*delete conn;*/
 		conn->shutdown();
 		conn->delRef();
@@ -214,30 +214,30 @@ static void rediffbol_set_status(PurpleAccount *acct, PurpleStatus *status) {
 		stype);
 	
 	RediffBolConn* rb = (RediffBolConn*) acct->gc->proto_data;
-	if ( ! rb ) return;
+	if (! rb) return;
 
-	if ( primitive == PURPLE_STATUS_AVAILABLE or
-	     primitive == PURPLE_STATUS_MOBILE ) { 
+	if (primitive == PURPLE_STATUS_AVAILABLE or
+	     primitive == PURPLE_STATUS_MOBILE) { 
 		rb->setStatus("Online", msg);
 		return;
 	}
 
-	if ( primitive == PURPLE_STATUS_AWAY  ) { 
+	if (primitive == PURPLE_STATUS_AWAY) { 
 		rb->setStatus("Away", msg);
 		return;
 	}
 
-	if ( primitive == PURPLE_STATUS_UNAVAILABLE) {
-		rb->setStatus("Busy", msg );
+	if (primitive == PURPLE_STATUS_UNAVAILABLE) {
+		rb->setStatus("Busy", msg);
 		return;
 	}
 
-	if ( primitive == PURPLE_STATUS_INVISIBLE ) { 
+	if (primitive == PURPLE_STATUS_INVISIBLE) { 
 		rb->setStatus("Invisible", msg);
 		return;
 	}
 
-	if ( primitive == PURPLE_STATUS_OFFLINE ) { 
+	if (primitive == PURPLE_STATUS_OFFLINE) { 
 		purple_debug_info("rbol", "uh, ok, so I have to set my status to offline\n");
 		return;
 	}
@@ -252,9 +252,9 @@ static void rediffbol_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 
 	RediffBolConn *conn = (RediffBolConn*) gc->proto_data;
 
-	if ( !conn ) return;
-	conn->sendAddContactRequest( SAFE(buddy->name), 
-				    SAFE(group->name) );
+	if (!conn) return;
+	conn->sendAddContactRequest(SAFE(buddy->name), 
+				    SAFE(group->name));
 }
 
 
@@ -265,7 +265,7 @@ static void rediffbol_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy,
 		     "Deleteing %s under %s\n", buddy->name,
 		     group->name);
 	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
-	if ( !conn) return;
+	if (!conn) return;
 	conn->sendDelContactRequest(SAFE(buddy->name), SAFE(group->name));
 }
 
@@ -295,10 +295,10 @@ static void rediffbol_set_buddy_icon(PurpleConnection *gc,
 
 static char *rediffbol_status_text(PurpleBuddy *b) { 
 	RediffBolConn *rb = (RediffBolConn*) b->account->gc->proto_data;
-	if ( ! rb) return NULL;
+	if (! rb) return NULL;
 
 	std::string message = rb->getBuddyStatusMessage(b->name);
-	if ( message != "" ) return g_strdup(message.c_str() );
+	if (message != "") return g_strdup(message.c_str());
 	else return NULL;
 }
 
@@ -312,7 +312,7 @@ static unsigned int rediffbol_send_typing(PurpleConnection *gc,
 
 	RediffBolConn * conn = (RediffBolConn*) gc->proto_data;
 
-	if ( typing == PURPLE_TYPING or typing == PURPLE_TYPED ) {
+	if (typing == PURPLE_TYPING or typing == PURPLE_TYPED) {
 		conn->sendTypingNotification(SAFE(name));
 	} else { 
 		purple_debug_info("rbol", "I can't handle this "
@@ -325,7 +325,7 @@ static unsigned int rediffbol_send_typing(PurpleConnection *gc,
 static void rediffbol_group_buddy(PurpleConnection *gc, 
 				  const char* who, 
 				  const char* old_group, 
-				  const char* new_group ) { 
+				  const char* new_group) { 
 	RediffBolConn* conn = (RediffBolConn*) gc->proto_data;
 	conn->sendChangeBuddyGroupRequest(SAFE(who), 
 					  SAFE(old_group),

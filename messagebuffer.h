@@ -38,10 +38,10 @@ namespace rbol{
 		
 		char readByte();
 		
-		std::string readBytes( int len);
+		std::string readBytes(int len);
 		
 		MessageBuffer
-			readMessageBuffer( int len);
+			readMessageBuffer(int len);
 		
 		std::string readString();
 		

@@ -18,7 +18,7 @@ std::set<RObject*> RObject::_valid;
 
 RObject::RObject() :ref_counter(1) 
 { 
-	for(int i = 0;i < ROBJECT_RAND_STRING_LENGTH ; i ++ ) 
+	for(int i = 0;i < ROBJECT_RAND_STRING_LENGTH ; i ++) 
 		rand_string[i] = rand() & 127;
 
 	memcpy(rand_string_verify, rand_string, ROBJECT_RAND_STRING_LENGTH);
@@ -31,7 +31,7 @@ RObject::~RObject() {
 }
 
 void RObject::setInvalid() { 
-	for(int i = 0;i < ROBJECT_RAND_STRING_LENGTH ; i ++ ) 
+	for(int i = 0;i < ROBJECT_RAND_STRING_LENGTH ; i ++) 
 		rand_string[i] = 0;
 	_valid.erase(this);
 }
@@ -39,14 +39,14 @@ void RObject::setInvalid() {
 bool RObject::isInvalid() { 
 
 	try { 	
-		if ( ref_counter == 0 ) return true;
-		if ( _valid.count(this) == 0 ) return true;
+		if (ref_counter == 0) return true;
+		if (_valid.count(this) == 0) return true;
 		
 		/* verify the hashes match */
-		if ( memcmp(rand_string, rand_string_verify, ROBJECT_RAND_STRING_LENGTH) == 0)
+		if (memcmp(rand_string, rand_string_verify, ROBJECT_RAND_STRING_LENGTH) == 0)
 			return false;
 		else return true;
-	} catch ( ... ) {
+	} catch (...) {
 		return true;
 	}
 }
@@ -67,7 +67,7 @@ del_robject(gpointer data) {
 void RObject::delRef() { 
 	assert(ref_counter > 0);
 	ref_counter --;
-	if ( ref_counter == 0 ) { 
+	if (ref_counter == 0) { 
 		/* make sure all its deleted only after existing callbacks
 		   are called */
 		purple_timeout_add_seconds(2, del_robject, this);
@@ -81,7 +81,7 @@ int RObject::getRef() const {
 void RObject::dump() const {
 	ostringstream s;
 	for(typeof(_valid.begin()) it = _valid.begin();
-	    it != _valid.end();it++ ) { 
+	    it != _valid.end();it++) { 
 		s << *it;
 		s << " ";
 	}

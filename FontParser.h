@@ -10,7 +10,7 @@ namespace rbol {
 		std::string data;
 		
 	public:
-		FontParser(std::string fontname,std::string fontdata );
+		FontParser(std::string fontname,std::string fontdata);
 
 		int getSize();
 		std::string getColor();

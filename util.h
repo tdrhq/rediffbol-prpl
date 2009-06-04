@@ -13,7 +13,7 @@ namespace rbol {
 	std::string bytes2Int(char byte0, char byte1, char byte2, 
 			      char byte3);
 
-	int bytesToLEInt ( char byte0, char byte1, char byte2, 
+	int bytesToLEInt (char byte0, char byte1, char byte2, 
 				  char byte3);
 
 	int bytes2Short(std::string buf);

@@ -115,7 +115,7 @@ namespace rbol {
 		void deleteOfflineMessage(std::string id);
 
 		void readCallback(MessageBuffer &buffer, PurpleAsyncConn*);
-		virtual void readError(PurpleAsyncConn* );
+		virtual void readError(PurpleAsyncConn*);
 		void parseGkResponse(MessageBuffer &buffer);
 		void parseCSResponse(MessageBuffer &buffer);
 		void parseNewMailsResponse(MessageBuffer &buffer);
