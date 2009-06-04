@@ -286,9 +286,9 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 		     payloadsize, numentries);
 	map<string, string> cap;
 
-        for(int i = 0;i < numentries ; i++) { 
+        for(int i = 0; i < numentries; i++) { 
                 int subentries = buffer.readInt32();
-                for(int j = 0;j < subentries; j++){ 
+                for(int j = 0; j < subentries; j++){ 
                         string cp = buffer.readString();
                         string val = buffer.readString();
 			purple_debug(PURPLE_DEBUG_INFO, "rbol", 
@@ -299,7 +299,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
         }
 
 	string list = cap[CAP_DIR];
-        for(size_t i = 0;i < list.size() ; i++)
+        for(size_t i = 0; i < list.size(); i++)
                 if (list[i] == ',') list[i] = ' ';
 
         istringstream iss(list);
@@ -373,7 +373,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	connection_state = 2;
 	string names [3];
 
-	for(int i = 0;i < 3; i++) 
+	for(int i = 0; i < 3; i++) 
 		names[i] = buffer.readString();
 
 	this->server_userId = names[0];
@@ -390,7 +390,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 
 	int numprops = buffer.readInt();
 	
-	for(int i = 0;i < numprops; i++) { 
+	for(int i = 0; i < numprops; i++) { 
 		string propname = buffer.readString();
 		string value = buffer.readString();
 		optionsmap[propname] = value;
@@ -401,7 +401,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	//read roster entries (buddy list)
 	int rosternum = buffer.readInt();
 
-	for(int i = 0;i < rosternum; i++) { 
+	for(int i = 0; i < rosternum; i++) { 
 		string name = buffer.readString();
 		roster.push_back(name);
 		buffer.readInt();/* what integer does this read?? */
@@ -411,7 +411,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	}
 
 	int telnums = buffer.readInt();
-	for(int i = 0;i < telnums; i++){ 
+	for(int i = 0; i < telnums; i++){ 
 		buffer.readString();/* telephone number */
 		buffer.readString();/* contact name */ 
 		/* discard! */
@@ -420,15 +420,14 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	//read blocked entries 
 	set<string> blocked;
 	int blockednum = buffer.readInt();
-	for(int i = 0;i <  blockednum ; i++) { 
-
+	for(int i = 0; i <  blockednum ; i++) { 
 		string name = buffer.readString();
 		blocked.insert(name);
 		buffer.readInt();
 	}
 
 	int allowednum = buffer.readInt();
-	for(int i = 0;i < allowednum; i++) {
+	for(int i = 0; i < allowednum; i++) {
 		string name = buffer.readString();
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", "allowed --> %s\n", 
 			     name.c_str());
@@ -460,7 +459,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	
 
 	purple_connection_set_state(account->gc, PURPLE_CONNECTED);
-	for(int i = 0;i < numgroups ; i++) { 
+	for(int i = 0; i < numgroups; i++) { 
 		string groupname1 = buffer.readString();
 		string groupname2 = buffer.readString();
 
@@ -472,7 +471,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 			     groupname1.c_str(), groupname2.c_str(),
 			     groupentries);
 		vector<string> members;
-		for(int j = 0;j < groupentries ; j ++) {
+		for(int j = 0; j < groupentries; j++) {
 			string membername = buffer.readString();
 			members.push_back(membername);
 			purple_debug(PURPLE_DEBUG_INFO, "rbol", 
@@ -512,7 +511,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	sendOfflineMessagesRequest();
 	sendGetAddRequest();
 
-	for(size_t i = 0;i < roster.size(); i ++) 
+	for(size_t i = 0; i < roster.size(); i++) 
 		loadAvatar(roster[i]);
 
 	keep_alive_timer_handle = purple_timeout_add_seconds(30, keep_alive_timer, this);
@@ -537,7 +536,7 @@ void RediffBolConn::parseCSContacts(MessageBuffer &buffer) {
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "#contacts = %d\n", 
 		     numcontacts);
 
-	for(int i = 0;i < numcontacts ; i++) { 
+	for(int i = 0; i < numcontacts; i++) { 
 		string name1 = buffer.readString();
 		string name2 = buffer.readString();
 		string name3 = buffer.readString();
@@ -838,7 +837,7 @@ void RediffBolConn::parseOfflineMessages(MessageBuffer &buffer) {
 	buffer = buffer.readMessageBuffer(payloadsize);
 	int numentries = buffer.readInt();
 
-	for(int i = 0;i < numentries; i ++) { 
+	for(int i = 0; i < numentries; i++) { 
 		string msgid = buffer.readString();
 		string sender = buffer.readString();
 		
@@ -1264,7 +1263,7 @@ void RediffBolConn::parseOfflineAddContactResponse(MessageBuffer &buffer) {
 	int numentries = buffer.readInt();
 	if (numentries == 0) return;
 
-	for(int i = 0;i < numentries; i ++) { 
+	for(int i = 0; i < numentries; i++) { 
 		string reqId = buffer.readString();
 		string from = buffer.readString();
 		buffer.readInt();/* unknown code */

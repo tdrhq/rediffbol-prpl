@@ -46,7 +46,7 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 	string r_key  (url_text, url_text+len);
 	r_key = r_key.substr(5);
 
-	for(size_t l = 0;l < r_key.size(); l++) 
+	for(size_t l = 0; l < r_key.size(); l++) 
 		if (r_key[l] == '<') { 
 			r_key = r_key.substr(0, l);
 			break;

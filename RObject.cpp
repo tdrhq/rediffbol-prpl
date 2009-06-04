@@ -18,7 +18,7 @@ std::set<RObject*> RObject::_valid;
 
 RObject::RObject() :ref_counter(1) 
 { 
-	for(int i = 0;i < ROBJECT_RAND_STRING_LENGTH ; i ++) 
+	for(int i = 0; i < ROBJECT_RAND_STRING_LENGTH; i++) 
 		rand_string[i] = rand() & 127;
 
 	memcpy(rand_string_verify, rand_string, ROBJECT_RAND_STRING_LENGTH);
@@ -31,7 +31,7 @@ RObject::~RObject() {
 }
 
 void RObject::setInvalid() { 
-	for(int i = 0;i < ROBJECT_RAND_STRING_LENGTH ; i ++) 
+	for(int i = 0; i < ROBJECT_RAND_STRING_LENGTH; i++) 
 		rand_string[i] = 0;
 	_valid.erase(this);
 }
@@ -81,7 +81,7 @@ int RObject::getRef() const {
 void RObject::dump() const {
 	ostringstream s;
 	for(typeof(_valid.begin()) it = _valid.begin();
-	    it != _valid.end();it++) { 
+	    it != _valid.end(); it++) { 
 		s << *it;
 		s << " ";
 	}
