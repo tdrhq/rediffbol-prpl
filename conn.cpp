@@ -67,6 +67,7 @@ PurpleAsyncConn::~PurpleAsyncConn() {
 
 void 
 PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) { 
+	isHandlerExisting ();
 
 	connection_attempt_data = NULL;
 	purple_debug_info("rbol", "got an fd of %d\n", source);
@@ -77,7 +78,7 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 
 
 	if (source < 0) { 
-		handler->connectionError(error, this);
+		if (handler) handler->connectionError(error, this);
 		close();
 
 		setInvalid();
@@ -93,7 +94,7 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 	assert(rx_handler == 0);
 	rx_handler = purple_input_add(fd, PURPLE_INPUT_READ, 
 				      conn_read_cb, (gpointer)this->getId());
-	handler->gotConnected();
+	if (handler) handler->gotConnected();
 }
 
 
@@ -186,7 +187,7 @@ void
 PurpleAsyncConn::write(const void* data, 
 	int datalen) { 
 	int written;
-
+	isHandlerExisting ();
 	if (isInvalid()) { 
 		purple_debug_info("rbol", "Writing to a invalid conn?\n");
 		return;
@@ -202,7 +203,7 @@ PurpleAsyncConn::write(const void* data,
 		written = 0;
 	else if (written <= 0) { 
 		written = 0;
-		handler->readError(this);
+		if (handler) handler->readError(this);
 		close();
 		return;
 	}
@@ -220,12 +221,13 @@ PurpleAsyncConn::write(const void* data,
 
 	}
 
-	handler->writeCallback(this);
+	if (handler) handler->writeCallback(this);
 }
 
 
 void 
 PurpleAsyncConn::write_cb() { 
+	isHandlerExisting ();
 	int writelen , ret;
 	
 	writelen = purple_circ_buffer_get_max_read(txbuf);
@@ -243,7 +245,7 @@ PurpleAsyncConn::write_cb() {
 	else if (ret <= 0) {
 		
 		purple_debug_error("rbol", "writing failed, going into bad state\n");
-		handler->readError(this);
+		if (handler) handler->readError(this);
 		close();
 		return;
 	}
@@ -280,13 +282,13 @@ PurpleAsyncConn::read_cb(int source) {
 			return;/* safe */
 		
 		/* todo: register a connection error */
-		handler->readError(this);
+		if (handler) handler->readError(this);
 		close();
 		return;
 	} else if (len == 0) { 
 		/* todo: server closed conenction */ 
 		
-		handler->closeCallback(this);
+		if (handler) handler->closeCallback(this);
 		close();
 
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol",
@@ -296,7 +298,7 @@ PurpleAsyncConn::read_cb(int source) {
 	
 	awaiting.push(string(buf, buf+len));
 
-	handler->readCallback(awaiting, this);
+	if (handler) handler->readCallback(awaiting, this);
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {
