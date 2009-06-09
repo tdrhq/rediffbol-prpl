@@ -206,7 +206,7 @@ PurpleAsyncConn::write(const void* data,
 			tx_handler = purple_input_add(fd, 
 				  PURPLE_INPUT_WRITE, 
 				  conn_write_cb, 
-				  this);
+						      (gpointer) this->getId());
 
 
 	}
@@ -247,7 +247,8 @@ PurpleAsyncConn::write_cb() {
 
 static void conn_write_cb(gpointer data, gint source, 
 			   PurpleInputCondition cond) { 
-	PurpleAsyncConn* conn = (PurpleAsyncConn*) data;
+	PurpleAsyncConn* conn = (PurpleAsyncConn*) RObject::getObjectById (GPOINTER_TO_UINT (data));
+	if (!conn) return;
 
 	conn->write_cb();
 }
