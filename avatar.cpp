@@ -30,17 +30,22 @@ static void load_avatar_callback(PurpleUtilFetchUrlData* url_data,
 				  gpointer user_data, const gchar * url_text, 
 				  gsize len ,const gchar* error_message) {
 	purple_debug_info ("rbol", "avatar callback\n");
-	pair<RediffBolConn*, string> *data = NULL;
+	pair<int, string> *data = NULL;
 	data = (typeof(data)) (user_data);
+	RediffBolConn* conn = (RediffBolConn*) RObject::getObjectById (data->first);
 
-	if (url_text == NULL or data ->first->isInvalid())  {
-		data->first->delRef();
+	if (!conn) { 
 		delete data;
 		return;
 	}
-	data->first->_loadAvatarCompleted(data->second, string(url_text, 
+
+	if (url_text == NULL or conn->isInvalid())  {
+		delete data;
+		return;
+	}
+
+	conn->_loadAvatarCompleted(data->second, string(url_text, 
 							       url_text+len));
-	data->first->delRef();
 	delete data;
 }
 
@@ -48,12 +53,11 @@ static void load_avatar_callback(PurpleUtilFetchUrlData* url_data,
 static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data, 
 				  gpointer user_data, const gchar * url_text, 
 				  gsize len ,const gchar* error_message) {
-	pair<RediffBolConn*, string> *data = NULL;
+	pair<int, string> *data = NULL;
 	data = (typeof(data)) (user_data);
 
 	if (! url_text) { 
 		purple_debug_info("rbol", "Unable to load url string\n");
-		data->first->delRef();
 		delete data;
 		return;
 	}
@@ -88,9 +92,8 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 
 }
 void RediffBolConn::loadAvatar(std::string name) { 
-	addRef();
-	pair<RediffBolConn*, string> *data = new pair<RediffBolConn*, string> 
-		(this, name);
+	pair<int, string> *data = new pair<int, string> 
+		(this->getId(), name);
 
 	string url = "http://avatars.rediff.com/avatars/getkey.asp?username="
 		+ name + 
@@ -108,8 +111,6 @@ void RediffBolConn::loadAvatar(std::string name) {
 				      load_avatar_key_callback, 
 				      (void*) data);
 	
-
-
 }
 
 void RediffBolConn::_loadAvatarCompleted(std::string name, 
