@@ -47,7 +47,9 @@ RObject::RObject()
 
 RObject::~RObject() { 
 	/* blank out one of the strings */
+	purple_debug_info ("rbol", "Deleteing object %p with id %d\n", this, id);
 	id_map.erase (id);
+	assert(id_map.count (id) == 0);
 	setInvalid();
 }
 
