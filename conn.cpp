@@ -83,7 +83,7 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 	/* so now this callback need not take care of connection issues */
 	assert(rx_handler == 0);
 	rx_handler = purple_input_add(fd, PURPLE_INPUT_READ, 
-					  conn_read_cb, this);
+				      conn_read_cb, (gpointer)this->getId());
 	handler->gotConnected();
 }
 
@@ -290,6 +290,9 @@ PurpleAsyncConn::read_cb(int source) {
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {
+	PurpleAsyncConn *conn = (PurpleAsyncConn*) RObject::getObjectById (GPOINTER_TO_UINT(data));
+
+	if (!conn) return;
 
 	int _tmp;
 	if (source < 0 or purple_input_get_error(source, &_tmp) != 0) { 
@@ -297,7 +300,7 @@ static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) 
 		return;
 
 	}
-	((PurpleAsyncConn*)data)->read_cb(source);
+	conn->read_cb(source);
 }
 
 void PurpleAsyncConn::write(string s) { 
