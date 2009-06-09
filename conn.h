@@ -61,7 +61,8 @@ namespace rbol {
 
 		/* super handler */
 		PurpleAsyncConnHandler *handler;
-
+		int handlerId; 
+		bool isHandlerExisting ();
 	public:
 		int getParseMode() { 
 			return parse_mode;

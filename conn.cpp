@@ -42,6 +42,9 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 				 int pm) :awaiting("") 
 { 
 	handler = _handler;
+	handlerId = _handler->getId ();
+	assert (gpointer(handler) == RObject::getObjectById (handlerId));
+
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm;
 	rx_handler = 0;
@@ -50,6 +53,12 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 
 	purple_debug_info("rbol", "Connection object created: %p\n", this);
 
+}
+
+bool PurpleAsyncConn::isHandlerExisting ()
+{
+	handler = (PurpleAsyncConnHandler*) RObject::getObjectById (handlerId);
+	if (!handler) return false;
 }
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
