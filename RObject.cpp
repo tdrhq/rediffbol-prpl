@@ -89,21 +89,12 @@ void RObject::addRef() {
 	ref_counter ++;
 }
 
-static gboolean 
-del_robject(gpointer data) {
-	purple_debug_info("rbol", "Deleting object %p\n", data);
-	RObject* d = (RObject*) data;
-	delete d;
-	return FALSE;/* should not run again */
-}
-
 void RObject::delRef() { 
 	assert(ref_counter > 0);
 	ref_counter --;
 	if (ref_counter == 0) { 
-		/* make sure all its deleted only after existing callbacks
-		   are called */
-		purple_timeout_add_seconds(2, del_robject, this);
+		purple_debug_info ("rbol", "deleting object %p with id %d", this, this->getId());
+		delete this;
 	}
 }
 
