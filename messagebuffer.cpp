@@ -33,7 +33,7 @@ MessageBuffer::MessageBuffer(string s) {
 
 int 
 MessageBuffer::left() { 
-	return str.length() - offset;
+	return int(str.length()) - offset;
 }
 
 
