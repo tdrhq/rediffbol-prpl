@@ -284,8 +284,9 @@ static void rediffbol_alias_buddy(PurpleConnection *gc, const char *who,
  */
 const char *rediffbol_normalize(const PurpleAccount *acct,
                                       const char *input) {
-	std::string ret = RediffBolConn::fixEmail(SAFE(input));
-	return strdup(ret.c_str());
+	static std::string ret;
+	ret = RediffBolConn::fixEmail(SAFE(input));
+	return ret.c_str();
 }
 
 static void rediffbol_set_buddy_icon(PurpleConnection *gc,
