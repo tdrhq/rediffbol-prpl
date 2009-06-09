@@ -269,8 +269,10 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 		buffer = buffer.tail ();
 		
 		/* try and parse to see what we've got */
-		if (connection->getParseMode()) 
+		if (connection->getParseMode()) {
 			parseGkResponse(buf);
+			break; /* the message buffer is no longer valid, dirty hack */
+		}
 		else 
 			parseCSResponse(buf);
 	}
