@@ -30,11 +30,15 @@
 #include <debug.h>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 
 using namespace rbol;
 using namespace std;
 
 std::set<RObject*> RObject::_valid;
+
+static int id_counter = 0;
+static map<int, RObject*> id_map;
 
 RObject::RObject() :ref_counter(1) 
 { 
@@ -43,10 +47,13 @@ RObject::RObject() :ref_counter(1)
 
 	memcpy(rand_string_verify, rand_string, ROBJECT_RAND_STRING_LENGTH);
 	_valid.insert(this);
+	id = id_counter ++;
+	id_map[id] = this;
 }
 
 RObject::~RObject() { 
 	/* blank out one of the strings */
+	id_map.erase (id);
 	setInvalid();
 }
 
@@ -54,6 +61,12 @@ void RObject::setInvalid() {
 	for(int i = 0; i < ROBJECT_RAND_STRING_LENGTH; i++) 
 		rand_string[i] = 0;
 	_valid.erase(this);
+}
+
+RObject* RObject::getObjectById (int id)
+{
+	if (id_map.count (id) == 0) return NULL;
+	else return id_map[id];
 }
 
 bool RObject::isInvalid() { 

@@ -45,8 +45,10 @@ namespace rbol {
 		char rand_string[ROBJECT_RAND_STRING_LENGTH];
 		char rand_string_verify[ROBJECT_RAND_STRING_LENGTH];
 		int ref_counter;
+		int id;
 
 	public:
+		static RObject* getObjectById (int id);
 		virtual bool isInvalid();
 		virtual void setInvalid();
 
