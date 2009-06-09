@@ -267,8 +267,6 @@ static void conn_write_cb(gpointer data, gint source,
 #include <iostream>
 void
 PurpleAsyncConn::read_cb(int source) { 
-	dump();
-
 	purple_debug_info("rbol", "got a read on %p with fd=%d\n", this, source);
 	char buf[1024];
 	int len = read(source, buf, sizeof(buf));

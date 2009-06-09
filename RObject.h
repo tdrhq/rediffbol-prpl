@@ -26,24 +26,17 @@
 #include "config.h"
 namespace rbol { 
 	/**
-	 * This object tries to mimic a *validity tester*. Any child
-	 * of this should be able to easily verify if it is itself valid 
-	 * or not.
-	 * 
-	 * A object can be set to "Invalid" even if the object still exists
-	 * in memory. Thus we 3 possible states: perfectly valid, Invalid
-	 * but in object exists, and absolutely invalid.
-	 *
-	 * This is *NOT* guaranteed to work always, there's a small but
-	 * non-zero probability of failure.
+	 * This class just tries to do the following: it creates 
+	 * a "handler" for objects, so that the handler can be passed
+	 * safely in callback functions, instead of the pointer itself.
+	 * It also creates a notion of the object being "invalid", whose
+	 * actual purpose is defined by the child class. The basic idea is
+	 * that the object is still existing, but it should not be trusted
+	 * as long as it remains invalid.
 	 */
-
 	class RObject { 
 
-		static std::set<RObject*> _valid;
-#define ROBJECT_RAND_STRING_LENGTH 5
-		char rand_string[ROBJECT_RAND_STRING_LENGTH];
-		char rand_string_verify[ROBJECT_RAND_STRING_LENGTH];
+		bool invalid;
 		int id;
 
 	public:
@@ -58,7 +51,6 @@ namespace rbol {
 		virtual ~RObject();
 		RObject();
 
-		void dump()  const;
 	};
 }
 

@@ -35,18 +35,12 @@
 using namespace rbol;
 using namespace std;
 
-std::set<RObject*> RObject::_valid;
-
 static int id_counter = 0;
 static map<int, RObject*> id_map;
 
 RObject::RObject()
 { 
-	for(int i = 0; i < ROBJECT_RAND_STRING_LENGTH; i++) 
-		rand_string[i] = rand() & 127;
-
-	memcpy(rand_string_verify, rand_string, ROBJECT_RAND_STRING_LENGTH);
-	_valid.insert(this);
+	invalid = false;
 	id = id_counter ++;
 	id_map[id] = this;
 }
@@ -58,9 +52,7 @@ RObject::~RObject() {
 }
 
 void RObject::setInvalid() { 
-	for(int i = 0; i < ROBJECT_RAND_STRING_LENGTH; i++) 
-		rand_string[i] = 0;
-	_valid.erase(this);
+	invalid = true;
 }
 
 RObject* RObject::getObjectById (int id)
@@ -70,28 +62,7 @@ RObject* RObject::getObjectById (int id)
 }
 
 bool RObject::isInvalid() { 
-
-	try { 	
-		if (_valid.count(this) == 0) return true;
-		
-		/* verify the hashes match */
-		if (memcmp(rand_string, rand_string_verify, ROBJECT_RAND_STRING_LENGTH) == 0)
-			return false;
-		else return true;
-	} catch (...) {
-		return true;
-	}
+	return invalid;
 }
 
 
-void RObject::dump() const {
-	ostringstream s;
-	for(typeof(_valid.begin()) it = _valid.begin();
-	    it != _valid.end(); it++) { 
-		s << *it;
-		s << " ";
-	}
-
-	purple_debug_info("rbol", "[%p] Valid objects: %s\n", this, 
-			  s.str().c_str());
-}
