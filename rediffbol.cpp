@@ -359,6 +359,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 
 gboolean keep_alive_timer(gpointer data) { 
 	RediffBolConn *conn = (RediffBolConn*) RObject::getObjectById (GPOINTER_TO_INT (data));
+	if (!conn) return false;
 	conn->sendKeepAlive();
 	return true;
 }
