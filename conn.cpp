@@ -106,7 +106,7 @@ PurpleAsyncConn::establish_connection(
 	
 	connection_attempt_data = purple_proxy_connect(NULL, handler->getProxyAccount(), 
 						       ip.c_str(), 
-						       port, conn_got_connected, this);
+						       port, conn_got_connected, (gpointer) this->getId());
 	if (connection_attempt_data == NULL) {
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol", 
 			     "connection failed\n");
@@ -119,9 +119,10 @@ PurpleAsyncConn::establish_connection(
 static void conn_got_connected(gpointer data, gint source, 
 			       const gchar * error_message) { 
 
-	PurpleAsyncConn *conn = (PurpleAsyncConn*)data;
-	conn->got_connected_cb(source, error_message);
+	PurpleAsyncConn *conn = (PurpleAsyncConn*)RObject::getObjectById (GPOINTER_TO_UINT(data));
+	if (!conn) return;
 
+	conn->got_connected_cb(source, error_message);
 }
 
 
