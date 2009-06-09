@@ -184,7 +184,7 @@ static void rediffbol_close(PurpleConnection *gc)
 	if (conn) { 
 		/*delete conn;*/
 		conn->shutdown();
-		conn->delRef();
+		delete conn;
 		gc->proto_data = NULL;
 	}
 	else purple_debug_error("rbol", 

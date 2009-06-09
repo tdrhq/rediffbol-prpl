@@ -40,7 +40,7 @@ std::set<RObject*> RObject::_valid;
 static int id_counter = 0;
 static map<int, RObject*> id_map;
 
-RObject::RObject() :ref_counter(1) 
+RObject::RObject()
 { 
 	for(int i = 0; i < ROBJECT_RAND_STRING_LENGTH; i++) 
 		rand_string[i] = rand() & 127;
@@ -72,7 +72,6 @@ RObject* RObject::getObjectById (int id)
 bool RObject::isInvalid() { 
 
 	try { 	
-		if (ref_counter == 0) return true;
 		if (_valid.count(this) == 0) return true;
 		
 		/* verify the hashes match */
@@ -84,23 +83,6 @@ bool RObject::isInvalid() {
 	}
 }
 
-
-void RObject::addRef() { 
-	ref_counter ++;
-}
-
-void RObject::delRef() { 
-	assert(ref_counter > 0);
-	ref_counter --;
-	if (ref_counter == 0) { 
-		purple_debug_info ("rbol", "deleting object %p with id %d", this, this->getId());
-		delete this;
-	}
-}
-
-int RObject::getRef() const {
-	return ref_counter;
-}
 
 void RObject::dump() const {
 	ostringstream s;

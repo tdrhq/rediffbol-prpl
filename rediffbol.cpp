@@ -84,7 +84,7 @@ void RediffBolConn::softDestroy() {
 		keep_alive_timer_handle = 0;
 	}
 	setInvalid();
-	connection->delRef();
+	delete connection;
 	connection = NULL;
 	
 }
@@ -352,7 +352,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 				     "Failed to initiate connection to CS\n");
 
 	connection->close();
-	connection->delRef();
+	delete connection;
 
 	connection = newconn;
 }

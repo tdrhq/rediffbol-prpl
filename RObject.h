@@ -44,7 +44,6 @@ namespace rbol {
 #define ROBJECT_RAND_STRING_LENGTH 5
 		char rand_string[ROBJECT_RAND_STRING_LENGTH];
 		char rand_string_verify[ROBJECT_RAND_STRING_LENGTH];
-		int ref_counter;
 		int id;
 
 	public:
@@ -58,10 +57,6 @@ namespace rbol {
 
 		virtual ~RObject();
 		RObject();
-
-		void addRef();
-		int  getRef() const;
-		void  delRef();
 
 		void dump()  const;
 	};
