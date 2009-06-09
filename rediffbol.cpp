@@ -358,7 +358,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 }
 
 gboolean keep_alive_timer(gpointer data) { 
-	RediffBolConn *conn = (RediffBolConn*) data;
+	RediffBolConn *conn = (RediffBolConn*) RObject::getObjectById (GPOINTER_TO_INT (data));
 	conn->sendKeepAlive();
 	return true;
 }
@@ -534,7 +534,7 @@ void RediffBolConn::parseCSLoginResponse(MessageBuffer buffer) {
 	for(size_t i = 0; i < roster.size(); i++) 
 		loadAvatar(roster[i]);
 
-	keep_alive_timer_handle = purple_timeout_add_seconds(30, keep_alive_timer, this);
+	keep_alive_timer_handle = purple_timeout_add_seconds(30, keep_alive_timer, (gpointer) (this->getId ()));
 }
 string getStatusFromID(int status) { 
 	if (status == 2) { 

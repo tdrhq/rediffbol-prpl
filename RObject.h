@@ -48,6 +48,10 @@ namespace rbol {
 		int id;
 
 	public:
+		int getId () {
+			return id;
+		}
+
 		static RObject* getObjectById (int id);
 		virtual bool isInvalid();
 		virtual void setInvalid();
