@@ -78,10 +78,9 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 
 
 	if (source < 0) { 
+		/* TODO: this assumes that the conn object will be destroyed. */
+		close ();
 		if (handler) handler->connectionError(error, this);
-		close();
-
-		setInvalid();
 		purple_debug_error("rbol", "connection error '%s'\n", 
 			     error);
 		return;
@@ -203,8 +202,8 @@ PurpleAsyncConn::write(const void* data,
 		written = 0;
 	else if (written <= 0) { 
 		written = 0;
+		close ();
 		if (handler) handler->readError(this);
-		close();
 		return;
 	}
 
@@ -245,8 +244,8 @@ PurpleAsyncConn::write_cb() {
 	else if (ret <= 0) {
 		
 		purple_debug_error("rbol", "writing failed, going into bad state\n");
+		close ();
 		if (handler) handler->readError(this);
-		close();
 		return;
 	}
 
@@ -280,14 +279,13 @@ PurpleAsyncConn::read_cb(int source) {
 			return;/* safe */
 		
 		/* todo: register a connection error */
+		close ();
 		if (handler) handler->readError(this);
-		close();
 		return;
 	} else if (len == 0) { 
 		/* todo: server closed conenction */ 
-		
+		close ();
 		if (handler) handler->closeCallback(this);
-		close();
 
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol",
 			     "pathetic, the server has closed the connection\n");
