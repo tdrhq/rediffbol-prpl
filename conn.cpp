@@ -42,9 +42,6 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 				 int pm) :awaiting("") 
 { 
 	handler = _handler;
-	handlerId = _handler->getId ();
-	assert (gpointer(handler) == RObject::getObjectById (handlerId));
-
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm;
 	rx_handler = 0;
@@ -55,11 +52,6 @@ PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
 
 }
 
-bool PurpleAsyncConn::isHandlerExisting ()
-{
-	handler = (PurpleAsyncConnHandler*) RObject::getObjectById (handlerId);
-	if (!handler) return false;
-}
 
 PurpleAsyncConn::~PurpleAsyncConn() { 
 	this->close();
@@ -67,8 +59,6 @@ PurpleAsyncConn::~PurpleAsyncConn() {
 
 void 
 PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) { 
-	isHandlerExisting ();
-
 	connection_attempt_data = NULL;
 	purple_debug_info("rbol", "got an fd of %d\n", source);
 	if (isInvalid()) { 
@@ -186,7 +176,6 @@ void
 PurpleAsyncConn::write(const void* data, 
 	int datalen) { 
 	int written;
-	isHandlerExisting ();
 	if (isInvalid()) { 
 		purple_debug_info("rbol", "Writing to a invalid conn?\n");
 		return;
@@ -226,7 +215,6 @@ PurpleAsyncConn::write(const void* data,
 
 void 
 PurpleAsyncConn::write_cb() { 
-	isHandlerExisting ();
 	int writelen , ret;
 	
 	writelen = purple_circ_buffer_get_max_read(txbuf);
