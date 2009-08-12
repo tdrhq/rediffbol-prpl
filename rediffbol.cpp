@@ -29,7 +29,7 @@
 #include "util.h"
 #include <connection.h>
 #include "FontParser.h"
-
+#include <cstdio>
 
 
 using namespace std;

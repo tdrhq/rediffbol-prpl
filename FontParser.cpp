@@ -21,6 +21,7 @@
 
 #include "FontParser.h" 
 #include <debug.h>
+#include <cstdio>
 
 using namespace std;
 using namespace rbol;
