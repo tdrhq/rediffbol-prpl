@@ -24,6 +24,7 @@
 #include <string>
 #include <cassert>
 #include <cerrno>
+#include <cstdio>
 
 using namespace std;
 using namespace rbol;
