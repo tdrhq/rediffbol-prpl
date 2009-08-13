@@ -12,3 +12,23 @@
 
 	* Sorry I didn't maintain ChangeLog at this point of time,
 	  do look at the Git history.
+
+????-??-??
+
+	Version 0.2.4
+
+	* Removed stale dependency on curl
+	* Fixed compile warnings, mostly caused for 64-bit architectures.
+
+????-??-??
+	
+	Version 0.2.3
+
+	* Fixed issue with login on certain accounts.
+	* Fixed compile errors on GCC 4.3
+
+????-??-??
+
+	Version 0.2.2
+	* Fixed login issue, new protocol changes.
+
