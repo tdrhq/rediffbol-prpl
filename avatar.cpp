@@ -68,6 +68,13 @@ static void load_avatar_key_callback(PurpleUtilFetchUrlData* url_data,
 	string url = "http://imavatars.rediff.com/avatars/getmasque_new.asp?type=image&username=" + name + "&key=";
 	
 	string r_key  (url_text, url_text+len);
+	
+	if (r_key.length () < 6) {
+		purple_debug_error ("rbol", "avatar string too short\n");
+		delete data;
+		return;
+	}
+
 	r_key = r_key.substr(5);
 
 	for(size_t l = 0; l < r_key.size(); l++) 
