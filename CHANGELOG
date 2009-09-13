@@ -1,3 +1,10 @@
+????-??-?? Arnold Noronha <arnstein87@gmail.com>
+	
+	Version 0.3.1
+	
+	* Makes robust against rare case of badly formed response from
+	  Rediff.
+
 2009-08-12 Arnold Noronha <arnstein87@gmail.com>
 
 	Version 0.3.0
