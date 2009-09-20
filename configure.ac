@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([rediffbol-prpl], [0.3.0], [arnstein87@users.sourceforge.net])
+AC_INIT([rediffbol-prpl], [0.3.1], [arnstein87@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR([rediffbol.h])
 AC_CONFIG_HEADER([config.h])
