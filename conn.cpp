@@ -31,6 +31,8 @@ using namespace std;
 
 #include <connection.h>
 
+#define HANDLER ((PurpleAsyncConnHandler*) (RObject::getObjectById (this->handler_id)))
+
 namespace rbol { 
 	void hex_dump(const string, const string);
 }
@@ -38,10 +40,10 @@ namespace rbol {
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond);
 
-PurpleAsyncConn::PurpleAsyncConn(PurpleAsyncConnHandler *_handler,
+PurpleAsyncConn::PurpleAsyncConn(int conn_id,
 				 int pm) :awaiting("") 
 { 
-	handler = _handler;
+	handler_id = conn_id;
 	txbuf = purple_circ_buffer_new(0);
 	parse_mode = pm;
 	rx_handler = 0;
@@ -70,7 +72,7 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 	if (source < 0) { 
 		/* TODO: this assumes that the conn object will be destroyed. */
 		close ();
-		if (handler) handler->connectionError(error, this);
+		if (HANDLER) HANDLER->connectionError(error, this);
 		purple_debug_error("rbol", "connection error '%s'\n", 
 			     error);
 		return;
@@ -83,7 +85,8 @@ PurpleAsyncConn::got_connected_cb(gint source, const gchar* error) {
 	assert(rx_handler == 0);
 	rx_handler = purple_input_add(fd, PURPLE_INPUT_READ, 
 				      conn_read_cb, (gpointer)this->getId());
-	if (handler) handler->gotConnected();
+	
+	if (HANDLER) HANDLER->gotConnected();
 }
 
 
@@ -94,8 +97,9 @@ static void conn_got_connected(gpointer data, gint source,
 bool 
 PurpleAsyncConn::establish_connection(
 	const string ip, 
-	const int port) {
- 
+	const int port) 
+{
+	assert (HANDLER);
 	/* try to ensure this is called only once */
 	assert(rx_handler == 0 and tx_handler == 0
 		and connection_attempt_data == NULL);
@@ -103,7 +107,7 @@ PurpleAsyncConn::establish_connection(
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "establishing connection\n");
 	fd = -1;
 	
-	connection_attempt_data = purple_proxy_connect(NULL, handler->getProxyAccount(), 
+	connection_attempt_data = purple_proxy_connect(NULL, HANDLER->getProxyAccount(), 
 						       ip.c_str(), 
 						       port, conn_got_connected, (gpointer) this->getId());
 	if (connection_attempt_data == NULL) {
@@ -161,10 +165,6 @@ PurpleAsyncConn::close() {
 		rx_handler = 0;
 	}
 
-	handler = NULL;
-	
-	
-	
 }
 
 static void conn_write_cb(gpointer data, gint source, 
@@ -192,7 +192,7 @@ PurpleAsyncConn::write(const void* data,
 	else if (written <= 0) { 
 		written = 0;
 		close ();
-		if (handler) handler->readError(this);
+		if (HANDLER) HANDLER->readError(this);
 		return;
 	}
 
@@ -209,7 +209,7 @@ PurpleAsyncConn::write(const void* data,
 
 	}
 
-	if (handler) handler->writeCallback(this);
+	if (HANDLER) HANDLER->writeCallback(this);
 }
 
 
@@ -233,7 +233,7 @@ PurpleAsyncConn::write_cb() {
 		
 		purple_debug_error("rbol", "writing failed, going into bad state\n");
 		close ();
-		if (handler) handler->readError(this);
+		if (HANDLER) HANDLER->readError(this);
 		return;
 	}
 
@@ -268,12 +268,12 @@ PurpleAsyncConn::read_cb(int source) {
 		
 		/* todo: register a connection error */
 		close ();
-		if (handler) handler->readError(this);
+		if (HANDLER) HANDLER->readError(this);
 		return;
 	} else if (len == 0) { 
 		/* todo: server closed conenction */ 
 		close ();
-		if (handler) handler->closeCallback(this);
+		if (HANDLER) HANDLER->closeCallback(this);
 
 		purple_debug(PURPLE_DEBUG_ERROR, "rbol",
 			     "pathetic, the server has closed the connection\n");
@@ -282,7 +282,7 @@ PurpleAsyncConn::read_cb(int source) {
 	
 	awaiting.push(string(buf, buf+len));
 
-	if (handler) handler->readCallback(awaiting, this);
+	if (HANDLER) HANDLER->readCallback(awaiting, this);
 }
 
 static void conn_read_cb(gpointer data, gint source, PurpleInputCondition cond) {

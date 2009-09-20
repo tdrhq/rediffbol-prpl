@@ -60,7 +60,7 @@ namespace rbol {
 		int parse_mode;
 
 		/* super handler */
-		PurpleAsyncConnHandler *handler;
+		int handler_id;
 	public:
 		int getParseMode() { 
 			return parse_mode;
@@ -68,8 +68,7 @@ namespace rbol {
 		void setParseMode(int a) {
 			parse_mode = a;
 		}
-		PurpleAsyncConn(PurpleAsyncConnHandler* conn, 
-			        int pm);
+		PurpleAsyncConn(int conn_id, int pm);
 		bool establish_connection(std::string ip, gint32 port);
 
 		virtual ~PurpleAsyncConn();

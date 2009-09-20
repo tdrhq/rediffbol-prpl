@@ -92,7 +92,7 @@ void RediffBolConn::startLogin() {
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "starting login\n");
 
-	connection = new PurpleAsyncConn(this, 
+	connection = new PurpleAsyncConn(this->getId (), 
 					 1);
 	if (!connection->establish_connection(	"gatekeeper.rediff.com",
 						1863)) {
@@ -107,7 +107,7 @@ void RediffBolConn::startLogin() {
 void RediffBolConn::startLoginOver80() 
 {
 	purple_debug(PURPLE_DEBUG_INFO, "rbol", "trying login over port 80\n");
-	connection = new PurpleAsyncConn (this, 2);
+	connection = new PurpleAsyncConn (this->getId (), 2);
 	if (!connection->establish_connection ("gatekeeper.rediff.com", 80)) {
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
 				     "Unable to initiate port 80 connection to GK\n");
@@ -342,7 +342,7 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 
 	purple_debug(PURPLE_DEBUG_INFO, "rbol" , "connecting to chatserver[%s,%d]\n", ip.c_str(), port);
 
-	PurpleAsyncConn* newconn =  new PurpleAsyncConn(this, 
+	PurpleAsyncConn* newconn =  new PurpleAsyncConn(this->getId (), 
 					 0);
 	if (! newconn->establish_connection(ip, port)) 
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
