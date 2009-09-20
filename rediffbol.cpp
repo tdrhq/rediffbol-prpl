@@ -1098,7 +1098,7 @@ void RediffBolConn::closeCallback(PurpleAsyncConn* conn) {
 	
 	assert(!isInvalid());
 	setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
-			     "Pathetic, the server has closed the connection");
+			     "The server has closed the connection");
 }
 
 
