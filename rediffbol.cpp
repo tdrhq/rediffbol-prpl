@@ -98,6 +98,7 @@ void RediffBolConn::startLogin() {
 						1863)) {
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 				     "Unable to initiate connection to GK\n");
+		delete connection;
 		connection = NULL;
 	}
 	
@@ -223,6 +224,7 @@ RediffBolConn::~RediffBolConn() {
 	softDestroy();
 
 	if (connection) delete connection;
+	connection = NULL;
 }		
 void RediffBolConn::gotConnected() { 
 	/* what's my state? */
@@ -240,8 +242,9 @@ void RediffBolConn::gotConnected() {
 
 void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) try { 
 	if (isInvalid ()) { 
-		purple_debug_info("rbol", "read callback on bad guy\n");
+		purple_debug_error("rbol", "read callback on bad guy\n");
 	}
+	assert (connection == conn);
 
 	if (conn->getParseMode() == 2) {
 		string resp = buffer.getRawBuffer();
@@ -256,7 +259,7 @@ void RediffBolConn::readCallback(MessageBuffer &buffer, PurpleAsyncConn *conn) t
 		}
 		conn->setParseMode(1);/* from now onwards looks like normal GK */
 	}
-	while (buffer.left() >= 4) { 
+	while (connection && buffer.left() >= 4) { 
 		purple_debug(PURPLE_DEBUG_INFO, "rbol", 
 			     "got a response\n");
 		
@@ -344,9 +347,12 @@ void RediffBolConn::parseGkResponse(MessageBuffer &buffer) {
 
 	PurpleAsyncConn* newconn =  new PurpleAsyncConn(this->getId (), 
 					 0);
-	if (! newconn->establish_connection(ip, port)) 
+	if (! newconn->establish_connection(ip, port)) { 
 		setStateNetworkError(PURPLE_CONNECTION_ERROR_NETWORK_ERROR, 
 				     "Failed to initiate connection to CS\n");
+		delete newconn;
+		newconn = NULL;
+	}
 
 	connection->close();
 	delete connection;
