@@ -3,6 +3,7 @@
 	Version 0.3.2
 
 	* Fix Segmentation Fault when a login error is encountered.
+	* Changed User Agent string to match RediffBol's exactly
 
 2009-09-20 Arnold Noronha <arnstein87@gmail.com>
 	
